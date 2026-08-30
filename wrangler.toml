@@ -1,5 +1,5 @@
 # ToolFront — Worker config
-# Deploy: cd toolfront-landing && npx wrangler deploy
+# Deploy: npx wrangler deploy
 # Then bind toolfront.dev under Workers & Pages -> toolfront -> Settings -> Domains
 name = "toolfront"
 main = "worker.js"
@@ -10,13 +10,16 @@ compatibility_date = "2026-08-01"
 directory = "./public"
 binding = "ASSETS"
 
-# REQUIRED for production: KV for 24h scan cache and waitlist storage.
+# KV for 24h scan cache and waitlist storage.
 # (Rate limiting no longer uses KV — see the RATE_LIMITER binding below.)
-# Create with: npx wrangler kv namespace create KV
-# Then paste the returned id below and uncomment:
+# Setup (one-time, in YOUR Cloudflare account):
+#   npx wrangler kv namespace create KV
+#   npx wrangler kv namespace list   # copy the id
+#   paste it below — deploy fails with a placeholder, by design
+# (wrangler dev works with any id: KV is simulated locally by miniflare)
 [[kv_namespaces]]
 binding = "KV"
-id = "75cfa4ee789d4ace9c7d808012638b8b"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
 
 # REQUIRED Worker secrets (never put values in this file — it is committed to git):
 #   npx wrangler secret put RESEND_API_KEY    # transactional email (Resend)
