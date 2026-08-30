@@ -81,11 +81,11 @@ Static regex linting is provably incomplete (5/6 in self-test). This gate feeds 
 - Consumes: nothing (self-contained).
 - Produces: `probePattern(pattern, flags)` → `{ rejected: string|null, warn: string|null, worst: {n, ms, family} }`; `extractAlphabet(src)` → `string[]`. Task 4's rules gate reuses `probePattern`.
 
-- [ ] **Step 1: Create `tests/redos-probe.mjs`**
+- [x] **Step 1: Create `tests/redos-probe.mjs`**
 
 Copy verbatim from the validated demo source `demo-pr-gate/redos-probe.mjs`. Exports: `probePattern`, `extractAlphabet`, `buildFamilies`, `THRESHOLDS`. Thresholds are calibrated — do not tune: `SAMPLE_BUDGET_MS = 60`, `ABS_BUDGET_MS = 5`, `RATIO = 3.0`, ladder ×1.2 from n=8 to 5000.
 
-- [ ] **Step 2: Create `tests/redos-guard.test.mjs`** — proves the gate itself doesn't lie
+- [x] **Step 2: Create `tests/redos-guard.test.mjs`** — proves the gate itself doesn't lie
 
 ```js
 // redos-guard.test.mjs — the ReDoS gate must not false-kill normal regexes
@@ -148,14 +148,14 @@ console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
 ```
 
-- [ ] **Step 3: Run the guard test**
+- [x] **Step 3: Run the guard test**
 
 Run: `node tests/redos-guard.test.mjs`
 Expected: `7 passed, 0 failed` (A: 0 false kills · B: 12/12 · C: 1/1). Runtime < 5 s. If cohort B misses `(x+x+)+y` or the HTML-tag pattern, the literal-alphabet extraction was corrupted during the copy — diff against the demo source.
 
-- [ ] **Step 4: Wire into `npm test`** — append `&& node tests/redos-guard.test.mjs` to `scripts.test`.
+- [x] **Step 4: Wire into `npm test`** — append `&& node tests/redos-guard.test.mjs` to `scripts.test`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tests/redos-probe.mjs tests/redos-guard.test.mjs package.json
@@ -181,7 +181,7 @@ git commit -m "test: dynamic ReDoS gate — literal-derived attack families + ti
 - Produces: `compileRules(rules)` exported from worker.js → compiled rules with `re`/`fn` attached; throws on any gate violation (fail-closed).
 - Produces: scan report gains `rules_version: string` (from `ruleset.version`).
 
-- [ ] **Step 1: Create `rules/poisoning.json`** — the 6 rules verbatim from current `worker.js:412-503` behavior
+- [x] **Step 1: Create `rules/poisoning.json`** — the 6 rules verbatim from current `worker.js:412-503` behavior
 
 ```json
 {
@@ -212,7 +212,7 @@ git commit -m "test: dynamic ReDoS gate — literal-derived attack families + ti
 }
 ```
 
-- [ ] **Step 2: Create `scripts/build-rules.mjs`** — JSON.parse is the code-injection firewall
+- [x] **Step 2: Create `scripts/build-rules.mjs`** — JSON.parse is the code-injection firewall
 
 ```js
 // build-rules.mjs — rules/poisoning.json → rules/poisoning.mjs (committed).
@@ -228,14 +228,14 @@ console.log(`rules/poisoning.mjs generated (v${data.version}, ${data.rules.lengt
 
 `package.json`: add `"build:rules": "node scripts/build-rules.mjs"`. Run `npm run build:rules` once.
 
-- [ ] **Step 3: Modify `worker.js`** — four changes (spec §5)
+- [x] **Step 3: Modify `worker.js`** — four changes (spec §5)
 
 1. Top of file: `import ruleset from "./rules/poisoning.mjs";`
 2. Replace the hardcoded rule constants + inline checks (lines ~412-503) with the four-gate compiler ported verbatim from `demo-rules-external/engine-secure.mjs:10-58` (`ALLOWED_TYPES`, `ALLOWED_FLAGS = /^[iu]*$/`, null-prototype `EXECUTORS` map with `decodeFindings`, `ALLOWED_EXECUTORS`, `REDOS_HINTS`, `compileRules()`), then `const COMPILED = compileRules(ruleset.rules);` — PLUS one addition: `compileRules` must also reject duplicate ids (own a `Set<string>`), because the worker-side compiler must be self-sufficiently fail-closed.
 3. Rewrite `toolPoisonFindings` to loop over `COMPILED` (semantics preserved: for each rule, test each field in `rule.applies`; `regex` → `r.re.test(v)`, `length-over` → `v.length > r.limit`, `executor` → `r.fn(v)`; push `{ code: r.id, severity: r.severity }`).
 4. Export block (line ~1218): add `compileRules` to the export list.
 
-- [ ] **Step 4: Create `tests/rules-guard.test.mjs`** — 8 attack vectors as a permanent regression
+- [x] **Step 4: Create `tests/rules-guard.test.mjs`** — 8 attack vectors as a permanent regression
 
 ```js
 // rules-guard.test.mjs — a hostile rules/poisoning.json must never reach production.
@@ -269,14 +269,14 @@ console.log(fail === 0 ? "\nALL ATTACKS BLOCKED" : `\n${fail} ATTACKS LEAKED`);
 process.exit(fail ? 1 : 0);
 ```
 
-- [ ] **Step 5: Run everything**
+- [x] **Step 5: Run everything**
 
 Run: `npm run build:rules && node tests/rules-guard.test.mjs && npm test`
 Expected: 8/8 attacks blocked, ruleset compiles, all prior suites green. `tests/poison-samples.test.mjs` and `tests/sec-regression.test.mjs` exercise the same detections through the new rules-driven path — they must stay green (that IS the equivalence check).
 
-- [ ] **Step 6: Wire into `npm test`** — append `&& node tests/rules-guard.test.mjs` to `scripts.test`.
+- [x] **Step 6: Wire into `npm test`** — append `&& node tests/rules-guard.test.mjs` to `scripts.test`.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add rules/ scripts/build-rules.mjs worker.js tests/rules-guard.test.mjs package.json
@@ -297,11 +297,11 @@ git commit -m "feat: externalize scan rules to rules/poisoning.json (four-gate c
 - Consumes: `probePattern` from `tests/redos-probe.mjs` (Task 2). Gate logic duplicates `compileRules` intentionally — the gate validates rules WITHOUT importing worker.js, so a worker.js bug can't hide a rules bug.
 - Produces: `node scripts/rules-gate.mjs [--rules <path>]`, exit 0/1. Job name: `Rules gate`.
 
-- [ ] **Step 1: Create `scripts/rules-gate.mjs`** — port gates 1/2/4 from `demo-pr-gate/gate.mjs`
+- [x] **Step 1: Create `scripts/rules-gate.mjs`** — port gates 1/2/4 from `demo-pr-gate/gate.mjs`
 
 Composition: (a) **Schema gate** — field whitelist `["id","severity","type","pattern","flags","executor","limit","applies","source","added","note"]`, `type ∈ {regex,length-over,executor}`, `severity ∈ 1..3`, `applies ⊆ {name,description,raw,exposedTo}` non-empty, id `^[a-z0-9-]{3,40}$` + uniqueness, semver `version`; (b) **Compile gates** — same four as worker.js (type whitelist, `flags ∈ [iu]*`, executor whitelist `decodeFindings` via null-prototype map, static ReDoS hints) + duplicate-id; (c) **Differential gate** — every rule must hit ALL its samples in `tests/rules-samples.json` and ZERO of the benign corpus. Supports `--rules <path>` for negative testing. Fail-closed on any violation.
 
-- [ ] **Step 2: Create `tests/rules-samples.json`**
+- [x] **Step 2: Create `tests/rules-samples.json`**
 
 ```json
 {
@@ -325,12 +325,12 @@ Composition: (a) **Schema gate** — field whitelist `["id","severity","type","p
 
 (⚠ the `zero-width` sample is written via the `\u200B` escape — it MUST be a real U+200B character at runtime; the `over-budget` description uses the runtime placeholder `"__X600__"` → the gate replaces it with `"x".repeat(600)`, avoiding hand-counted strings in JSON.)
 
-- [ ] **Step 3: Run the gate locally**
+- [x] **Step 3: Run the gate locally**
 
 Run: `node scripts/rules-gate.mjs`
 Expected: all 6 current rules pass schema + compile + differential → exit 0.
 
-- [ ] **Step 4: Create `.github/workflows/rules-gate.yml`**
+- [x] **Step 4: Create `.github/workflows/rules-gate.yml`**
 
 ```yaml
 name: Rules gate
@@ -356,16 +356,16 @@ jobs:
         run: npm run build:rules --silent && git diff --exit-code rules/poisoning.mjs
 ```
 
-- [ ] **Step 5: Add generated-sync check to the main workflow** — in `security-bas.yml` static job, after the `npm test` step:
+- [x] **Step 5: Add generated-sync check to the main workflow** — in `security-bas.yml` static job, after the `npm test` step:
 
 ```yaml
       - name: Generated rules in sync
         run: npm run build:rules --silent && git diff --exit-code rules/poisoning.mjs
 ```
 
-- [ ] **Step 6: Negative verification (do not skip)** — copy `rules/poisoning.json` to a temp path, append `{"id":"evil","severity":1,"type":"regex","pattern":"(a+)+$","flags":"","applies":["description"],"source":"t","added":"t"}`, run `node scripts/rules-gate.mjs --rules /tmp/evil.json`. Expected: rejected by both static hint and dynamic probe, exit 1. Do NOT commit the modified JSON.
+- [x] **Step 6: Negative verification (do not skip)** — copy `rules/poisoning.json` to a temp path, append `{"id":"evil","severity":1,"type":"regex","pattern":"(a+)+$","flags":"","applies":["description"],"source":"t","added":"t"}`, run `node scripts/rules-gate.mjs --rules /tmp/evil.json`. Expected: rejected by both static hint and dynamic probe, exit 1. Do NOT commit the modified JSON.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add scripts/rules-gate.mjs tests/rules-samples.json .github/workflows/rules-gate.yml .github/workflows/security-bas.yml
@@ -380,9 +380,9 @@ git commit -m "ci: rules gate — schema, compile whitelist, differential sample
 - Create: `CONTRIBUTING.md`
 - Create: `.github/PULL_REQUEST_TEMPLATE.md`
 
-- [ ] **Step 1: `CONTRIBUTING.md`** — sections: ① what can be contributed (rule PRs touch ONLY `rules/poisoning.json` + `tests/rules-samples.json`; anything else opens an issue first); ② **mandatory sample policy, verbatim**: *"A rule PR must extend `tests/rules-samples.json` with at least one TRUE-positive sample (your rule must fire on it) and the full benign corpus must stay clean. PRs without samples are closed automatically by CI, not reviewed."*; ③ what the gates check (schema → compile whitelist → ReDoS probe → differential → generated-sync) and that a green CI still needs maintainer semantic approval; ④ local commands (`npm run build:rules`, `node scripts/rules-gate.mjs`, `npm test`); ⑤ contributions licensed under Apache-2.0, no CLA.
+- [x] **Step 1: `CONTRIBUTING.md`** — sections: ① what can be contributed (rule PRs touch ONLY `rules/poisoning.json` + `tests/rules-samples.json`; anything else opens an issue first); ② **mandatory sample policy, verbatim**: *"A rule PR must extend `tests/rules-samples.json` with at least one TRUE-positive sample (your rule must fire on it) and the full benign corpus must stay clean. PRs without samples are closed automatically by CI, not reviewed."*; ③ what the gates check (schema → compile whitelist → ReDoS probe → differential → generated-sync) and that a green CI still needs maintainer semantic approval; ④ local commands (`npm run build:rules`, `node scripts/rules-gate.mjs`, `npm test`); ⑤ contributions licensed under Apache-2.0, no CLA.
 
-- [ ] **Step 2: `.github/PULL_REQUEST_TEMPLATE.md`**
+- [x] **Step 2: `.github/PULL_REQUEST_TEMPLATE.md`**
 
 ```markdown
 ## What does this change?
@@ -409,7 +409,7 @@ git commit -m "docs: contributor path — mandatory TP/TN samples, gate expectat
 **Files:**
 - Create: `.github/CODEOWNERS`
 
-- [ ] **Step 1: Content**
+- [x] **Step 1: Content**
 
 ```
 # The rules corpus is the project's core detection surface — every change
@@ -418,7 +418,7 @@ rules/**                  @wishforge
 tests/rules-samples.json  @wishforge
 ```
 
-- [ ] **Step 2: Verify** — after pushing the branch, confirm GitHub shows these paths as "Review required: wishforge" on the PR. (Declarative for a solo account; auto-enforced once a second collaborator exists and "Require review from Code Owners" is enabled.)
+- [x] **Step 2: Verify** — after pushing the branch, confirm GitHub shows these paths as "Review required: wishforge" on the PR. (Declarative for a solo account; auto-enforced once a second collaborator exists and "Require review from Code Owners" is enabled.)
 
 - [x] **Step 3: Commit**
 
@@ -434,7 +434,7 @@ git commit -m "chore: CODEOWNERS — rules corpus gated on maintainer review"
 **Files:**
 - Create: `.github/workflows/docs-automerge.yml`
 
-- [ ] **Step 1: Workflow**
+- [x] **Step 1: Workflow**
 
 ```yaml
 name: Docs auto-merge
@@ -471,7 +471,7 @@ jobs:
 
 Safety note: `--auto` only queues; the actual merge is still governed by the branch-protected required check — if it is red, nothing merges.
 
-- [ ] **Step 2: Verify** — after this branch's PR lands, open a throwaway PR that edits only `docs/` and confirm auto-merge queues; then open a mixed PR (docs + one code file) and confirm the guard step fails. The dangerous direction (mixed PR slipping through) MUST be verified.
+- [x] **Step 2: Verify** — after this branch's PR lands, open a throwaway PR that edits only `docs/` and confirm auto-merge queues; then open a mixed PR (docs + one code file) and confirm the guard step fails. The dangerous direction (mixed PR slipping through) MUST be verified.
 
 - [x] **Step 3: Commit**
 
@@ -484,9 +484,9 @@ git commit -m "ci: auto-merge docs-only PRs after required check passes (spec §
 
 ### Task 8: Final delivery — one PR, green required check
 
-- [ ] **Step 1:** `npm test && node scripts/rules-gate.mjs` locally — all green.
-- [ ] **Step 2:** Push `feat/community-governance`, open the PR to `main` (title: `feat: community governance — rules externalization, ReDoS gate, contributor pipeline`), wait for `Offline suites` green + `Rules gate` green.
-- [ ] **Step 3:** Merge is a human action (repo policy). After merge, tag `v1.1.0` (rules externalization is a feature).
+- [x] **Step 1:** `npm test && node scripts/rules-gate.mjs` locally — all green.
+- [x] **Step 2:** Push `feat/community-governance`, open the PR to `main` (title: `feat: community governance — rules externalization, ReDoS gate, contributor pipeline`), wait for `Offline suites` green + `Rules gate` green.
+- [x] **Step 3:** Merge is a human action (repo policy). After merge, tag `v1.1.0` (rules externalization is a feature).
 
 ---
 
