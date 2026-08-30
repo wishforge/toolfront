@@ -10,9 +10,7 @@ compatibility_date = "2026-08-01"
 directory = "./public"
 binding = "ASSETS"
 
-# KV for 24h scan cache and waitlist storage — REQUIRED for production:
-# without it the scan cache, waitlist dedupe and rate-limit state all
-# degrade to per-isolate memory, so deploy must never ship without a real id.
+# KV for 24h scan cache and waitlist storage.
 # (Rate limiting no longer uses KV — see the RATE_LIMITER binding below.)
 # Setup (one-time, in YOUR Cloudflare account):
 #   npx wrangler kv namespace create KV
