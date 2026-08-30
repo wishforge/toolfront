@@ -13,4 +13,3 @@ node_modules/
 # so the public repo ships product code only. Ignores the paths even if a
 # working copy is recreated locally.
 docs/
-design-candidates/
