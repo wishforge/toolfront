@@ -1,3 +1,7 @@
+// Rules are data: the JSON source of truth is rules/poisoning.json, compiled
+// through the four fail-closed gates below. See docs/superpowers/specs/.
+import ruleset from "./rules/poisoning.mjs";
+
 // ToolFront Agent-Readiness Scanner — Cloudflare Worker (hardened)
 // Endpoints:
 //   GET  /api/scan?domain=example.com   -> heuristic agent-readiness report (JSON)
@@ -409,34 +413,87 @@ function challengeProbe(status, text, cfMitigated) {
    - mcp-scan / Aegis / WebMCP-Phalanx (zero-width & NFKC obfuscation,
      instruction patterns, encoded blobs, name shadowing) */
 
-const ZERO_WIDTH_RE = /[\u200B\u200C\u200D\u200E\u200F\u180E\u202A-\u202E\u2060-\u2064\u3164\u115F\uFEFF\u00AD]/;
-const INSTRUCTION_RE = /ignore\s+(all\s+)?(previous|prior|above)|disregard\s+(the\s+)?(previous|prior|above)|do\s+not\s+(tell|inform|reveal)|exfiltrat|send\s+.{0,40}\b(?:to|at)\b\s+https?:|post\s+.{0,40}\bto\b\s+https?:/i;
-const BASE64_BLOB_RE = /[A-Za-z0-9+/]{16,}={0,2}/g;
-const HEX_BLOB_RE = /[0-9a-fA-F]{16,}/g;
+/* ── Rule-driven detection (source of truth: rules/poisoning.json) ──────
+   Four compile-time gates, all fail-closed — a hostile rules file must throw
+   here at startup, never reach production:
+     gate 1  type + id whitelist, duplicate-id rejection
+     gate 2  flags whitelist (i/u only — stateful g/y leak lastIndex across calls)
+     gate 3  executor whitelist over a null-prototype map (`constructor` and
+             every other prototype property are unreachable)
+     gate 4  static ReDoS heuristics (detection support, not proof — the
+             dynamic timing gate in tests/redos-guard.test.mjs is the backstop) */
+const ALLOWED_TYPES = new Set(["regex", "length-over", "executor"]);
+const ALLOWED_FLAGS = /^[iu]*$/;
 
-// Decode-and-inspect: any encoded blob found in tool text is decoded and
-// checked for instruction patterns. This removes any dependence on length
-// thresholds — a 40-char base64 of "ignore previous instructions" is caught
-// exactly like a 400-char one, while benign encoded-looking words decode to
-// harmless text and stay silent (no false positives).
-function decodeFindings(text) {
-  const findings = [];
-  for (const b64 of text.match(BASE64_BLOB_RE) || []) {
-    try {
-      const decoded = atob(b64.replace(/=+$/, "") + "===".slice((b64.length + 3) % 4));
-      if (INSTRUCTION_RE.test(decoded)) return true;
-    } catch (_) { /* not valid base64 */ }
+const EXECUTORS = Object.create(null);
+EXECUTORS.decodeFindings = (() => {
+  const INSTRUCTION_RE = /ignore\s+(all\s+)?(previous|prior|above)|disregard\s+(the\s+)?(previous|prior|above)|do\s+not\s+(tell|inform|reveal)|exfiltrat/i;
+  // Decode-and-inspect: any encoded blob found in tool text is decoded and
+  // checked for instruction patterns. This removes any dependence on length
+  // thresholds — a 40-char base64 of "ignore previous instructions" is caught
+  // exactly like a 400-char one, while benign encoded-looking words decode to
+  // harmless text and stay silent (no false positives).
+  return (text) => {
+    for (const b64 of text.match(/[A-Za-z0-9+/]{16,}={0,2}/g) || []) {
+      try {
+        const decoded = atob(b64.replace(/=+$/, "") + "===".slice((b64.length + 3) % 4));
+        if (INSTRUCTION_RE.test(decoded)) return true;
+      } catch (_) { /* not valid base64 */ }
+    }
+    for (const hex of text.match(/[0-9a-fA-F]{16,}/g) || []) {
+      try {
+        if (hex.length % 2) continue;
+        let decoded = "";
+        for (let i = 0; i < hex.length; i += 2) decoded += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+        if (INSTRUCTION_RE.test(decoded)) return true;
+      } catch (_) { /* skip */ }
+    }
+    return false;
+  };
+})();
+const ALLOWED_EXECUTORS = new Set(["decodeFindings"]);
+
+const REDOS_HINTS = [
+  { name: "nested quantifier (x+)+", re: /\([^)]*[+*][^)]*\)\s*[+*]/ },
+  { name: "adjacent quantifiers a+*", re: /[+*]\s*[+*]/ },
+  { name: "repeated group (x{n,})+", re: /\([^)]*\{[^}]*,[^}]*\}[^)]*\)\s*[+*]/ },
+  { name: "alternation branch (a|aa)+", re: /\([^)]*\|[^)]*\)\s*[+*]/ },
+];
+
+export function compileRules(rules) {
+  const seen = new Set();
+  const out = [];
+  for (const r of rules) {
+    if (!r || typeof r !== "object") throw new Error("rules: non-object rule");
+    if (typeof r.id !== "string" || !/^[a-z0-9-]{3,40}$/.test(r.id))
+      throw new Error("rules: bad rule id (expected kebab-case, 3-40 chars)");
+    if (seen.has(r.id)) throw new Error(`rules: duplicate rule id "${r.id}"`);
+    seen.add(r.id);
+    if (!ALLOWED_TYPES.has(r.type)) throw new Error(`rules: unknown rule type "${r.type}"`);
+    if (!Number.isInteger(r.severity) || r.severity < 1 || r.severity > 3)
+      throw new Error(`rules: "${r.id}" severity must be an integer 1..3`);
+    if (r.type === "regex") {
+      if (typeof r.pattern !== "string" || !r.pattern) throw new Error(`rules: "${r.id}" regex requires a non-empty pattern`);
+      const flags = r.flags || "";
+      if (!ALLOWED_FLAGS.test(flags)) throw new Error(`rules: flags "${flags}" not allowed (i/u only)`);
+      const hints = REDOS_HINTS.filter(h => h.re.test(r.pattern)).map(h => h.name);
+      if (hints.length) throw new Error(`rules: pattern looks ReDoS-prone (${hints.join("; ")})`);
+      out.push({ ...r, re: new RegExp(r.pattern, flags) });
+    } else if (r.type === "executor") {
+      if (typeof r.executor !== "string" || !r.executor) throw new Error(`rules: "${r.id}" executor requires a name`);
+      if (!ALLOWED_EXECUTORS.has(r.executor) || typeof EXECUTORS[r.executor] !== "function")
+        throw new Error(`rules: executor "${r.executor}" not whitelisted`);
+      out.push({ ...r, fn: EXECUTORS[r.executor] });
+    } else if (r.type === "length-over") {
+      if (!Number.isInteger(r.limit)) throw new Error(`rules: "${r.id}" length-over requires an integer limit`);
+      // needs no compilation — but it must still ship.
+      out.push({ ...r });
+    }
   }
-  for (const hex of text.match(HEX_BLOB_RE) || []) {
-    try {
-      if (hex.length % 2) continue;
-      let decoded = "";
-      for (let i = 0; i < hex.length; i += 2) decoded += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-      if (INSTRUCTION_RE.test(decoded)) return true;
-    } catch (_) { /* skip */ }
-  }
-  return false;
+  return out;
 }
+const COMPILED_RULES = compileRules(ruleset.rules);
+const RULES_VERSION = ruleset.version;
 
 function extractWebMcpSurface(html) {
   const surface = { tools: [], platform: null, declarative: 0, imperative: 0 };
@@ -480,24 +537,17 @@ function extractWebMcpSurface(html) {
 
 function toolPoisonFindings(tool) {
   const findings = [];
-  const texts = [tool.description, tool.raw].filter(t => typeof t === "string" && t.length);
-  for (const t of texts) {
-    if (ZERO_WIDTH_RE.test(t)) findings.push({ code: "zero-width", severity: 3 });
-    if (INSTRUCTION_RE.test(t)) findings.push({ code: "instruction-pattern", severity: 3 });
-    if (decodeFindings(t)) findings.push({ code: "encoded-instruction", severity: 3 });
-  }
-  // WebMCP spec: tool name must be 1-128 chars of ASCII alphanumerics plus _
-  // and . and -. Spec-level charset check covers fullwidth/homoglyph/NFKC name
-  // variants WITHOUT false-positiving CJK descriptions, whose fullwidth
-  // punctuation legitimately changes under NFKC normalization.
-  if (typeof tool.name === "string" && tool.name && /[^a-zA-Z0-9._-]/.test(tool.name)) {
-    findings.push({ code: "name-charset", severity: 3 });
-  }
-  if (typeof tool.description === "string" && tool.description.length > 500) {
-    findings.push({ code: "over-budget", severity: 1 });
-  }
-  if (typeof tool.exposedTo === "string" && (/\*/.test(tool.exposedTo) || /[^\x20-\x7E]/.test(tool.exposedTo))) {
-    findings.push({ code: "wildcard-exposure", severity: 2 });
+  for (const rule of COMPILED_RULES) {
+    const targets = rule.applies.map(f => tool[f]).filter(v => typeof v === "string" && v.length);
+    // Per-target push (no break): mirrors the original per-text semantics —
+    // a tool with description AND raw both matching scores both findings.
+    for (const text of targets) {
+      let hit = false;
+      if (rule.type === "regex") hit = rule.re.test(text);
+      else if (rule.type === "length-over") hit = text.length > rule.limit;
+      else if (rule.type === "executor") hit = rule.fn(text) === true;
+      if (hit) findings.push({ code: rule.id, severity: rule.severity });
+    }
   }
   return findings;
 }
@@ -770,7 +820,7 @@ async function scanDomainCore(domain, env) {
   // tool_surface_hash enables rug-pull detection in scheduled-scan diffs; report_json
   // is the durable snapshot stored in D1 scan_reports by the cron.
   const tool_surface_hash = await sha256Hex(JSON.stringify(surface.tools));
-  const report = { domain, score, scoreMax, grade, verdict, checks, tool_surface_hash, scannedAt: new Date().toISOString(), cached: false };
+  const report = { domain, score, scoreMax, grade, verdict, checks, tool_surface_hash, rules_version: RULES_VERSION, scannedAt: new Date().toISOString(), cached: false };
   // Provenance: a self-scan never touched the network.
   if (selfScan) report.self = true;
   if (unavailable.length) report.unavailable = unavailable;

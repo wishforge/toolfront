@@ -38,31 +38,14 @@ jobs:
       - name: Install dev dependencies
         run: npm ci
 
-      - name: Syntax check
-        run: node --check worker.js
+      - name: Offline suites (single entrypoint)
+        run: npm test
+
+      - name: Generated rules in sync
+        run: npm run build:rules --silent && git diff --exit-code rules/poisoning.mjs
 
       - name: Secret scan (full git history)
         run: python tests/gitleaks-scan.py .
-
-      - name: SAST rules (Workers stack)
-        run: node tests/sast-scan.mjs
-
-      - name: Malicious tool-surface sample library
-        run: node tests/poison-samples.test.mjs
-
-      - name: Security regression suite
-        run: node tests/sec-regression.test.mjs
-
-      - name: Unsubscribe semantics
-        run: node tests/test-unsub.test.mjs
-
-      - name: Response-header audit
-        run: node tests/red14.test.mjs
-
-      - name: Tool-surface detection probes
-        run: |
-          node tests/red12.test.mjs
-          node tests/red13.test.mjs
 
   live:
     name: Live BAS (production)
