@@ -1,0 +1,38 @@
+name: Docs auto-merge
+
+# Zero-touch path for typo-level PRs (docs/README/LICENSE/llms.txt only).
+# The guard runs FIRST and needs only git — no npm install, so a PR that
+# smuggles a postinstall script into package.json gets no execution window.
+# `--auto` only QUEUES the merge; the branch-protected required check still
+# governs it, so a red CI never merges.
+on:
+  pull_request:
+    paths: ["docs/**", "README.md", "LICENSE", "public/llms.txt"]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  automerge:
+    name: Auto-merge docs-only PRs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Guard — queue only for docs-only PRs (before anything else runs)
+        id: guard
+        run: |
+          git fetch origin main --quiet
+          if git diff --name-only origin/main...HEAD | grep -qvE '^(docs/|README\.md$|LICENSE$|public/llms\.txt$)'; then
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            echo "PR touches files outside the docs allowlist — skipping auto-merge (it will merge via normal review)"
+          else
+            echo "docs_only=true" >> "$GITHUB_OUTPUT"
+            echo "Docs-only PR — queuing auto-merge"
+          fi
+      - name: Queue auto-merge (required check still governs the merge)
+        if: steps.guard.outputs.docs_only == 'true'
+        run: gh pr merge --auto --squash "$PR_URL" --repo "${{ github.repository }}"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}

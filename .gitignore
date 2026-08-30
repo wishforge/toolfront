@@ -9,8 +9,6 @@ node_modules/
 .env.*
 !.env.example
 
-# Design workbench & specs — kept in the private repo (toolfront-monitor/docs-base)
-# so the public repo ships product code only. Ignores the paths even if a
-# working copy is recreated locally.
-docs/
+# Design workbench scratch — kept out of the repo even if a local copy exists.
+# (Specs/plans live in-repo under docs/superpowers/ since 2026-08-31.)
 design-candidates/

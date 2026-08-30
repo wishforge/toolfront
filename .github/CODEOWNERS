@@ -1,0 +1,4 @@
+# The rules corpus is the project's core detection surface — every change
+# requires the maintainer's review, even after all CI gates pass.
+rules/**                  @wishforge
+tests/rules-samples.json  @wishforge
