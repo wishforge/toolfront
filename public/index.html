@@ -6,6 +6,19 @@
 <title>ToolFront V5 — Free & Open</title>
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23FFFFFF'/%3E%3Cpath d='M10 44 L10 20 L26 20 M10 32 L22 32' stroke='%230C1222' stroke-width='6' fill='none'/%3E%3Cpath d='M38 44 L54 44 M46 20 L46 44' stroke='%232563EB' stroke-width='6' fill='none'/%3E%3C/svg%3E">
+<!-- JSON-LD: three blocks so the structured-data check sees a complete picture
+     of the product; OpenGraph meta so social/agent scrapers can extract
+     the page title and description. (Both are required to score the full
+     20 pts on the structured-data check.) -->
+<meta property="og:title" content="ToolFront — Free agent-readiness scan for AI">
+<meta property="og:description" content="Scan any public website for AI-agent readiness. Get a 0-100 score with six checks and a prioritised fix list. Free &amp; open.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolfront.dev/">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"ToolFront","url":"https://toolfront.dev/","logo":"https://toolfront.dev/favicon.ico","description":"Free, open-source toolkit for AI-agent readiness.","email":"privacy@toolfront.dev","sameAs":["https://github.com/wishforge/toolfront"]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"ToolFront","url":"https://toolfront.dev/","inLanguage":["en","zh-CN"]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"ToolFront","applicationCategory":"DeveloperApplication","operatingSystem":"Any (server-side)","url":"https://toolfront.dev/","description":"Scan any public website for AI-agent readiness. Six checks (WebMCP tools, structured data, llms.txt, AI crawler policy, machine-readable surfaces, tool-surface security) with a 0-100 score and a prioritised fix list.","offers":{"@type":"Offer","price":0,"priceCurrency":"USD"}}</script>
+
 <style>
   /* ════════════════ V3 POLISHED ════════════════
      Design system: 4px base unit · 3-tier type · SVG icons
@@ -1425,6 +1438,7 @@
   "email.aria": "Email for updates",
   "email.err": "Enter a valid email address.",
   "email.ok": "Check your inbox — we sent a confirmation link.",
+    "email.fail": "That didn't go through. Please try again in a moment.",
   "foot.tagline": "Built on the open WebMCP proposal.",
   "foot.example": "See an example report →",
   "foot.scanner": "Scanner info",
@@ -1521,6 +1535,7 @@
   "email.aria": "接收更新的邮箱",
   "email.err": "请输入有效的邮箱地址。",
   "email.ok": "请查收邮箱——我们刚发了一封确认邮件。",
+    "email.fail": "提交没有成功，请稍后再试。",
   "foot.tagline": "基于开放的 WebMCP 提案构建。",
   "foot.example": "看一份报告样例 →",
   "foot.scanner": "扫描器说明",
@@ -1607,13 +1622,22 @@
     function join() {
       var v = (eIn.value || '').trim();
       if (!v || v.indexOf('@') < 1) { note(t('email.err'), true); eIn.focus(); return; }
+      eBtn.disabled = true;
+      // Honest feedback: the server answers non-2xx when nothing was stored and
+      // nothing was sent (undeliverable address, provider failure, rate limit).
+      // Claiming "check your inbox" there would be a lie — and the failure
+      // wording is uniform for every reason, so it cannot be used to probe
+      // which addresses are deliverable.
       fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: v, domain: null }),
-      }).catch(function () {});
-      note(t('email.ok'), false);
-      eIn.value = '';
+        body: JSON.stringify({ email: v, domain: null, lang: lang }),
+      }).then(function (res) {
+        if (res.ok) { note(t('email.ok'), false); eIn.value = ''; }
+        else note(t('email.fail'), true);
+      }).catch(function () {
+        note(t('email.fail'), true);
+      }).finally(function () { eBtn.disabled = false; });
     }
     if (eBtn) eBtn.addEventListener('click', join);
     if (eIn) eIn.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); join(); } });

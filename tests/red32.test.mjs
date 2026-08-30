@@ -56,8 +56,8 @@ ok("非挑战 5xx/403/429 仍退避（不缓存不评分）", /home\.status === 
 console.log("\n[C] fetchCapped 增强与 HEAD 假阴性降级");
 ok("fetchCapped 透传 cfMitigated", /const cfMitigated = res\.headers\.get\("cf-mitigated"\) \|\| null;/.test(WORKER_SRC));
 ok("HEAD 返回也携带 cfMitigated", /method === "HEAD"\) return \{ status: res\.status, text: "", cfMitigated \}/.test(WORKER_SRC));
-ok("HEAD 405/501 → GET 降级重试（sitemap）", /sitemapRes\.status === 405 \|\| sitemapRes\.status === 501[\s\S]{0,80}fetchCapped\("https:\/\/" \+ domain \+ "\/sitemap\.xml"\)/.test(WORKER_SRC));
-ok("HEAD 405/501 → GET 降级重试（openapi）", /openapiRes\.status === 405 \|\| openapiRes\.status === 501[\s\S]{0,80}fetchCapped\("https:\/\/" \+ domain \+ "\/openapi\.json"\)/.test(WORKER_SRC));
+ok("HEAD 405/501 → GET 降级重试（sitemap）", /sitemapRes\.status === 405 \|\| sitemapRes\.status === 501[\s\S]{0,80}(fetchCapped\("https:\/\/" \+ domain \+ "\/sitemap\.xml"\)|probePath\(env, domain, "\/sitemap\.xml"\))/.test(WORKER_SRC));
+ok("HEAD 405/501 → GET 降级重试（openapi）", /openapiRes\.status === 405 \|\| openapiRes\.status === 501[\s\S]{0,80}(fetchCapped\("https:\/\/" \+ domain \+ "\/openapi\.json"\)|probePath\(env, domain, "\/openapi\.json"\))/.test(WORKER_SRC));
 ok("重定向 SSRF 门仍在（3 跳上限）", /MAX_REDIRECTS = 3;/.test(WORKER_SRC));
 
 /* ————— D. 扫描器身份 ————— */

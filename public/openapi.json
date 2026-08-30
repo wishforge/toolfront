@@ -1,0 +1,124 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ToolFront Agent-Readiness API",
+    "description": "Public HTTP API for the ToolFront free, open-source agent-readiness scanner. Endpoints below read five public paths of a target domain and return a 0-100 score. No authentication is required for public sites.",
+    "version": "1.0.0",
+    "license": { "name": "Apache-2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0" },
+    "contact": { "email": "privacy@toolfront.dev" }
+  },
+  "servers": [
+    { "url": "https://toolfront.dev", "description": "Production" }
+  ],
+  "paths": {
+    "/api/scan": {
+      "get": {
+        "operationId": "scanDomain",
+        "summary": "Scan a public domain for AI-agent readiness",
+        "description": "Probes the target's /, /robots.txt, /llms.txt, /sitemap.xml, /openapi.json. Returns a 0-100 score with six checks and a per-check status. Scanner UA: ToolFront-Scanner/0.3.",
+        "parameters": [
+          {
+            "name": "domain",
+            "in": "query",
+            "required": true,
+            "description": "Apex domain to scan, e.g. example.com",
+            "schema": { "type": "string", "pattern": "^[a-zA-Z0-9.-]+$" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Scan result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ScanReport" }
+              }
+            }
+          },
+          "502": {
+            "description": "Target unreachable or returned non-OK on all probes"
+          },
+          "429": { "description": "Rate-limited (per IP)" }
+        }
+      }
+    },
+    "/api/waitlist": {
+      "post": {
+        "operationId": "joinWaitlist",
+        "summary": "Join the launch waitlist (double opt-in)",
+        "description": "Submits an email; a confirmation link is sent. Pending records expire in 7 days. Single-use, rate-limited per IP.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WaitlistSignup" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Submission accepted (or uniform 'stored=false' for validation failures)" },
+          "400": { "description": "Invalid payload or email appears undeliverable" },
+          "429": { "description": "Rate-limited (per IP)" }
+        }
+      }
+    },
+    "/confirm": {
+      "get": {
+        "operationId": "confirmWaitlist",
+        "summary": "Confirm a waitlist subscription via single-use token",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "HTML confirmation page (success or expired)" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ScanReport": {
+        "type": "object",
+        "required": ["domain", "score", "scoreMax", "grade", "checks", "verdict", "scannedAt"],
+        "properties": {
+          "domain": { "type": "string" },
+          "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "scoreMax": { "type": "integer", "enum": [100] },
+          "grade": { "type": "string", "enum": ["A", "B", "C", "D", "F"] },
+          "verdict": { "type": "string" },
+          "checks": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/CheckResult" }
+          },
+          "cached": { "type": "boolean", "description": "True if served from the 24h KV cache" },
+          "scannedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CheckResult": {
+        "type": "object",
+        "required": ["id", "label", "max", "status", "points", "detail"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "max": { "type": "integer" },
+          "status": { "type": "string", "enum": ["pass", "partial", "fail", "na"] },
+          "points": { "type": "integer" },
+          "detail": { "type": "string" }
+        }
+      },
+      "WaitlistSignup": {
+        "type": "object",
+        "required": ["email"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "domain": { "type": "string", "description": "Optional: the domain the visitor was scanning" },
+          "lang": { "type": "string", "enum": ["en", "zh"], "description": "Email language; defaults to en" }
+        }
+      }
+    }
+  }
+}

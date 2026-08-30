@@ -215,7 +215,6 @@
   body.anim .nums { animation: fadeUp .4s ease 1.05s backwards; }
   body.anim .verdict { animation: fadeUp .4s ease 1.2s backwards; }
   body.anim .trackwrap { animation: fadeUp .4s ease 1.3s backwards; }
-  body.anim .track .cursor { transition: left 1s cubic-bezier(.3,.7,.2,1); }
   body.anim .pills .pill { animation: stampIn .3s cubic-bezier(.2,.9,.3,1.15) backwards; }
   body.anim .pills .pill:nth-child(1) { animation-delay: 1.5s } body.anim .pills .pill:nth-child(2) { animation-delay: 1.6s }
   body.anim .pills .pill:nth-child(3) { animation-delay: 1.7s } body.anim .pills .pill:nth-child(4) { animation-delay: 1.8s }
@@ -229,7 +228,6 @@
   .potential .mini i { transition: width .45s cubic-bezier(.3,.7,.2,1); }
   @media (prefers-reduced-motion: reduce) {
     body.anim .grade, body.anim .nums, body.anim .verdict, body.anim .trackwrap, body.anim .pills .pill, body.anim .vs, body.anim .acts, body.anim .card:not(.replay) { animation: none; }
-    body.anim .track .cursor { transition: none; }
     body.anim .card.replay .scan-fx { animation: none; }
     .potential .mini i { transition: none; }
   }
@@ -467,14 +465,16 @@
     'report.proj.label': 'All fixes applied →', 'report.proj.est': 'est. {s} / 100 · Grade {g}',
     'report.cta.fine': 'One tag to install. Your site stays yours — payment still needs human confirmation.',
     'report.vs.improved': '↑ improved', 'report.vs.regressed': '↓ regressed',
-    'report.loading0': ''
+    'report.loading0': '',
+    'waitlist.fail': 'That didn\'t go through. Please try again in a moment.'
   });
   Object.assign(LANGS.zh, {
     'report.track.you': '你', 'report.track.opaque': '对 AI 封闭', 'report.track.ready': '智能体就绪',
     'report.proj.label': '全部修复完成后 →', 'report.proj.est': '预计 {s} / 100 · {g} 级',
     'report.cta.fine': '一行代码安装。网站仍是你的——支付仍需人工确认。',
     'report.vs.improved': '↑ 进步', 'report.vs.regressed': '↓ 退步',
-    'report.loading0': ''
+    'report.loading0': '',
+    'waitlist.fail': '提交没有成功，请稍后再试。'
   });
 
 
@@ -565,12 +565,12 @@
     var cursor = el('div', 'cursor');
     var pct = (typeof r.score === 'number' && r.scoreMax > 0) ? Math.round((r.score / r.scoreMax) * 100) : 0;
     cursor.setAttribute('data-label', t('report.track.you') + ' · ' + r.score);
-    if (animate && !reducedMotion()) {
-      cursor.style.left = '0%';
-      setTimeout(function () { cursor.style.left = pct + '%'; }, 1400);
-    } else {
-      cursor.style.left = pct + '%';
-    }
+      // The cursor is always at the correct position from the first frame.
+    // (The card-level scanline sweep already carries the "scanning" motion;
+    // animating the cursor from 0 → pct was both fragile — it could stick at
+    // 0% if setTimeout was throttled in a backgrounded tab — and visually
+    // misleading, since the score position is data, not a transition.)
+    cursor.style.left = pct + '%';
     track.appendChild(cursor);
     tw.appendChild(track);
     var scale = el('div', 'track-scale');
@@ -766,15 +766,21 @@
     function go() {
       var v = (em.value || '').trim();
       if (!v || v.indexOf('@') < 1) { em.focus(); return; }
+      btn.disabled = true;
+      // Same honesty rule as the landing page: only claim success when the
+      // server actually accepted the submission.
       fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: v, domain: r.domain || null }),
-      }).catch(function () {});
-      var q = el('div', 'queued', t('waitlist.done'));
-      cta.appendChild(q);
-      em.value = '';
-      btn.disabled = true;
+        body: JSON.stringify({ email: v, domain: r.domain || null, lang: lang }),
+      }).then(function (res) {
+        cta.appendChild(el('div', 'queued', res.ok ? t('waitlist.done') : t('waitlist.fail')));
+        if (res.ok) em.value = '';
+        else btn.disabled = false;
+      }).catch(function () {
+        cta.appendChild(el('div', 'queued', t('waitlist.fail')));
+        btn.disabled = false;
+      });
     }
     return cta;
   }

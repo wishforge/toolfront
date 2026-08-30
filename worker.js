@@ -167,7 +167,7 @@ async function handleInternalScan(url, request, env) {
 
   const domain = normalizeDomain(url.searchParams.get("domain"));
   if (!domain) return json({ error: "invalid_domain" }, 400);
-  const report = await scanDomainCore(domain);
+  const report = await scanDomainCore(domain, env);
   if (!report) return json({ error: "unscannable", detail: "SSRF-blocked, opted-out, unreachable, or refused." }, 502);
   return json(report, 200);
 }
@@ -645,33 +645,67 @@ const SUB_CHECKS = [
 // (SSRF-blocked / opted-out / unreachable / target refused).
 // A report with blocked:true means the homepage itself was served a bot
 // challenge: no score is produced (grade null) and nothing can be gamed.
-async function scanDomainCore(domain) {
+/* ————— self-scan: our own domain is read from the published assets —————
+   A Cloudflare Worker cannot fetch its own zone: the request never leaves the
+   edge and comes back as 522, so scanning toolfront.dev would always report
+   "unreachable". For that one domain we read the published assets directly and
+   run the IDENTICAL checks — and we LABEL the result (self: true) so nobody
+   mistakes it for a live network scan.
+
+   Honesty caveat: if a Cloudflare-level feature ever rewrites a response (for
+   example content-signals replacing /robots.txt), the asset-based result could
+   diverge from what the public receives. That is exactly why the result is
+   labelled and why tests/dogfood.test.mjs re-scores public/ from disk. */
+const OWN_DOMAIN = "toolfront.dev";
+
+async function probePath(env, domain, path, method) {
+  if (domain === OWN_DOMAIN && env.ASSETS) {
+    // Assets are read in-process: no method negotiation, and the checks only
+    // need the status plus a capped text sample.
+    try {
+      const res = await env.ASSETS.fetch(new Request("https://" + OWN_DOMAIN + path));
+      const text = (await res.text()).slice(0, MAX_BYTES);
+      return { status: res.status, text, blocked: false, cfMitigated: false };
+    } catch (_) {
+      return { status: 0, text: "", blocked: false, cfMitigated: false };
+    }
+  }
+  // Third-party domains keep the original HEAD-first behaviour: cheaper, and it
+  // is what makes the 405/501 → GET fallback below meaningful.
+  return fetchCapped("https://" + domain + path, method);
+}
+
+async function scanDomainCore(domain, env) {
+  // Our own domain is served from the published assets (see probePath): no
+  // network round-trip, so the DNS/SSRF gate does not apply to it.
+  const selfScan = domain === OWN_DOMAIN && !!env.ASSETS;
+
   // SSRF gate: resolve before we fetch.
-  if (!(await dnsAllows(domain))) {
+  if (!selfScan && !(await dnsAllows(domain))) {
     return null;
   }
 
   // Opt-out gate: fetch robots.txt first and honor an explicit scanner ban.
-  const robots = await fetchCapped("https://" + domain + "/robots.txt");
+  const robots = await probePath(env, domain, "/robots.txt");
   if (robotsOptedOut(robots.text)) {
     return null;
   }
 
   const [home, llms, sitemap, openapi] = await Promise.all([
-    fetchCapped("https://" + domain + "/"),
-    fetchCapped("https://" + domain + "/llms.txt"),
-    fetchCapped("https://" + domain + "/sitemap.xml", "HEAD"),
-    fetchCapped("https://" + domain + "/openapi.json", "HEAD"),
+    probePath(env, domain, "/"),
+    probePath(env, domain, "/llms.txt"),
+    probePath(env, domain, "/sitemap.xml", "HEAD"),
+    probePath(env, domain, "/openapi.json", "HEAD"),
   ]);
 
   // Some servers reject HEAD outright (405/501) while serving GET fine —
   // retry once with GET (capped at MAX_BYTES) before believing the 404.
   let sitemapRes = sitemap, openapiRes = openapi;
   if (sitemapRes.status === 405 || sitemapRes.status === 501) {
-    sitemapRes = await fetchCapped("https://" + domain + "/sitemap.xml");
+    sitemapRes = await probePath(env, domain, "/sitemap.xml");
   }
   if (openapiRes.status === 405 || openapiRes.status === 501) {
-    openapiRes = await fetchCapped("https://" + domain + "/openapi.json");
+    openapiRes = await probePath(env, domain, "/openapi.json");
   }
 
   if (home.blocked) return null;
@@ -737,6 +771,8 @@ async function scanDomainCore(domain) {
   // is the durable snapshot stored in D1 scan_reports by the cron.
   const tool_surface_hash = await sha256Hex(JSON.stringify(surface.tools));
   const report = { domain, score, scoreMax, grade, verdict, checks, tool_surface_hash, scannedAt: new Date().toISOString(), cached: false };
+  // Provenance: a self-scan never touched the network.
+  if (selfScan) report.self = true;
   if (unavailable.length) report.unavailable = unavailable;
   report.report_json = JSON.stringify(report);
   return report;
@@ -758,7 +794,7 @@ async function handleScan(url, request, env) {
     if (cached) return json({ ...cached, cached: true }, 200, { "Cache-Control": "public, max-age=300" });
   }
 
-  const report = await scanDomainCore(domain);
+  const report = await scanDomainCore(domain, env);
   if (!report) {
     // Re-derive WHY cheaply for the HTTP caller (cron callers just skip).
     if (!(await dnsAllows(domain))) {
@@ -954,12 +990,12 @@ async function handleWaitlist(request, env) {
     // Double opt-in: CSPRNG token (crypto.randomUUID = 122-bit entropy), single-use,
     // 7-day TTL (industry standard), pending record never joins the active list.
     const token = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
-    const pending = { email, domain: normalizeDomain(body.domain) || null, ip, signupTs: new Date().toISOString() };
+    const pending = { email, domain: normalizeDomain(body.domain) || null, ip, lang: body.lang === "zh" ? "zh" : "en", signupTs: new Date().toISOString() };
     await env.KV.put("wl:token:" + token, JSON.stringify(pending), { expirationTtl: 7 * 86400 });
     await env.KV.put("wl:pending:" + email, JSON.stringify({ token, ts: pending.signupTs }), { expirationTtl: 7 * 86400 });
 
     if (env.RESEND_API_KEY) {
-      const sent = await sendConfirmationEmail(env, email, token, pending.domain);
+      const sent = await sendConfirmationEmail(env, email, token, pending.domain, pending.lang);
       if (!sent) {
         // Roll the submission back entirely (round-29 finding): no email was
         // delivered, so keeping the pending record would (a) store data the user
@@ -1028,31 +1064,40 @@ async function handleResend(request, env) {
 
 async function handleConfirm(url, env) {
   const token = url.searchParams.get("token") || "";
-  const html = (ok, email) => `<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  // One language, chosen at signup time: an English signup confirms in English,
+  // a Chinese signup in Chinese. The other language stays one click away.
+  const html = (ok, lang) => {
+    const L = lang === "zh" ? "zh" : "en";
+    const zh = L === "zh";
+    const copy = zh
+      ? { title: "订阅成功", h1: "订阅成功", p1: "我们会在智能体工具发布时发邮件通知你。", exp: "链接已失效", expP: "确认链接为一次性使用，7 天后过期。请到 toolfront.dev 重新订阅。", home: "返回 toolfront.dev", alt: "English", altHref: "/?lang=en" }
+      : { title: "Subscription confirmed", h1: "You're on the list", p1: "We'll email you when the agent-readiness tools launch.", exp: "This link has expired", expP: "Confirmation links are single-use and expire after 7 days. Please sign up again at toolfront.dev.", home: "Back to toolfront.dev", alt: "中文", altHref: "/?lang=zh" };
+    return `<!DOCTYPE html>
+<html lang="${zh ? "zh-CN" : "en"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<title>ToolFront — ${ok ? "Subscription confirmed" : "Link expired"}</title>
+<title>ToolFront — ${ok ? copy.title : copy.exp}</title>
 <style>body{font-family:-apple-system,'Segoe UI',sans-serif;background:#F8FAFC;color:#0F172A;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
 .c{max-width:460px;padding:48px;text-align:center}h1{font-size:24px;margin:0 0 12px}.g{color:#16A34A}
 p{color:#475569;line-height:1.6;margin:0 0 16px}a{color:#1D4ED8}</style></head>
 <body><div class="c">
-${ok ? `<h1>You're on the list<span class="g">.</span></h1><p>Subscription confirmed${email ? "" : ""}. We'll email you when the agent-readiness tools launch.</p><p><a href="/?lang=zh">中文</a> · <a href="/">Back to toolfront.dev</a></p>`
-      : `<h1>This link has expired<span class="g">.</span></h1><p>Confirmation links are single-use and expire after 7 days. Please sign up again at <a href="/">toolfront.dev</a>.</p><p><a href="/?lang=zh">中文</a> · <a href="/">Back to toolfront.dev</a></p>`}
+${ok ? `<h1>${copy.h1}<span class="g">.</span></h1><p>${copy.p1}</p><p><a href="${copy.altHref}">${copy.alt}</a> · <a href="/${zh ? "?lang=zh" : ""}">${copy.home}</a></p>`
+      : `<h1>${copy.exp}<span class="g">.</span></h1><p>${copy.expP}</p><p><a href="${copy.altHref}">${copy.alt}</a> · <a href="/${zh ? "?lang=zh" : ""}">${copy.home}</a></p>`}
 </div></body></html>`;
+  };
   const hdr = { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "Referrer-Policy": "no-referrer", "X-Content-Type-Options": "nosniff", "X-Frame-Options": "DENY", "Content-Security-Policy": CSP };
 
-  if (!/^[0-9a-f]{64}$/.test(token)) return new Response(html(false), { status: 200, headers: hdr });
-  if (!env.KV) return new Response(html(false), { status: 200, headers: hdr });
+  if (!/^[0-9a-f]{64}$/.test(token)) return new Response(html(false, "en"), { status: 200, headers: hdr });
+  if (!env.KV) return new Response(html(false, "en"), { status: 200, headers: hdr });
 
   const raw = await env.KV.get("wl:token:" + token, "json");
-  if (!raw || !raw.email) return new Response(html(false), { status: 200, headers: hdr }); // expired or already used — idempotent
+  if (!raw || !raw.email) return new Response(html(false, "en"), { status: 200, headers: hdr }); // expired or already used — idempotent
 
   // Suppression check: if the address unsubscribed between signup and confirm,
   // burn the token and render the neutral "expired" page — never activate.
   if (await isSuppressed(env, raw.email)) {
     await env.KV.delete("wl:token:" + token);
     await env.KV.delete("wl:pending:" + raw.email);
-    return new Response(html(false), { status: 200, headers: hdr });
+    return new Response(html(false, raw.lang || "en"), { status: 200, headers: hdr });
   }
 
   // Activate: this is the auditable consent record (GDPR Art.7 proof).
@@ -1064,14 +1109,44 @@ ${ok ? `<h1>You're on the list<span class="g">.</span></h1><p>Subscription confi
   await env.KV.delete("wl:token:" + token);
   await env.KV.delete("wl:pending:" + raw.email);
   await env.KV.delete("wl:cool:" + raw.email);
-  return new Response(html(true, raw.email), { status: 200, headers: hdr });
+  return new Response(html(true, raw.lang || "en"), { status: 200, headers: hdr });
 }
 
 /* ————— transactional email via Resend —————
    RESEND_API_KEY must be a Worker secret (`npx wrangler secret put RESEND_API_KEY`),
    NEVER a value in wrangler.toml (which lives in git history). */
 
-async function sendConfirmationEmail(env, toEmail, token, domain) {
+/* Waitlist confirmation email copy — ONE language per send. The visitor's
+   language is captured at signup and honoured here: an English signup gets an
+   English email, a Chinese signup gets a Chinese one. Never both. */
+const EMAIL_L10N = {
+  en: {
+    subject: "Confirm your spot on ToolFront",
+    intro: "Hi — thanks for your interest in <strong>ToolFront</strong>, the agent-readiness toolkit for the open web.",
+    domain: "You asked about the tool blueprint for <strong>{d}</strong> — we'll include it in your early access.",
+    ask: "Please confirm your email address:",
+    cta: "Confirm my email",
+    orPaste: "Or paste this link into your browser:",
+    ignore: "If you didn't request this, just ignore this email — nothing will be subscribed.",
+    privacy: "Privacy policy",
+    unsub: "Unsubscribe",
+    textLink: "Open this link to confirm your email:",
+  },
+  zh: {
+    subject: "请确认订阅 ToolFront",
+    intro: "你好——感谢关注 <strong>ToolFront</strong>，这个面向开放网络的智能体就绪度工具箱。",
+    domain: "你询问了 <strong>{d}</strong> 的工具蓝图——我们会在早期访问时一并给你。",
+    ask: "请确认你的邮箱地址：",
+    cta: "确认我的邮箱",
+    orPaste: "或把这个链接粘贴到浏览器：",
+    ignore: "如果这不是你本人操作，忽略本邮件即可——不会产生任何订阅。",
+    privacy: "隐私政策",
+    unsub: "取消订阅",
+    textLink: "打开下面的链接确认邮箱：",
+  },
+};
+
+async function sendConfirmationEmail(env, toEmail, token, domain, lang) {
   const base = (env.PUBLIC_BASE_URL || "https://toolfront.dev").replace(/\/$/, "");
   const confirmUrl = base + "/confirm?token=" + token;
   // CAN-SPAM §5: every email must carry a valid physical postal address.
@@ -1091,17 +1166,19 @@ async function sendConfirmationEmail(env, toEmail, token, domain) {
     return false;
   }
   const unsubUrlStr = unsubUrl(env, toEmail, unsub);
-  const subject = "Confirm your spot on ToolFront";
-  const html = `<!DOCTYPE html><html><body style="font-family:-apple-system,'Segoe UI',sans-serif;color:#0F172A;max-width:520px;margin:0 auto;padding:32px">
-<p style="font-size:15px;line-height:1.6">Hi — thanks for your interest in <strong>ToolFront</strong>, the agent-readiness toolkit for the open web.</p>
-${domain ? `<p style="font-size:14px;color:#475569;line-height:1.6">You asked about the tool blueprint for <strong>${domain}</strong> — we'll include it in your early access.</p>` : ""}
-<p style="font-size:15px;line-height:1.6">Please confirm your email address:</p>
-<p style="text-align:center;margin:28px 0"><a href="${confirmUrl}" style="background:#16A34A;color:#fff;text-decoration:none;font-weight:600;padding:12px 28px;border-radius:10px;display:inline-block">Confirm my email</a></p>
-<p style="font-size:13px;color:#475569;line-height:1.6">Or paste this link into your browser:<br><a href="${confirmUrl}" style="word-break:break-all">${confirmUrl}</a></p>
-<p style="font-size:12.5px;color:#94A3B8;line-height:1.6">If you didn't request this, just ignore this email — nothing will be subscribed.</p>
-<p style="font-size:12.5px;color:#94A3B8;line-height:1.6">ToolFront · ${postal} · <a href="https://toolfront.dev/privacy" style="color:#94A3B8">Privacy policy</a>${unsubUrlStr ? ` · <a href="${unsubUrlStr}" style="color:#94A3B8">Unsubscribe</a>` : ""}</p>
+  const L = lang === "zh" ? "zh" : "en";
+  const c = EMAIL_L10N[L];
+  const subject = c.subject;
+  const html = `<!DOCTYPE html><html lang="${L === "zh" ? "zh-CN" : "en"}"><body style="font-family:-apple-system,'Segoe UI',sans-serif;color:#0F172A;max-width:520px;margin:0 auto;padding:32px">
+<p style="font-size:15px;line-height:1.6">${c.intro}</p>
+${domain ? `<p style="font-size:14px;color:#475569;line-height:1.6">${c.domain.replace("{d}", domain)}</p>` : ""}
+<p style="font-size:15px;line-height:1.6">${c.ask}</p>
+<p style="text-align:center;margin:28px 0"><a href="${confirmUrl}" style="background:#16A34A;color:#fff;text-decoration:none;font-weight:600;padding:12px 28px;border-radius:10px;display:inline-block">${c.cta}</a></p>
+<p style="font-size:13px;color:#475569;line-height:1.6">${c.orPaste}<br><a href="${confirmUrl}" style="word-break:break-all">${confirmUrl}</a></p>
+<p style="font-size:12.5px;color:#94A3B8;line-height:1.6">${c.ignore}</p>
+<p style="font-size:12.5px;color:#94A3B8;line-height:1.6">ToolFront · ${postal} · <a href="https://toolfront.dev/privacy" style="color:#94A3B8">${c.privacy}</a>${unsubUrlStr ? ` · <a href="${unsubUrlStr}" style="color:#94A3B8">${c.unsub}</a>` : ""}</p>
 </body></html>`;
-  const text = `Confirm your spot on ToolFront\n\nOpen this link to confirm your email:\n${confirmUrl}\n\nIf you didn't request this, ignore this email.\n\nToolFront · ${postal} · https://toolfront.dev/privacy${unsubUrlStr ? `\n\nUnsubscribe: ${unsubUrlStr}` : ""}`;
+  const text = `${c.subject}\n\n${c.textLink}\n${confirmUrl}\n\n${c.ignore}\n\nToolFront · ${postal} · https://toolfront.dev/privacy${unsubUrlStr ? `\n\n${c.unsub}: ${unsubUrlStr}` : ""}`;
   // Compliance assertion: no placeholder text may ever reach a recipient.
   if (html.includes("[YOUR") || text.includes("[YOUR")) {
     console.log("email_blocked_placeholder_detected");
@@ -1135,6 +1212,12 @@ ${domain ? `<p style="font-size:14px;color:#475569;line-height:1.6">You asked ab
   }
 }
 
-// Named exports for the tool-surface security test suite (tests/poison-samples.test.mjs)
-export { extractWebMcpSurface, toolPoisonFindings, checkToolSecurity, checkWebMCP, scanDomainCore };
+// Named exports for the test suites: the scanner's pure check functions can be
+// imported and run against any HTML/payload without a network round-trip, so
+// tests always exercise the production implementation — never a copy.
+export {
+  extractWebMcpSurface, toolPoisonFindings, checkToolSecurity, checkWebMCP,
+  scanDomainCore, challengeProbe, checkStructuredData, checkLlmsTxt,
+  checkRobotsAI, checkMachineSurfaces,
+};
 

@@ -34,6 +34,23 @@ toolfront/
 - DOM-construction rendering (dynamic data never enters HTML source text); self-hosted fonts (zero third-party requests)
 - Scanner opt-out honored (explicit robots.txt ban of our UA)
 
+## Known limitations
+
+**Self-scan.** A Cloudflare Worker cannot fetch its own zone: the request
+never leaves the edge and comes back as 522, so scanning `toolfront.dev`
+would always report "unreachable". For our own domain the scanner therefore
+reads the published assets in `public/` and runs the *identical* checks — the
+result is labelled with `self: true` so its provenance is never ambiguous.
+
+Caveat: if a Cloudflare-level feature ever rewrites a response (for example
+content-signals replacing `/robots.txt`), the asset-based result could diverge
+from what the public receives. `tests/dogfood.test.mjs` re-scores `public/`
+from disk with the production check functions, so the self-score stays
+auditable without a network call.
+
+Any **third party** scanning toolfront.dev takes the normal network path and
+is unaffected by this special case.
+
 ## Local development
 
 ```bash

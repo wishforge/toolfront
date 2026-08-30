@@ -1,0 +1,56 @@
+# ToolFront
+
+> ToolFront is a free, open-source toolkit for AI-agent readiness: it scans any
+> public website and reports how well AI agents can read, quote and operate it.
+> Scan result is a 0–100 score with six checks and a prioritised fix list.
+
+## What the scan checks
+
+- **WebMCP tools** (20 pts) — whether the site exposes callable tools so agents
+  can complete tasks (search, add-to-cart, booking) instead of screenshot-and-click.
+- **Tool surface security** (10 pts) — tool names, descriptions and parameters
+  audited against prompt-injection and tool-poisoning patterns.
+- **Structured data** (20 pts) — JSON-LD / schema.org coverage, so prices,
+  ratings and product facts can be quoted accurately instead of guessed.
+- **llms.txt** (15 pts) — one markdown file that tells agents what the site does
+  in the site's own words.
+- **AI crawler policy** (10 pts) — robots.txt guidance naming AI agents, so the
+  site states a policy instead of relying on defaults.
+- **Machine-readable surfaces** (25 pts) — sitemap.xml and OpenAPI, the map
+  agents use instead of crawling page by page.
+
+## How to use ToolFront
+
+- Scan any domain: `https://toolfront.dev/report?domain=example.com`
+- Results are returned as a graded report (A–F) with per-check status
+  (pass / partial / fail / not-verifiable), business-impact notes and a fix list
+  sorted by points gained.
+- No account or API key is required for public sites.
+
+## Our scanner's identity
+
+- User-agent: `ToolFront-Scanner/0.3`
+- It reads five paths only: `/`, `/robots.txt`, `/llms.txt`, `/sitemap.xml`,
+  `/openapi.json`. It does not execute JavaScript and does not authenticate.
+- Site owners can exclude it with a robots.txt rule, and can read exactly what
+  it does and why at `https://toolfront.dev/bot`.
+
+## Key pages
+
+- [Home](https://toolfront.dev/) — what ToolFront does and how to start a scan
+- [Example report](https://toolfront.dev/report?domain=vercel.com) — a live
+  agent-readiness report for a real site
+- [Scanner declaration](https://toolfront.dev/bot) — what our crawler reads, and
+  how to opt out
+- [Privacy policy](https://toolfront.dev/privacy) — what we store and for how long
+- [Security](https://toolfront.dev/security) — how the service is built and hardened
+- [Terms](https://toolfront.dev/terms) — terms of use
+
+## Source
+
+- [github.com/wishforge/toolfront](https://github.com/wishforge/toolfront) —
+  Apache-2.0. The scan engine, this site and the report page are all in the repo.
+
+## Contact
+
+- Privacy and data requests: privacy@toolfront.dev

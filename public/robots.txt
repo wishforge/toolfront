@@ -1,0 +1,42 @@
+# ToolFront — stated crawler policy
+#
+# We build tooling for AI agents, so we state our policy explicitly instead of
+# leaving agents to guess from defaults. Every crawler named below is welcome.
+
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# ── AI agents: explicitly allowed ────────────────────────────────────────
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+# ── Our own scanner (see https://toolfront.dev/bot) ───────────────────────
+User-agent: ToolFront-Scanner
+Allow: /
+
+Sitemap: https://toolfront.dev/sitemap.xml

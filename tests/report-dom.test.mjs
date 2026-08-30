@@ -117,5 +117,31 @@ console.log("\n[E] 安全不变量");
   ok("恶意域名以纯文本呈现", (dom.window.document.querySelector(".rhead .dom") || {}).textContent === "<img src=x onerror=alert(1)>");
 }
 
+/* F. 留资失败必须诚实（不可一律报成功） */
+console.log("\n[F] waitlist 失败反馈的诚实性");
+{
+  // The server rejects an undeliverable address with 400 and stores nothing.
+  // The page must NOT claim success in that case.
+  const dom = loadPage("https://toolfront.dev/report?domain=example.com", async (u) => {
+    if (String(u).includes("/api/waitlist")) {
+      return { ok: false, status: 400, json: async () => ({ ok: false, stored: false }) };
+    }
+    return { ok: true, json: async () => REPORT };
+  });
+  await new Promise(r => setTimeout(r, 60));
+  const doc = dom.window.document;
+  const em = doc.querySelector(".cta input[type=email]");
+  const btn = doc.querySelector(".cta button");
+  em.value = "nobody@example.com";
+  btn.click();
+  await new Promise(r => setTimeout(r, 80));
+  const queued = doc.querySelector(".cta .queued");
+  ok("失败时给出失败提示", !!queued && queued.textContent.includes("didn't go through"), queued && queued.textContent);
+  // Only the rendered notice counts: the LANGS dictionary lives in the page's
+  // <script>, so matching on body.textContent would hit the string there.
+  ok("失败时不谎报成功", !!queued && !queued.textContent.includes("Check your inbox"), queued && queued.textContent);
+  ok("失败后按钮可重试（未锁死）", btn.disabled === false);
+}
+
 console.log(`\nreport-dom 结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail ? 1 : 0);
