@@ -582,7 +582,8 @@
     var tw = el('div', 'trackwrap');
     var track = el('div', 'track');
     var cursor = el('div', 'cursor');
-    var pct = (typeof r.score === 'number' && r.scoreMax > 0) ? Math.round((r.score / r.scoreMax) * 100) : 0;
+    var sm = (typeof r.scoreMax === 'number' && r.scoreMax > 0) ? r.scoreMax : 100;
+    var pct = (typeof r.score === 'number') ? Math.round((r.score / sm) * 100) : 0;
     cursor.setAttribute('data-label', t('report.track.you') + ' · ' + r.score);
       // The cursor is always at the correct position from the first frame.
     // (The card-level scanline sweep already carries the "scanning" motion;
