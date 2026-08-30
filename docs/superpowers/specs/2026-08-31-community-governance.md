@@ -54,7 +54,7 @@ Honest limitation, disclosed: the ReDoS heuristic is detection-support, not proo
 
 ## 5. Rules externalization (v3, validated 42/42)
 
-`rules/poisoning.json` is the only community-editable surface; `rules/poisoning.mjs` is generated from it by `scripts/build-rules.mjs` (`JSON.parse` is the code-injection firewall — a "JSON" PR containing JS dies there) and committed so Workers deploys need no build step; CI asserts the generated file is in sync. `worker.js` compiles rules through the four gates at startup; `compileRules` is exported for regression tests (8 hostile-rule vectors must all be rejected, including duplicate-id — the worker-side compiler is self-sufficiently fail-closed).
+`rules/poisoning.json` is the only community-editable surface; `rules/poisoning.mjs` is generated from it by `scripts/build-rules.mjs` (`JSON.parse` is the code-injection firewall — a "JSON" PR containing JS dies there) and committed so Workers deploys need no build step; CI asserts the generated file is in sync. `worker.js` compiles rules through the four gates at startup; `compileRules` is exported for regression tests (10 hostile-rule vectors must all be rejected, including duplicate-id — the worker-side compiler is self-sufficiently fail-closed).
 
 ## 6. Implementation mapping
 
