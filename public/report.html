@@ -113,7 +113,11 @@
   .trackwrap { margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--line); }
   .track { height: 12px; border-radius: var(--r-full); position: relative; background: linear-gradient(90deg, var(--bad) 0 30%, var(--mid) 30% 50%, #F59E0B 50% 70%, var(--good-deep) 70% 85%, var(--good) 85% 100%); opacity: 0.92; }
   .track .cursor { position: absolute; top: -6px; bottom: -6px; width: 3px; background: var(--ink); border-radius: 2px; }
+  /* Edge-aware: near the ends the label would overflow the card, so it anchors
+     by its inner edge instead of its centre. */
   .track .cursor::after { content: attr(data-label); position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: 10.5px; font-weight: 600; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 5px; padding: 2px 8px; white-space: nowrap; }
+  .track .cursor[data-edge="end"]::after { left: 100%; transform: translateX(-100%); }
+  .track .cursor[data-edge="start"]::after { left: 0; transform: translateX(0); }
   .track-scale { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--ink-3); margin-top: 8px; }
   .track-scale span b { color: var(--ink-2); }
 
@@ -258,7 +262,7 @@
 
   <div class="colo">
     <span>© 2026 ToolFront · Free &amp; Open</span>
-    <span><a href="/privacy">Privacy</a> · <a href="/security">Security</a> · <a href="/bot">/bot</a></span>
+    <span><a href="/privacy" data-i18n="rfoot.privacy">Privacy</a> · <a href="/security" data-i18n="rfoot.security">Security</a> · <a href="/bot" data-i18n="rfoot.bot">/bot</a></span>
   </div>
 </div>
 
@@ -306,6 +310,11 @@
       'report.raise': '<b>Want to raise this score?</b> ToolFront generates the missing tools for you:',
       'report.raise.keep': '<b>Great score — keep it that way.</b> A redesign can silently break it. Leave your email and we\u2019ll alert you if it drops:',
       'report.fix.title': 'Fix list', 'report.fix.passed': 'already in place', 'report.fix.alldone': 'All fixes applied! Re-scan to see your new score.', 'report.fix.nofixes': 'Nothing to fix — everything is already in place.',
+    'rfoot.privacy': 'Privacy',
+    'rfoot.security': 'Security',
+    'rfoot.bot': '/bot docs',
+    'report.email.placeholder': 'Email',
+    'report.email.aria': 'Email',
       'report.vs.title': 'Since your last scan', 'report.vs.first': 'First scan for this domain — check back after you make changes.', 'report.vs.local': 'Stored only in this browser — clear it anytime in browser settings.', 'report.vs.unchanged': 'No change since your last scan.', 'report.vs.date': 'Compared to your scan on {d}',
       'report.getfix': 'Get the fix list',
       'report.loading': 'Scanning {d} — checking how agents see your site',
@@ -318,21 +327,21 @@
     },
     zh: {
       'doc.title': 'ToolFront — 你的网站准备好迎接 AI 智能体了吗？',
-      'hero.title': '你的网站准备好迎接 <span class="hl">AI 智能体</span>了吗？',
-      'hero.sub': 'AI 助手已经开始替你的客户浏览、比价、下单。对它们而言，大多数网站是一个<strong>只能截图乱猜的黑盒</strong>。ToolFront 让你的网站<strong>容易被智能体理解和使用</strong>——并免费告诉你现在站在哪。',
+      'hero.title': '你的网站准备好迎接 <span class="hl">AI</span> 了吗？',
+      'hero.sub': 'AI 正在帮你的客户找产品、比价、下单。对大多数网站来说，AI 只能<strong>截图乱猜</strong>——像个黑盒。ToolFront 让你的网站<strong>变得 AI 友好</strong>，并免费告诉你现在的水平。',
       'scan.free': '免费扫描', 'scan.secs': '约 5 秒', 'scan.btn': '扫描',
       'scan.placeholder': '你的域名，如 example.com',
       'scan.meta': '检测项：<b>WebMCP 工具 · 结构化数据 · llms.txt · AI 爬虫政策 · sitemap</b>。无需注册。',
       'shift.kicker': '时代变了',
-      'shift.h2': '你网站的下一批访客，将不再是人类。',
-      'shift.sub': '搜索引擎读你的网站，是为了把人带进来；智能体读你的网站，是为了直接办事——购物、预订、比价、订阅。规则已经变了，大多数网站还没跟上。',
+      'shift.h2': '下一个访问你网站的，可能不是人。',
+      'shift.sub': '搜索引擎读你的网站是为了引流量；AI 读你的网站是为了直接办事——购物、比价、下单。规则已经变了，但大多数网站还没跟上。',
       'proof.active': '进行中', 'proof.live': '已上线', 'proof.preview': '预览',
       'proof.incubated': '由 <b>Google + Microsoft</b> 孵化',
       'how.kicker': '工作原理', 'how.h2': '从黑盒，到敞开的门。',
-      'step1.title': '扫一扫', 'step1.text': '看看智能体眼中的你的网站。得到一份不需要工程师背景也能照着做的分数和改进清单。',
-      'step2.title': '生成工具', 'step2.text': 'ToolFront 根据你已有的能力，自动补写网站缺失的机器可读工具定义。一行代码安装，无需重构。',
-      'step3.title': '保持掌控', 'step3.text': '智能体可以使用你的网站，但支付和注册仍需人工确认。钥匙在你手里——全程留痕、可审计。',
-      'dogfood.kicker': '以身作则',
+      'step1.title': '扫一扫', 'step1.text': '看看 AI 怎么看你：一个直观的分数，加上一份照着就能改的清单——不用懂代码。',
+      'step2.title': '生成工具', 'step2.text': '根据你现有的功能，自动补上缺失的工具定义。一行代码装上，不改原有架构。',
+      'step3.title': '保持掌控', 'step3.text': 'AI 可以操作你的网站，但关键动作还是你说了算。每次操作都有记录，随时可查。',
+      'dogfood.kicker': '我们吃自己的狗粮',
       'dogfood.h2': '这个页面本身就是一个 WebMCP 工具。',
       'dogfood.title': '本页注册了一个真实的工具：',
       'dogfood.tool.live': 'scan_domain — 已注册并生效',
@@ -342,22 +351,27 @@
       'waitlist.msg': '不发垃圾邮件。你只会收到一封确认邮件。参见隐私政策。',
       'waitlist.enter': '请输入有效的邮箱。',
       'waitlist.done': '请查收邮箱——我们刚给你发了一封确认邮件。',
-      'waitlist.queued': '已为 {d} 排队生成改进清单，我们会尽快联系你。',
+      'waitlist.queued': '已收到 {d} 的定制改进清单请求——做好后第一时间通知你。',
       'colophon.built': '基于开源 WebMCP 提案构建',
       'colophon.privacy': '隐私',
       'colophon.terms': '条款',
       'colophon.security': '安全',
-      'report.yours': '你的报告', 'report.summary': '报告总结', 'report.label': '智能体就绪度', 'report.scanned': '扫描于',
+      'report.yours': '你的报告', 'report.summary': '报告摘要', 'report.label': '智能体就绪度', 'report.scanned': '扫描于',
       'report.biz.title': '这对你的生意意味着什么', 'report.tech.title': '技术详情',
-      'report.biz.low': '总结：你的网站对 AI 是"黑盒"。让 AI 推荐的客户正在流向竞争对手——每拖一天都在丢单。',
-      'report.biz.mid': '总结：AI 只看懂了你的一半——关键时刻仍然说不清你、推不动你。补齐下面几项，立刻见效。',
-      'report.biz.high': '总结：你的网站已经"会说 AI 的语言"——领先大多数对手。保持住，并持续监控。',
-      'report.biz.allgood': '暂无需紧急处理：AI 已经能读懂并使用你的网站。保持监控，别让改版把它改坏。',
+      'report.biz.low': '总结：你的网站对 AI 来说是个黑盒。本来应该流向你的客户，正在被 AI 指向对手——每拖一天都在丢单。',
+      'report.biz.mid': '总结：AI 只读懂了你的一半——关键时刻还是说不清、推不动。补齐下面几项，立刻见效。',
+      'report.biz.high': '总结：你的网站已经"会说 AI 的语言"——领先大多数对手。保持住，定期复查。',
+      'report.biz.allgood': '暂时不用改：AI 已经能读懂并使用你的网站。保持监控，别让下次改版把它搞坏。',
       'report.share': '分享', 'report.pdf': '存为 PDF', 'report.new': '重新扫描', 'report.copied': '链接已复制', 'report.copyfail': '复制失败——请从地址栏复制',
       'report.printhead': '智能体就绪度报告 — toolfront.dev',
       'report.raise': '<b>想提高这个分数？</b> ToolFront 为你生成缺失的工具：',
-      'report.raise.keep': '<b>保持住这个成绩。</b>一次改版就可能悄悄破坏它。留个邮箱，掉了立刻告诉你：',
+      'report.raise.keep': '<b>保持住这个成绩。</b>一次改版就可能悄悄掉分。留个邮箱，掉了第一时间通知你：',
       'report.fix.title': '修复清单', 'report.fix.passed': '已就绪', 'report.fix.alldone': '全部修复完成！重新扫描看看新分数。', 'report.fix.nofixes': '无需修复——一切已就绪。',
+    'rfoot.privacy': '隐私政策',
+    'rfoot.security': '安全说明',
+    'rfoot.bot': '扫描器说明',
+    'report.email.placeholder': '你的邮箱地址',
+    'report.email.aria': '邮箱地址',
       'report.vs.title': '对比上次扫描', 'report.vs.first': '首次扫描该域名——改完再来看看变化。', 'report.vs.local': '数据仅存于本浏览器——可随时在浏览器设置中清除。', 'report.vs.unchanged': '与上次扫描相比无变化。', 'report.vs.date': '对比 {d} 的扫描结果',
       'report.getfix': '获取改进清单',
       'report.loading': '正在扫描 {d}——看看智能体眼中的你的网站',
@@ -405,7 +419,7 @@
     },
     zh: {
       labels: { webmcp: 'WebMCP 工具', 'tool-security': '工具面安全', 'structured-data': '结构化数据', 'llms-txt': 'llms.txt', 'robots-policy': 'AI 爬虫政策', 'machine-surfaces': '机器可读入口' },
-      verdicts: [70, '智能体就绪。智能体可以有条理地使用这个网站。', 40, '部分可读。智能体时而靠猜，时而失败。', '对智能体完全不透明。每次交互都是截图加乱点的赌博。'],
+      verdicts: [70, '已就绪。AI 可以顺畅地使用你的网站。', 40, '部分可读。AI 有时能看懂，有时只能瞎猜。', '对 AI 完全不透明。每次交互都是截图加乱点的赌博。'],
       biz: {
         'webmcp.fail': { pain: '客户越来越让 AI 助手替他们办事。AI 点不动你的网站——它办不了，就去办你竞争对手的。', gain: '注册 WebMCP 工具后，AI 能直接调用你的服务：从"被 AI 提到"升级为"被 AI 使用"，吃到第一波 Agent 流量。' },
         'webmcp.partial': { pain: 'AI 只能用你网站的一部分功能——客户旅程走到一半就断在 AI 手里。', gain: '补全工具面后，AI 能在你的网站走完全程。' },
@@ -434,23 +448,28 @@
         'machine-surfaces.partial': '补一份 OpenAPI 规范'
       },
       details: {
-        'webmcp.pass': '已检测到 WebMCP 工具面——智能体可以直接在本页发现原生工具。',
+        'webmcp.pass': '已检测到 WebMCP 工具——AI 可以直接在本页调用它们。',
         'webmcp.fail': '未注册 WebMCP 工具。智能体只能截图乱点——界面一改，流程就断。',
-        'tool-security.pass': '工具面通过静态安全检查：未发现投毒特征，标注与规范一致（参照 Chrome 官方指南与 OWASP ASI02）。',
+        'tool-security.pass': '通过安全检查：没发现投毒风险，标注符合规范（参照 Chrome 官方指南与 OWASP ASI02）。',
         'tool-security.partial': '工具面有轻微问题（缺少建议标注或超出长度预算）。参照 Chrome WebMCP 安全指南核对。',
-        'tool-security.fail': '检测到工具面安全问题——工具描述对智能体而言就是指令，可能被投毒利用（W3C WebMCP §6.3 / OWASP ASI02）。',
+        'tool-security.fail': '检测到安全问题——工具描述会被 AI 当成指令执行，可能被利用来投毒（W3C WebMCP §6.3 / OWASP ASI02）。',
         'tool-security.na': '本页没有 WebMCP 工具面，此项检查不适用。',
         'structured-data.pass': 'JSON-LD 与 OpenGraph 标签齐全，智能体可以可靠地提取页面信息。',
         'structured-data.partial': '有部分结构化数据，智能体只能看到片段而非全貌。',
         'structured-data.fail': '没有 JSON-LD 或 OpenGraph 数据，智能体只能读原始文本。',
-        'llms-txt.pass': '已提供 llms.txt——你已经在用智能体的语言说话了。',
+        'llms-txt.pass': '已提供 llms.txt——你已经会用 AI 能读懂的格式介绍自己了。',
         'llms-txt.fail': '缺少 /llms.txt。这是最容易拿到的分：一个描述你网站的 markdown 文件。',
         'llms-txt.na': '该路径被站点的 bot 防护拦截，无法检测——同一道墙通常也挡住了 AI 智能体。',
-        'robots-policy.pass': '对主流 AI 爬虫有明确的放行政策，智能体受欢迎。',
+    'webmcp.partial': '已注册 WebMCP 工具，但工具面还不完整——补全后智能体能完成更多任务。',
+    'webmcp.na': '主页被 bot 防护拦截，此项无法检测——同一道墙通常也挡住了 AI 智能体。',
+    'structured-data.na': '主页被 bot 防护拦截，此项无法检测——同一道墙通常也挡住了 AI 智能体。',
+    'llms-txt.partial': 'llms.txt 存在但内容太短或缺少关键段落——补全后智能体理解更准。',
+
+        'robots-policy.pass': '明确放行了主流 AI 爬虫——AI 来访问不会被挡。',
         'robots-policy.partial': 'robots.txt 存在但未提及 AI 爬虫。默认放行——但明确的政策更有力。',
         'robots-policy.fail': 'robots.txt 明确屏蔽了部分主流 AI 爬虫，智能体被拒之门外。',
         'robots-policy.na': 'robots.txt 被 bot 防护拦截，无法读取——同一道墙通常也挡住了 AI 智能体。',
-        'machine-surfaces.pass': '已提供 sitemap / OpenAPI 等机器可读入口——生成工具的上好素材。',
+        'machine-surfaces.pass': '已有 sitemap / OpenAPI 等机器可读入口——这些是自动生成工具的好底料。',
         'machine-surfaces.partial': '提供了部分机器可读入口。补一份 OpenAPI 规范后，工具生成几乎全自动。',
         'machine-surfaces.fail': '未检测到 sitemap.xml 或 OpenAPI 规范，智能体没有你网站的地图。',
         'machine-surfaces.na': 'sitemap/OpenAPI 探测被 bot 防护拦截，无法检测——同一道墙通常也挡住了 AI 智能体。'
@@ -570,6 +589,9 @@
     // animating the cursor from 0 → pct was both fragile — it could stick at
     // 0% if setTimeout was throttled in a backgrounded tab — and visually
     // misleading, since the score position is data, not a transition.)
+    // Label alignment: centre by default, but anchor inward near the edges so
+    // a 0 or 100 score never pushes the tooltip outside the card.
+    cursor.dataset.edge = pct >= 90 ? 'end' : pct <= 10 ? 'start' : 'mid';
     cursor.style.left = pct + '%';
     track.appendChild(cursor);
     tw.appendChild(track);
@@ -757,7 +779,7 @@
     copy.appendChild(el('div', 'fine', t('report.cta.fine')));
     cta.appendChild(copy);
     var wl = el('div', 'scan');
-    var em = el('input'); em.type = 'email'; em.placeholder = t('waitlist.ph'); em.setAttribute('aria-label', 'Email');
+    var em = el('input'); em.type = 'email'; em.placeholder = t('waitlist.ph'); em.setAttribute('aria-label', t('report.email.aria'));
     var btn = el('button'); btn.type = 'button'; btn.textContent = t('report.getfix');
     wl.appendChild(em); wl.appendChild(btn);
     cta.appendChild(wl);
@@ -824,9 +846,12 @@
     nums.appendChild(el('div', 'grade-label', t('report.label')));
     hero.appendChild(nums);
     var vd = el('div', 'verdict');
-    var strong = el('b', null, localVerdict(r.score).split('.')[0] + '.');
+    // Split on first sentence-ending punctuation (. or 。) for bold/plain rendering
+    var vt = localVerdict(r.score);
+    var dotIdx = Math.max(vt.indexOf('.'), vt.indexOf('。'));
+    var strong = el('b', null, dotIdx > -1 ? vt.slice(0, dotIdx + 1) : vt);
     vd.appendChild(strong);
-    vd.appendChild(document.createTextNode(localVerdict(r.score).slice(localVerdict(r.score).indexOf('.') + 1)));
+    vd.appendChild(document.createTextNode(dotIdx > -1 ? vt.slice(dotIdx + 1) : ''));
     hero.appendChild(vd);
     b1.appendChild(hero);
     b1.appendChild(buildTrack(r, first));
