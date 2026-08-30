@@ -470,18 +470,23 @@ export function compileRules(rules) {
     if (seen.has(r.id)) throw new Error(`rules: duplicate rule id "${r.id}"`);
     seen.add(r.id);
     if (!ALLOWED_TYPES.has(r.type)) throw new Error(`rules: unknown rule type "${r.type}"`);
+    if (!Number.isInteger(r.severity) || r.severity < 1 || r.severity > 3)
+      throw new Error(`rules: "${r.id}" severity must be an integer 1..3`);
     if (r.type === "regex") {
+      if (typeof r.pattern !== "string" || !r.pattern) throw new Error(`rules: "${r.id}" regex requires a non-empty pattern`);
       const flags = r.flags || "";
       if (!ALLOWED_FLAGS.test(flags)) throw new Error(`rules: flags "${flags}" not allowed (i/u only)`);
       const hints = REDOS_HINTS.filter(h => h.re.test(r.pattern)).map(h => h.name);
       if (hints.length) throw new Error(`rules: pattern looks ReDoS-prone (${hints.join("; ")})`);
       out.push({ ...r, re: new RegExp(r.pattern, flags) });
     } else if (r.type === "executor") {
+      if (typeof r.executor !== "string" || !r.executor) throw new Error(`rules: "${r.id}" executor requires a name`);
       if (!ALLOWED_EXECUTORS.has(r.executor) || typeof EXECUTORS[r.executor] !== "function")
         throw new Error(`rules: executor "${r.executor}" not whitelisted`);
       out.push({ ...r, fn: EXECUTORS[r.executor] });
-    } else {
-      // "length-over" needs no compilation — but it must still ship.
+    } else if (r.type === "length-over") {
+      if (!Number.isInteger(r.limit)) throw new Error(`rules: "${r.id}" length-over requires an integer limit`);
+      // needs no compilation — but it must still ship.
       out.push({ ...r });
     }
   }
@@ -534,12 +539,14 @@ function toolPoisonFindings(tool) {
   const findings = [];
   for (const rule of COMPILED_RULES) {
     const targets = rule.applies.map(f => tool[f]).filter(v => typeof v === "string" && v.length);
+    // Per-target push (no break): mirrors the original per-text semantics —
+    // a tool with description AND raw both matching scores both findings.
     for (const text of targets) {
       let hit = false;
       if (rule.type === "regex") hit = rule.re.test(text);
       else if (rule.type === "length-over") hit = text.length > rule.limit;
       else if (rule.type === "executor") hit = rule.fn(text) === true;
-      if (hit) { findings.push({ code: rule.id, severity: rule.severity }); break; }
+      if (hit) findings.push({ code: rule.id, severity: rule.severity });
     }
   }
   return findings;

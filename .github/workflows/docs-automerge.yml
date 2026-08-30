@@ -1,9 +1,10 @@
 name: Docs auto-merge
 
 # Zero-touch path for typo-level PRs (docs/README/LICENSE/llms.txt only).
-# The guard refuses anything touching code or rules; `--auto` only QUEUES the
-# merge — the branch-protected required check still governs it, so a red CI
-# never merges. Enforcement lives in branch protection; this is convenience.
+# The guard runs FIRST and needs only git — no npm install, so a PR that
+# smuggles a postinstall script into package.json gets no execution window.
+# `--auto` only QUEUES the merge; the branch-protected required check still
+# governs it, so a red CI never merges.
 on:
   pull_request:
     paths: ["docs/**", "README.md", "LICENSE", "public/llms.txt"]
@@ -16,11 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
         with:
-          node-version: '22'
-      - run: npm ci
-      - name: Guard — refuse if any non-docs file changed
+          persist-credentials: false
+      - name: Guard — refuse if any non-docs file changed (before anything else runs)
         run: |
           git fetch origin main --quiet
           CHANGED=$(git diff --name-only origin/main...HEAD)
