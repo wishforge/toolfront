@@ -1,0 +1,36 @@
+name: Docs auto-merge
+
+# Zero-touch path for typo-level PRs (docs/README/LICENSE/llms.txt only).
+# The guard refuses anything touching code or rules; `--auto` only QUEUES the
+# merge — the branch-protected required check still governs it, so a red CI
+# never merges. Enforcement lives in branch protection; this is convenience.
+on:
+  pull_request:
+    paths: ["docs/**", "README.md", "LICENSE", "public/llms.txt"]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  automerge:
+    name: Auto-merge docs-only PRs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Guard — refuse if any non-docs file changed
+        run: |
+          git fetch origin main --quiet
+          CHANGED=$(git diff --name-only origin/main...HEAD)
+          echo "$CHANGED"
+          if echo "$CHANGED" | grep -qvE '^(docs/|README\.md$|LICENSE$|public/llms\.txt$)'; then
+            echo "::error::PR touches files outside the docs allowlist"
+            exit 1
+          fi
+      - name: Queue auto-merge (required check still governs the merge)
+        run: gh pr merge --auto --squash "$PR_URL" --repo "${{ github.repository }}"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
