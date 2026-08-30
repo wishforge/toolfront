@@ -1,0 +1,42 @@
+# ToolFront — Worker config
+# Deploy: cd toolfront-landing && npx wrangler deploy
+# Then bind toolfront.dev under Workers & Pages -> toolfront -> Settings -> Domains
+name = "toolfront"
+main = "worker.js"
+compatibility_date = "2026-08-01"
+
+# Serves the landing page (index.html) from ./public
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# REQUIRED for production: KV for 24h scan cache and waitlist storage.
+# (Rate limiting no longer uses KV — see the RATE_LIMITER binding below.)
+# Create with: npx wrangler kv namespace create KV
+# Then paste the returned id below and uncomment:
+[[kv_namespaces]]
+binding = "KV"
+id = "75cfa4ee789d4ace9c7d808012638b8b"
+
+# REQUIRED Worker secrets (never put values in this file — it is committed to git):
+#   npx wrangler secret put RESEND_API_KEY    # transactional email (Resend)
+#   npx wrangler secret put POSTAL_ADDRESS    # CAN-SPAM §5 physical postal address; email sending is BLOCKED if unset
+#   npx wrangler secret put UNSUB_SECRET      # HMAC key for unsubscribe links (distinct one-purpose key); email sending is BLOCKED if unset
+#   npx wrangler secret put INTERNAL_SCAN_KEY # shared key authenticating internal scanning clients → /internal/scan
+
+# Rate limiting — official Cloudflare binding (Workers Paid plan).
+# Per-location atomic counters, zero KV cost, no added latency.
+# 30 requests / 60s per IP across all API endpoints (burst protection;
+# long-run abuse capped separately by per-email cooldowns and resend limits).
+# namespace_id: any integer unique to this Cloudflare account.
+# Requires wrangler 3.45+.
+[[unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 30, period = 60 }
+
+# Bind the primary domain at deploy time (zone must be on this Cloudflare account).
+routes = [
+  { pattern = "toolfront.dev", custom_domain = true }
+]

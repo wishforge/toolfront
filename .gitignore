@@ -1,0 +1,16 @@
+.DS_Store
+node_modules/
+.wrangler/
+*.log
+
+# Local secrets (Cloudflare convention) — never commit
+.dev.vars
+.env
+.env.*
+!.env.example
+
+# Design workbench & specs — kept in the private repo (toolfront-monitor/docs-base)
+# so the public repo ships product code only. Ignores the paths even if a
+# working copy is recreated locally.
+docs/
+design-candidates/

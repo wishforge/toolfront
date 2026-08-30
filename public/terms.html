@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToolFront — Terms of Service / 服务条款</title>
+<meta name="description" content="The terms governing your use of the ToolFront scanner and waitlist.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23FFFFFF'/%3E%3Cpath d='M10 44 L10 20 L26 20 M10 32 L22 32' stroke='%230C1222' stroke-width='6' fill='none'/%3E%3Cpath d='M38 44 L54 44 M46 20 L46 44' stroke='%232563EB' stroke-width='6' fill='none'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+  /* V5 tokens (design-system-v5.md): cool navy ink + electric blue accent + warm paper.
+     V5 aliases (--paper/--accent/--good/--line/--serif) are declared too, so future V5
+     components can be dropped into these pages without re-mapping. */
+  :root { --bg:#FAFBFC; --bg-soft:#F1F4F8; --ink:#0C1222; --ink-soft:#374151; --ink-faint:#6B7280; --green:#059669; --blue:#2563EB; --border:#E2E6EE; --sans:"Space Grotesk","Noto Sans SC",sans-serif; --serif:"Source Serif 4","Noto Serif SC",serif; --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace; --paper:#FAFBFC; --paper-soft:#F1F4F8; --accent:#2563EB; --accent-soft:#EFF6FF; --good:#059669; --good-soft:#ECFDF5; --line:#E2E6EE; --line-light:#F0F2F5; --r-1:4px; --r-2:8px; --r-3:12px; --r-4:16px; --r-full:9999px; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--ink); font-family:var(--serif); font-optical-sizing:auto; text-rendering:optimizeLegibility;
+         font-size:15.5px; font-weight:340; line-height:1.75; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:var(--r-1); }
+  .frame { max-width: 760px; margin: 0 auto; padding: 0 clamp(20px,5vw,48px) 72px; }
+  header { padding: 22px 0 8px; display:flex; justify-content:space-between; align-items:center; }
+  .wordmark { font-family:var(--mono); font-weight:700; font-size:17px; text-decoration:none; color:var(--ink); }
+  /* V5 wordmark signature: the trailing underscore is electric blue with an underline */
+  .wordmark .u { color:var(--accent); position:relative; }
+  .wordmark .u::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px; background:var(--accent); border-radius:1px; opacity:0.5; }
+  .lang { font-size:13px; color:var(--blue); cursor:pointer; background:none; border:none; font-family:var(--sans); }
+  h1 { font-family:var(--serif); font-optical-sizing:auto; font-size:clamp(26px, 4vw, 36px); font-weight:430; letter-spacing:-0.02em; margin:34px 0 6px; }
+  .meta { color: var(--ink-faint); font-size: 13px; margin-bottom: 34px; }
+  h2 { font-family:var(--serif); font-optical-sizing:auto; font-size:18px; font-weight:600; letter-spacing:-0.01em; margin:34px 0 8px; }
+  p, li { color: var(--ink-soft); }
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { margin-bottom: 6px; }
+  .zh { display: none; }
+  body.lang-zh .en { display:none; }
+  body.lang-zh .zh { display:block; }
+  .lang-switch { display:inline-flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; }
+  .lang-switch button { border:0; cursor:pointer; background:transparent; font-family:var(--sans); font-size:12px; font-weight:600; color:var(--ink-faint); padding:5px 12px; transition:background .15s ease, color .15s ease; }
+  .lang-switch button.on { background:var(--ink); color:#fff; }
+  .lang-switch button:not(.on):hover { color:var(--ink); background:var(--bg-soft); }
+  .i18n-zh { display:none; }
+  body.lang-zh .i18n-zh { display:inline; }
+  body.lang-zh .i18n-en { display:none; }
+  footer { border-top: 1px solid var(--border); margin-top: 48px; padding-top: 20px; font-size: 12.5px; color: var(--ink-faint); }
+  a { color: var(--blue); }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <header>
+    <a class="wordmark" href="/">toolfront<span class="u">_</span></a>
+    <div class="lang-switch" role="group" aria-label="Language / 语言">
+      <button type="button" data-lang="en">English</button>
+      <button type="button" data-lang="zh">简体中文</button>
+    </div>
+  </header>
+
+  <div class="en">
+    <h1>Terms of Service</h1>
+    <p class="meta">Version 1.0 · Effective date: August 29, 2026 · toolfront.dev</p>
+
+    <h2>1. Acceptance</h2>
+    <p>By using toolfront.dev (the "Service") — including the agent-readiness scanner and the waitlist — you agree to these Terms. If you do not agree, do not use the Service.</p>
+
+    <h2>2. What the Service does</h2>
+    <p>The scanner fetches a small set of publicly accessible pages (<code>/</code>, <code>/robots.txt</code>, <code>/llms.txt</code>, <code>/sitemap.xml</code>, <code>/openapi.json</code>) from a domain you submit, and returns a heuristic readiness report. The scanner identifies itself as <code>ToolFront-Scanner</code> and honors explicit robots.txt opt-outs.</p>
+
+    <h2>3. Acceptable use</h2>
+    <ul>
+      <li>Use the Service only to assess domains you have a legitimate interest in evaluating (e.g., your own site, or a site you are advising).</li>
+      <li>Do not automate, script, or resell access to the Service; do not circumvent rate limits.</li>
+      <li>Do not use the Service to probe, harass, or gain unauthorized access to any system.</li>
+      <li>We may suspend or block access for abuse, at our sole discretion.</li>
+    </ul>
+
+    <h2>4. No warranty</h2>
+    <p>The Service and all scan results are provided <strong>"as is"</strong> without warranties of any kind, express or implied. Scores and recommendations are heuristic and informational only — they do not constitute professional, legal, or security advice, and may be inaccurate or out of date.</p>
+
+    <h2>5. Limitation of liability</h2>
+    <p>To the maximum extent permitted by law, ToolFront shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of data or profits, arising from your use of the Service. Total aggregate liability shall not exceed USD 100.</p>
+
+    <h2>6. Waitlist</h2>
+    <p>Joining the waitlist does not guarantee access to any product. Emails are governed by our <a href="/privacy">Privacy Policy</a>; you may unsubscribe at any time via the link in any email.</p>
+
+    <h2>7. Changes</h2>
+    <p>We may update these Terms; material changes will be announced on the site before taking effect. Continued use after changes take effect constitutes acceptance.</p>
+
+    <h2>8. Contact &amp; governing law</h2>
+    <p>Questions: <a href="mailto:privacy@toolfront.dev">privacy@toolfront.dev</a>. The Service is operated by <strong>David</strong>, an independent developer located in Shanghai, China. These Terms are governed by the laws of the People's Republic of China, without regard to conflict-of-law rules.</p>
+  </div>
+
+  <div class="zh">
+    <h1>服务条款</h1>
+    <p class="meta">版本 1.0 · 生效日期：2026 年 8 月 29 日 · toolfront.dev</p>
+
+    <h2>1. 条款接受</h2>
+    <p>使用 toolfront.dev（"本服务"）——包括 Agent 就绪度扫描器与候补名单——即表示你同意本条款。如不同意，请勿使用本服务。</p>
+
+    <h2>2. 服务内容</h2>
+    <p>扫描器抓取你提交域名下的一小部分公开页面（<code>/</code>、<code>/robots.txt</code>、<code>/llms.txt</code>、<code>/sitemap.xml</code>、<code>/openapi.json</code>），并返回启发式就绪度报告。扫描器以 <code>ToolFront-Scanner</code> 标识自身，并遵守 robots.txt 中的明确排除声明。</p>
+
+    <h2>3. 可接受的使用</h2>
+    <ul>
+      <li>仅将本服务用于评估你有正当利益评估的域名（例如你自己的网站，或你提供咨询服务的网站）。</li>
+      <li>不得以自动化、脚本方式使用或转售本服务；不得规避限流。</li>
+      <li>不得利用本服务探测、骚扰或未授权访问任何系统。</li>
+      <li>对于滥用行为，我们可自行决定暂停或封禁访问。</li>
+    </ul>
+
+    <h2>4. 不作保证</h2>
+    <p>本服务及全部扫描结果按<strong>"现状"</strong>提供，不附带任何明示或默示保证。评分与建议仅为启发式参考信息，不构成专业、法律或安全建议，可能不准确或已过时。</p>
+
+    <h2>5. 责任限制</h2>
+    <p>在法律允许的最大范围内，ToolFront 对因你使用本服务而产生的任何间接、附带、特殊、后果性或惩罚性损害，以及任何数据或利润损失，概不负责。累计责任总额不超过 100 美元。</p>
+
+    <h2>6. 候补名单</h2>
+    <p>加入候补名单不保证获得任何产品的使用资格。邮件发送受<a href="/privacy">隐私政策</a>约束；你可随时通过邮件中的链接退订。</p>
+
+    <h2>7. 条款变更</h2>
+    <p>我们可能更新本条款；重大变更将在生效前于站内公告。变更生效后继续使用即视为接受。</p>
+
+    <h2>8. 联系与适用法律</h2>
+    <p>疑问垂询：<a href="mailto:privacy@toolfront.dev">privacy@toolfront.dev</a>。本服务由独立开发者 <strong>David</strong>（所在地：中国上海）运营。本条款受中华人民共和国法律管辖（不含冲突法规则）。</p>
+  </div>
+
+  <footer>
+    © 2026 ToolFront · <a href="/">toolfront.dev</a> · <a href="/privacy"><span class="i18n-en">Privacy</span><span class="i18n-zh">隐私</span></a> · <a href="/security"><span class="i18n-en">Security</span><span class="i18n-zh">安全</span></a>
+  </footer>
+
+</div>
+<script>
+  (function () {
+    var body = document.body;
+    var btns = document.querySelectorAll('.lang-switch button');
+    function setLang(zh) {
+      body.classList.toggle('lang-zh', zh);
+      try { localStorage.setItem('tf-lang', zh ? 'zh' : 'en'); } catch (_) {}
+      btns.forEach(function (b) { b.classList.toggle('on', (b.dataset.lang === 'zh') === zh); });
+    }
+    var saved = 'en';
+    try { saved = localStorage.getItem('tf-lang') || 'en'; } catch (_) {}
+    setLang(saved === 'zh');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () { setLang(b.dataset.lang === 'zh'); });
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToolFront Report</title>
+<meta name="description" content="Agent-readiness report — what AI agents see when they read this site.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23FFFFFF'/%3E%3Cpath d='M10 44 L10 20 L26 20 M10 32 L22 32' stroke='%230C1222' stroke-width='6' fill='none'/%3E%3Cpath d='M38 44 L54 44 M46 20 L46 44' stroke='%232563EB' stroke-width='6' fill='none'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+  /* ════════════════ V5 REPORT — production build ════════════════
+     Source: ToolFront V5 design system (cool navy ink + electric blue accent,
+     glow-border cards, score track, one-shot scan replay)
+     Fonts self-hosted (/fonts/fonts.css) — no third-party requests.
+     All dynamic content is DOM-built (textContent); motion = evidence. */
+  :root {
+    --paper: #FAFBFC; --paper-soft: #F1F4F8;
+    --ink: #0C1222; --ink-2: #374151; --ink-3: #6B7280; --ink-4: #9CA3AF;
+    --line: #E2E6EE; --line-light: #F0F2F5;
+    --accent: #2563EB; --accent-deep: #1D4ED8; --accent-soft: #EFF6FF;
+    --good: #059669; --good-deep: #047857; --good-soft: #ECFDF5;
+    --mid: #D97706; --mid-soft: #FFFBEB;
+    --bad: #DC2626; --bad-soft: #FEF2F2;
+    --card: #FFFFFF; --surface-dark: #0F172A;
+    --shadow-sm: 0 2px 8px -2px rgba(12,18,34,0.06), 0 1px 3px rgba(12,18,34,0.04);
+    --shadow-report-glow: 0 0 0 1px rgba(37,99,235,0.08), 0 0 20px -2px rgba(37,99,235,0.10), 0 0 48px -8px rgba(37,99,235,0.06), 0 20px 48px -12px rgba(12,18,34,.15);
+    --grad-primary: linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #3B82F6 100%);
+    --grad-primary-hover: linear-gradient(135deg, #1E40AF 0%, #1D4ED8 50%, #2563EB 100%);
+    --r-1: 4px; --r-2: 8px; --r-3: 12px; --r-4: 16px; --r-5: 20px; --r-full: 9999px;
+    --sans: "Space Grotesk", "Noto Sans SC", sans-serif;
+    --serif: "Source Serif 4", "Noto Serif SC", serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --dur-fast: 150ms; --dur-normal: 250ms;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--paper-soft); color: var(--ink);
+    font-family: var(--sans); font-size: 15px; line-height: 1.62;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+  }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--r-1); }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 36px) 72px; }
+
+  /* ═══ TOP BAR ═══ */
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid var(--line-light); }
+  .wordmark { font-family: var(--mono); font-weight: 700; font-size: 16px; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; display: flex; align-items: center; gap: 1px; }
+  .wordmark em { font-style: normal; color: var(--accent); position: relative; }
+  .wordmark em::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--accent); border-radius: 1px; opacity: 0.5; }
+  .top-right { display: flex; gap: 14px; align-items: center; font-size: 13px; }
+  .top-right a { color: var(--ink-2); text-decoration: none; font-family: var(--sans); font-weight: 500; transition: color var(--dur-fast); }
+  .top-right a:hover { color: var(--ink); }
+  .lang { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-full); overflow: hidden; }
+  .lang button { border: 0; background: transparent; font-family: var(--sans); font-size: 11.5px; font-weight: 600; color: var(--ink-3); padding: 5px 12px; cursor: pointer; transition: background var(--dur-fast), color var(--dur-fast); }
+  .lang button.on { background: var(--ink); color: #fff; }
+  .lang button:not(.on):hover { color: var(--ink); background: var(--paper-soft); }
+
+  /* ═══ REPORT HEADER ═══ */
+  .rhead { padding: 28px 0 20px; }
+  .rhead .you { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; display: inline-flex; align-items: center; gap: 6px; }
+  .rhead .you::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse-dot 2s infinite; }
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .rhead .dom { font-family: var(--serif); font-optical-sizing: auto; font-weight: 450; font-size: clamp(28px, 3.5vw, 38px); letter-spacing: -0.02em; color: var(--ink); overflow-wrap: anywhere; }
+
+  /* ═══ CARD SYSTEM (V5 glow border) ═══ */
+  .card {
+    background: var(--card); border: 1px solid rgba(37,99,235,0.08);
+    border-radius: var(--r-4); box-shadow: var(--shadow-report-glow);
+    margin-bottom: 20px; overflow: hidden;
+    transition: box-shadow var(--dur-normal) var(--ease-out), border-color var(--dur-fast) ease;
+  }
+  .card:hover { border-color: rgba(37,99,235,0.18); }
+  .cbar { display: flex; gap: 6px; padding: 12px 20px; border-bottom: 1px solid var(--line-light); align-items: center; background: var(--paper-soft); }
+  .cbar i { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .cbar i:nth-child(1){background:#EF4444} .cbar i:nth-child(2){background:#F59E0B} .cbar i:nth-child(3){background:#10B981}
+  .cbar .t { margin-left: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+  .cbody { padding: 24px 24px 28px; }
+
+  /* ═══ SUMMARY ═══ */
+  .hero-row { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+  .grade {
+    width: 88px; height: 88px; border-radius: var(--r-4);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--sans); font-weight: 800; font-size: 46px; flex-shrink: 0;
+    position: relative;
+  }
+  .grade::after { content: 'GRADE'; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: 8px; font-weight: 700; letter-spacing: 0.08em; opacity: 0.6; white-space: nowrap; }
+  .grade.good { color: var(--good); background: linear-gradient(145deg, var(--good-soft) 0%, #E4F8EF 100%); border: 2.5px solid var(--good); box-shadow: inset 0 2px 8px rgba(5,150,105,0.08), 0 4px 16px rgba(5,150,105,0.10); }
+  .grade.good::after { color: var(--good); }
+  .grade.mid { color: var(--mid); background: linear-gradient(145deg, var(--mid-soft) 0%, #FFF6E3 100%); border: 2.5px solid var(--mid); box-shadow: inset 0 2px 8px rgba(217,119,6,0.08), 0 4px 16px rgba(217,119,6,0.10); }
+  .grade.mid::after { color: var(--mid); }
+  .grade.bad { color: var(--bad); background: linear-gradient(145deg, var(--bad-soft) 0%, #FFF0EE 100%); border: 2.5px solid var(--bad); box-shadow: inset 0 2px 8px rgba(220,38,38,0.08), 0 4px 16px rgba(220,38,38,0.10); }
+  .grade.bad::after { color: var(--bad); }
+  .grade.na { color: var(--ink-3); background: var(--paper-soft); border: 2.5px solid var(--line); }
+  .grade.na::after { color: var(--ink-3); }
+
+  .nums { min-width: 200px; }
+  .nums .score { font-family: var(--mono); font-size: 32px; font-weight: 700; letter-spacing: -0.03em; color: var(--ink); }
+  .nums .score .of { font-size: 14px; color: var(--ink-3); font-weight: 400; }
+  .delta { display: inline-flex; align-items: center; gap: 4px; margin-left: 10px; font-family: var(--mono); font-size: 11.5px; font-weight: 700; border-radius: var(--r-full); padding: 3px 10px; vertical-align: 4px; }
+  .delta.up { color: var(--good-deep); background: var(--good-soft); border: 1px solid rgba(5,150,105,0.12); }
+  .delta.down { color: var(--bad); background: var(--bad-soft); border: 1px solid rgba(220,38,38,0.12); }
+  .delta.same { color: var(--ink-3); background: var(--paper-soft); border: 1px solid var(--line); }
+  .grade-label { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; margin-top: 6px; }
+
+  .verdict { flex: 1; min-width: 240px; border-left: 1.5px solid var(--line); padding-left: 24px; font-family: var(--serif); font-optical-sizing: auto; font-weight: 360; font-size: 14.5px; line-height: 1.58; color: var(--ink-2); }
+  .verdict b { color: var(--ink); font-weight: 520; }
+
+  /* ═══ SCORE TRACK ═══ */
+  .trackwrap { margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--line); }
+  .track { height: 12px; border-radius: var(--r-full); position: relative; background: linear-gradient(90deg, var(--bad) 0 30%, var(--mid) 30% 50%, #F59E0B 50% 70%, var(--good-deep) 70% 85%, var(--good) 85% 100%); opacity: 0.92; }
+  .track .cursor { position: absolute; top: -6px; bottom: -6px; width: 3px; background: var(--ink); border-radius: 2px; }
+  .track .cursor::after { content: attr(data-label); position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: 10.5px; font-weight: 600; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 5px; padding: 2px 8px; white-space: nowrap; }
+  .track-scale { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--ink-3); margin-top: 8px; }
+  .track-scale span b { color: var(--ink-2); }
+
+  /* ═══ PILL TAGS ═══ */
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11.5px; font-weight: 600; padding: 5px 13px; border-radius: var(--r-full); transition: transform var(--dur-fast) ease; }
+  .pill:hover { transform: translateY(-1px); }
+  .pill .pts { opacity: 0.55; font-weight: 400; }
+  .pill .ic { width: 14px; height: 14px; flex-shrink: 0; }
+  .pill.p { color: var(--good-deep); background: var(--good-soft); }
+  .pill.m { color: var(--mid); background: var(--mid-soft); }
+  .pill.f { color: var(--bad); background: var(--bad-soft); }
+  .pill.x { color: var(--ink-3); background: var(--paper-soft); border: 1px solid var(--line); }
+
+  /* warning banner (bot-protection transparency) */
+  .warn-banner { margin-top: 16px; padding: 12px 16px; border: 1px solid var(--line); border-left: 3px solid var(--ink-3); background: var(--paper-soft); border-radius: var(--r-2); font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
+
+  /* ═══ VS SECTION ═══ */
+  .vs { margin-top: 22px; border-top: 1px dashed var(--line); padding-top: 16px; }
+  .vs .vt { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; margin-bottom: 10px; }
+  .vs-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--ink-2); padding: 6px 0; }
+  .vs-item .tr { font-family: var(--mono); font-size: 11.5px; font-weight: 700; }
+  .vs-item .up { color: var(--good); } .vs-item .down { color: var(--bad); } .vs-item .same { color: var(--ink-3); }
+  .vs-note { margin-top: 10px; font-size: 11.5px; color: var(--ink-3); font-family: var(--mono); }
+
+  /* ═══ ACTION BUTTONS ═══ */
+  .acts { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+  .acts button { font-family: var(--sans); font-weight: 600; font-size: 12.5px; border-radius: var(--r-3); padding: 9px 18px; cursor: pointer; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); transition: all var(--dur-fast) ease; display: inline-flex; align-items: center; gap: 6px; }
+  .acts button:hover { border-color: var(--ink-3); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+  .acts .primary { background: var(--grad-primary); border-color: transparent; color: #FFF; box-shadow: 0 2px 10px rgba(37,99,235,0.18); }
+  .acts .primary:hover { background: var(--grad-primary-hover); box-shadow: 0 4px 16px rgba(37,99,235,0.28), 0 0 24px rgba(37,99,235,0.08); }
+
+  /* ═══ BUSINESS IMPACT ═══ */
+  .biz { display: grid; gap: 16px; }
+  .biz-item { border: 1px solid var(--line); border-radius: var(--r-4); padding: 18px 20px; background: var(--paper-soft); transition: border-color var(--dur-fast), box-shadow var(--dur-fast); }
+  .biz-item:hover { border-color: var(--ink-4); box-shadow: var(--shadow-xs); }
+  .biz-item h4 { font-family: var(--sans); font-size: 14.5px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; color: var(--ink); flex-wrap: wrap; }
+  .biz-item h4 .chk { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); font-weight: 400; background: var(--paper); padding: 2px 8px; border-radius: var(--r-full); border: 1px solid var(--line); }
+  .biz-item .pain { font-family: var(--serif); font-optical-sizing: auto; font-weight: 340; font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
+  .biz-item .gain { margin-top: 10px; font-family: var(--serif); font-optical-sizing: auto; font-size: 13px; color: var(--ink); display: flex; gap: 8px; align-items: flex-start; }
+  .biz-item .gain .arrow { color: var(--good); font-weight: 700; flex-shrink: 0; font-size: 16px; line-height: 1; }
+  .biz-sum { font-family: var(--serif); font-optical-sizing: auto; font-size: 14px; color: var(--ink-2); line-height: 1.55; border-left: 3px solid var(--mid); background: var(--mid-soft); border-radius: 0 var(--r-4) var(--r-4) 0; padding: 14px 18px; margin-bottom: 4px; }
+  .biz-item .gain, .biz-item .pain { overflow-wrap: anywhere; }
+
+  /* ═══ FIX LIST ═══ */
+  .fix { display: flex; gap: 14px; align-items: flex-start; padding: 14px 4px; border-bottom: 1px dashed var(--line); }
+  .fix:last-of-type { border-bottom: 0; }
+  .fix input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--good); cursor: pointer; flex-shrink: 0; }
+  .fix .t { flex: 1; }
+  .fix .t b { display: block; font-weight: 600; font-size: 14px; font-family: var(--sans); color: var(--ink); }
+  .fix .t span { font-size: 12.5px; color: var(--ink-3); font-family: var(--serif); font-optical-sizing: auto; font-weight: 340; }
+  .fix .gain { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--good); background: var(--good-soft); border-radius: var(--r-full); padding: 3px 10px; flex-shrink: 0; margin-top: 2px; }
+  .fix.passed { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--good); font-weight: 500; padding: 10px 4px; border-bottom: 1px dashed var(--line); }
+  .fix.passed:last-of-type { border-bottom: 0; }
+  .fix-done-msg { display: none; margin-top: 12px; font-family: var(--mono); font-size: 12.5px; color: var(--good-deep); background: var(--good-soft); border-radius: var(--r-2); padding: 10px 14px; }
+
+  .potential { margin-top: 18px; display: flex; align-items: center; gap: 16px; background: var(--accent-soft); border: 1px solid rgba(37,99,235,0.15); border-radius: var(--r-4); padding: 14px 18px; flex-wrap: wrap; }
+  .potential .txt { font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); }
+  .potential .mini { flex: 1; min-width: 140px; height: 8px; border-radius: var(--r-full); background: #DBEAFE; position: relative; overflow: hidden; }
+  .potential .mini i { position: absolute; inset: 0; width: 0; background: var(--accent); border-radius: var(--r-full); }
+  .potential .est { font-family: var(--mono); font-size: 12.5px; font-weight: 700; color: #FFF; background: var(--accent); border-radius: var(--r-full); padding: 5px 14px; flex-shrink: 0; }
+
+  /* ═══ ERROR ═══ */
+  .scan-error { background: var(--bad-soft); border: 1px solid rgba(220,38,38,0.2); color: var(--bad); border-radius: var(--r-4); padding: 18px 22px; font-family: var(--mono); font-size: 13px; }
+  .scan-loading { font-family: var(--mono); font-size: 13px; color: var(--ink-2); padding: 8px 2px; }
+  .scan-loading .dot { animation: pulse-dot 1s infinite; }
+
+  /* ═══ CTA ═══ */
+  .cta { margin-top: 28px; background: var(--surface-dark); border-radius: var(--r-5); color: #EEE; padding: 32px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: center; }
+  @media (max-width: 760px){ .cta { grid-template-columns: 1fr; } .hero-row { align-items: flex-start; } }
+  .cta h3 { font-family: var(--serif); font-optical-sizing: auto; font-weight: 430; font-size: 22px; letter-spacing: -0.015em; line-height: 1.25; color: #FFF; }
+  .cta h3 em { font-style: italic; color: #93C5FD; }
+  .cta .fine { font-family: var(--serif); font-optical-sizing: auto; font-size: 13px; color: #94A3B8; margin-top: 8px; font-weight: 340; }
+  .cta .scan { display: flex; }
+  .cta input { flex: 1; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); border-radius: var(--r-3) 0 0 var(--r-3); border-right: 0; padding: 12px 16px; font-size: 13.5px; color: #FFF; outline: none; font-family: var(--mono); }
+  .cta input::placeholder { color: #64748B; }
+  .cta input:focus { border-color: rgba(255,255,255,.35); box-shadow: 0 0 0 3px rgba(255,255,255,.08); }
+  .cta button { border: 0; background: var(--grad-primary); color: #FFF; font-weight: 600; font-size: 13.5px; padding: 0 22px; border-radius: 0 var(--r-3) var(--r-3) 0; cursor: pointer; font-family: var(--sans); transition: all var(--dur-fast) var(--ease-out); box-shadow: 0 2px 10px rgba(37,99,235,0.25); }
+  .cta button:hover { background: var(--grad-primary-hover); box-shadow: 0 4px 18px rgba(37,99,235,0.35), 0 0 28px rgba(37,99,235,0.12); transform: translateY(-1px); }
+  .cta .queued { grid-column: 1 / -1; font-family: var(--mono); font-size: 12px; color: #6EE7B7; }
+
+  /* ═══ COLOPHON ═══ */
+  .colo { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); margin-top: 20px; flex-wrap: wrap; gap: 8px; font-family: var(--mono); }
+  .colo a { color: var(--ink-2); text-decoration: none; transition: color var(--dur-fast); }
+  .colo a:hover { color: var(--accent); }
+
+  @media print {
+    body { background: #fff; }
+    .top, .acts, .cta, .colo, .scan-fx { display: none !important; }
+    .card { box-shadow: none; border: 1px solid var(--line); break-inside: avoid; }
+  }
+
+  /* ═══ MOTION — one-shot scan replay ═══ */
+  .scan-fx { position: absolute; left: 0; right: 0; height: 56px; top: -56px; pointer-events: none; background: linear-gradient(180deg, rgba(37,99,235,0) 0%, rgba(37,99,235,0.03) 35%, rgba(37,99,235,0.08) 55%, rgba(37,99,235,0.14) 75%, rgba(37,99,235,0.20) 90%, rgba(59,130,246,0.28) 100%); border-bottom: 2px solid rgba(37,99,235,0.55); opacity: 0; filter: blur(0.3px); box-shadow: 0 0 20px 4px rgba(37,99,235,0.08), 0 0 40px 8px rgba(37,99,235,0.04); }
+  .card.replay { position: relative; overflow: hidden; }
+  body.anim .card.replay .scan-fx { animation: sweepOnce 1.05s cubic-bezier(.4,0,.2,1) .15s forwards; }
+  @keyframes sweepOnce { 0% { top:-56px; opacity:1 } 92% { opacity:1 } 100% { top:105%; opacity:0 } }
+  body.anim .grade { animation: popIn .38s cubic-bezier(.2,.9,.3,1.2) .9s backwards; }
+  body.anim .nums { animation: fadeUp .4s ease 1.05s backwards; }
+  body.anim .verdict { animation: fadeUp .4s ease 1.2s backwards; }
+  body.anim .trackwrap { animation: fadeUp .4s ease 1.3s backwards; }
+  body.anim .track .cursor { transition: left 1s cubic-bezier(.3,.7,.2,1); }
+  body.anim .pills .pill { animation: stampIn .3s cubic-bezier(.2,.9,.3,1.15) backwards; }
+  body.anim .pills .pill:nth-child(1) { animation-delay: 1.5s } body.anim .pills .pill:nth-child(2) { animation-delay: 1.6s }
+  body.anim .pills .pill:nth-child(3) { animation-delay: 1.7s } body.anim .pills .pill:nth-child(4) { animation-delay: 1.8s }
+  body.anim .pills .pill:nth-child(5) { animation-delay: 1.9s } body.anim .pills .pill:nth-child(6) { animation-delay: 2.0s }
+  body.anim .pills .pill:nth-child(7) { animation-delay: 2.1s } body.anim .pills .pill:nth-child(8) { animation-delay: 2.2s }
+  body.anim .vs, body.anim .acts { animation: fadeUp .4s ease 2.15s backwards; }
+  body.anim .card:not(.replay) { animation: fadeUp .45s ease .3s backwards; }
+  @keyframes popIn { from { transform:scale(.6); opacity:0 } to { transform:scale(1); opacity:1} }
+  @keyframes fadeUp { from { transform:translateY(10px); opacity:0 } to { transform:none; opacity:1} }
+  @keyframes stampIn { from { transform:scale(.7); opacity:0 } to { transform:scale(1); opacity:1} }
+  .potential .mini i { transition: width .45s cubic-bezier(.3,.7,.2,1); }
+  @media (prefers-reduced-motion: reduce) {
+    body.anim .grade, body.anim .nums, body.anim .verdict, body.anim .trackwrap, body.anim .pills .pill, body.anim .vs, body.anim .acts, body.anim .card:not(.replay) { animation: none; }
+    body.anim .track .cursor { transition: none; }
+    body.anim .card.replay .scan-fx { animation: none; }
+    .potential .mini i { transition: none; }
+  }
+
+  @media (max-width: 680px) {
+    .hero-row { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .verdict { border-left: none; border-top: 1.5px solid var(--line); padding-left: 0; padding-top: 16px; }
+    .grade { width: 72px; height: 72px; font-size: 38px; }
+    .acts { flex-direction: column; }
+    .acts button { width: 100%; justify-content: center; }
+    .potential { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <a class="wordmark" href="/">toolfront<em>_</em></a>
+    <div class="top-right">
+      <a href="/">New scan</a>
+      <a href="https://github.com/wishforge/toolfront" target="_blank" rel="noopener">GitHub ↗</a>
+      <span class="lang"><button type="button" id="lang-en">EN</button><button type="button" id="lang-zh">中文</button></span>
+    </div>
+  </div>
+
+  <div id="scan-result"></div>
+
+  <div class="colo">
+    <span>© 2026 ToolFront · Free &amp; Open</span>
+    <span><a href="/privacy">Privacy</a> · <a href="/security">Security</a> · <a href="/bot">/bot</a></span>
+  </div>
+</div>
+
+<script>
+  var LANGS = {
+    en: {
+      'doc.title': 'ToolFront — Is your site ready for AI agents?',
+      'hero.title': 'Is your site ready for <span class="hl">AI agents?</span>',
+      'hero.sub': 'AI assistants are already browsing, comparing and buying on behalf of your customers. To them, most websites are a <strong>black box</strong> they can only screenshot and guess at. ToolFront makes yours <strong>easy for agents to understand and use</strong> — and shows you exactly where you stand, for free.',
+      'scan.free': 'Free scan', 'scan.secs': '~5 seconds', 'scan.btn': 'Scan',
+      'scan.placeholder': 'yourdomain.com',
+      'scan.meta': 'We check: <b>WebMCP tools · structured data · llms.txt · AI crawler policy · sitemap</b>. No signup needed.',
+      'shift.kicker': 'The shift',
+      'shift.h2': 'The next visitors to your website won\u2019t be human.',
+      'shift.sub': 'Search engines read your site to bring people in. Agents read it to get things done — shop, book, compare, subscribe. The rules changed. Most sites haven\u2019t.',
+      'proof.active': 'ACTIVE', 'proof.live': 'LIVE', 'proof.preview': 'PREVIEW',
+      'proof.incubated': 'Incubated by <b>Google + Microsoft</b>',
+      'how.kicker': 'How it works', 'how.h2': 'From black box to open door.',
+      'step1.title': 'Scan it', 'step1.text': 'See your site the way agents see it. Get a plain-language score and a fix list you don\u2019t need to be an engineer to follow.',
+      'step2.title': 'Generate tools', 'step2.text': 'ToolFront writes the machine-readable tool definitions your site is missing — from what you already have. One line to install, no rebuild.',
+      'step3.title': 'Stay in control', 'step3.text': 'Agents can use your site, but payments and signups still get a human confirmation. You keep the keys — with a full audit trail.',
+      'dogfood.kicker': 'We eat our own cooking',
+      'dogfood.h2': 'This page is itself a WebMCP tool.',
+      'dogfood.title': 'This page registered a live tool:',
+      'dogfood.tool.live': 'scan_domain — registered & live',
+      'dogfood.text': 'If you\u2019re viewing this in a WebMCP-enabled browser (Chrome 146+ Origin Trial), an AI agent on this page can call <code>scan_domain</code> right now and scan any website — same as the form above. That\u2019s the whole idea: your pages become places agents can <em>work</em>, not just read.',
+      'cta.h2': 'Find out where you stand — <span style="color:var(--green)">before your competitors do.</span>',
+      'waitlist.ph': 'you@company.com', 'waitlist.btn': 'Get early access',
+      'waitlist.msg': 'No spam. One confirmation email — that\u2019s it. See our privacy policy.',
+      'waitlist.enter': 'Enter a valid email first.',
+      'waitlist.done': 'Check your inbox — we just sent you a confirmation email.',
+      'waitlist.queued': 'Fix list queued for {d}. We\u2019ll be in touch.',
+      'colophon.built': 'Built on the open WebMCP proposal',
+      'colophon.privacy': 'Privacy',
+      'colophon.terms': 'Terms',
+      'colophon.security': 'Security',
+      'report.yours': 'Your report', 'report.summary': 'Report Summary', 'report.label': 'Agent readiness', 'report.scanned': 'Scanned',
+      'report.biz.title': 'What this means for your business', 'report.tech.title': 'Technical details',
+      'report.biz.low': 'Bottom line: your site is a black box to AI. Customers who ask AI for recommendations are being sent to competitors — every week this stays unfixed, you lose deals.',
+      'report.biz.mid': 'Bottom line: AI half-understands your site — at the moments that matter it still misdescribes or skips you. Fixing the items below starts paying back immediately.',
+      'report.biz.high': 'Bottom line: your site already speaks AI fluently — you are ahead of most competitors. Keep it that way and keep monitoring.',
+      'report.biz.allgood': 'Nothing urgent: AI can already read and work with your site. Keep monitoring so redesigns don\u2019t break it.',
+      'report.share': 'Share', 'report.pdf': 'Save as PDF', 'report.new': 'New scan', 'report.copied': 'Link copied', 'report.copyfail': 'Copy failed — copy it from the address bar',
+      'report.printhead': 'Agent-readiness report — toolfront.dev',
+      'report.raise': '<b>Want to raise this score?</b> ToolFront generates the missing tools for you:',
+      'report.raise.keep': '<b>Great score — keep it that way.</b> A redesign can silently break it. Leave your email and we\u2019ll alert you if it drops:',
+      'report.fix.title': 'Fix list', 'report.fix.passed': 'already in place', 'report.fix.alldone': 'All fixes applied! Re-scan to see your new score.', 'report.fix.nofixes': 'Nothing to fix — everything is already in place.',
+      'report.vs.title': 'Since your last scan', 'report.vs.first': 'First scan for this domain — check back after you make changes.', 'report.vs.local': 'Stored only in this browser — clear it anytime in browser settings.', 'report.vs.unchanged': 'No change since your last scan.', 'report.vs.date': 'Compared to your scan on {d}',
+      'report.getfix': 'Get the fix list',
+      'report.loading': 'Scanning {d} — checking how agents see your site',
+      'report.err.network': 'Network hiccup — try again in a moment.',
+      'report.err.generic': 'Scan failed. Try again.',
+      'report.blocked.title': 'Scan blocked by bot protection',
+      'report.blocked.note': 'This report carries no score by design: the site\u2019s bot protection challenged our scanner before the homepage loaded. No fix list applies — the wall itself is the finding. If that is not your intent, allow verified automated readers.',
+      'report.unavailable.warn': 'Result incomplete: {n} check(s) were blocked by the site\u2019s bot protection and are excluded from this score (neither counted nor penalized). The same wall usually stops AI agents.',
+      'badge.active': 'WebMCP: ACTIVE', 'badge.need': 'WebMCP: needs Chrome 146+', 'badge.standby': 'WebMCP: standby'
+    },
+    zh: {
+      'doc.title': 'ToolFront — 你的网站准备好迎接 AI 智能体了吗？',
+      'hero.title': '你的网站准备好迎接 <span class="hl">AI 智能体</span>了吗？',
+      'hero.sub': 'AI 助手已经开始替你的客户浏览、比价、下单。对它们而言，大多数网站是一个<strong>只能截图乱猜的黑盒</strong>。ToolFront 让你的网站<strong>容易被智能体理解和使用</strong>——并免费告诉你现在站在哪。',
+      'scan.free': '免费扫描', 'scan.secs': '约 5 秒', 'scan.btn': '扫描',
+      'scan.placeholder': '你的域名，如 example.com',
+      'scan.meta': '检测项：<b>WebMCP 工具 · 结构化数据 · llms.txt · AI 爬虫政策 · sitemap</b>。无需注册。',
+      'shift.kicker': '时代变了',
+      'shift.h2': '你网站的下一批访客，将不再是人类。',
+      'shift.sub': '搜索引擎读你的网站，是为了把人带进来；智能体读你的网站，是为了直接办事——购物、预订、比价、订阅。规则已经变了，大多数网站还没跟上。',
+      'proof.active': '进行中', 'proof.live': '已上线', 'proof.preview': '预览',
+      'proof.incubated': '由 <b>Google + Microsoft</b> 孵化',
+      'how.kicker': '工作原理', 'how.h2': '从黑盒，到敞开的门。',
+      'step1.title': '扫一扫', 'step1.text': '看看智能体眼中的你的网站。得到一份不需要工程师背景也能照着做的分数和改进清单。',
+      'step2.title': '生成工具', 'step2.text': 'ToolFront 根据你已有的能力，自动补写网站缺失的机器可读工具定义。一行代码安装，无需重构。',
+      'step3.title': '保持掌控', 'step3.text': '智能体可以使用你的网站，但支付和注册仍需人工确认。钥匙在你手里——全程留痕、可审计。',
+      'dogfood.kicker': '以身作则',
+      'dogfood.h2': '这个页面本身就是一个 WebMCP 工具。',
+      'dogfood.title': '本页注册了一个真实的工具：',
+      'dogfood.tool.live': 'scan_domain — 已注册并生效',
+      'dogfood.text': '如果你正在用支持 WebMCP 的浏览器（Chrome 146+ Origin Trial）查看本页，页面上的 AI 智能体现在就能调用 <code>scan_domain</code> 扫描任意网站——和上面的表单完全一样。这就是全部理念：让你的页面成为智能体能<em>干活</em>的地方，而不只是能读的地方。',
+      'cta.h2': '趁竞争对手还没反应过来，<span style="color:var(--green)">先看清自己的位置。</span>',
+      'waitlist.ph': 'you@company.com', 'waitlist.btn': '获取内测资格',
+      'waitlist.msg': '不发垃圾邮件。你只会收到一封确认邮件。参见隐私政策。',
+      'waitlist.enter': '请输入有效的邮箱。',
+      'waitlist.done': '请查收邮箱——我们刚给你发了一封确认邮件。',
+      'waitlist.queued': '已为 {d} 排队生成改进清单，我们会尽快联系你。',
+      'colophon.built': '基于开源 WebMCP 提案构建',
+      'colophon.privacy': '隐私',
+      'colophon.terms': '条款',
+      'colophon.security': '安全',
+      'report.yours': '你的报告', 'report.summary': '报告总结', 'report.label': '智能体就绪度', 'report.scanned': '扫描于',
+      'report.biz.title': '这对你的生意意味着什么', 'report.tech.title': '技术详情',
+      'report.biz.low': '总结：你的网站对 AI 是"黑盒"。让 AI 推荐的客户正在流向竞争对手——每拖一天都在丢单。',
+      'report.biz.mid': '总结：AI 只看懂了你的一半——关键时刻仍然说不清你、推不动你。补齐下面几项，立刻见效。',
+      'report.biz.high': '总结：你的网站已经"会说 AI 的语言"——领先大多数对手。保持住，并持续监控。',
+      'report.biz.allgood': '暂无需紧急处理：AI 已经能读懂并使用你的网站。保持监控，别让改版把它改坏。',
+      'report.share': '分享', 'report.pdf': '存为 PDF', 'report.new': '重新扫描', 'report.copied': '链接已复制', 'report.copyfail': '复制失败——请从地址栏复制',
+      'report.printhead': '智能体就绪度报告 — toolfront.dev',
+      'report.raise': '<b>想提高这个分数？</b> ToolFront 为你生成缺失的工具：',
+      'report.raise.keep': '<b>保持住这个成绩。</b>一次改版就可能悄悄破坏它。留个邮箱，掉了立刻告诉你：',
+      'report.fix.title': '修复清单', 'report.fix.passed': '已就绪', 'report.fix.alldone': '全部修复完成！重新扫描看看新分数。', 'report.fix.nofixes': '无需修复——一切已就绪。',
+      'report.vs.title': '对比上次扫描', 'report.vs.first': '首次扫描该域名——改完再来看看变化。', 'report.vs.local': '数据仅存于本浏览器——可随时在浏览器设置中清除。', 'report.vs.unchanged': '与上次扫描相比无变化。', 'report.vs.date': '对比 {d} 的扫描结果',
+      'report.getfix': '获取改进清单',
+      'report.loading': '正在扫描 {d}——看看智能体眼中的你的网站',
+      'report.err.network': '网络波动——稍后再试。',
+      'report.err.generic': '扫描失败，请重试。',
+      'report.blocked.title': '扫描被 bot 防护拦截',
+      'report.blocked.note': '本报告不出分数：站点的 bot 防护在首页加载前就拦截了我们的扫描器。没有可修复清单——这道墙本身就是结论。如果这不是你的本意，建议放行经验证的自动化读取方。',
+      'report.unavailable.warn': '结果不完整：{n} 项检测被站点 bot 防护拦截，本次评分已将其剔除（不计分也不扣分）。同一道墙通常也挡住了 AI 智能体。',
+      'badge.active': 'WebMCP：已生效', 'badge.need': 'WebMCP：需 Chrome 146+', 'badge.standby': 'WebMCP：待命'
+    }
+  };
+
+  /* report check labels & details (frontend translation of API responses) */
+  var CHECKS_L10N = {
+    en: {
+      labels: { webmcp: 'WebMCP tools', 'tool-security': 'Tool surface security', 'structured-data': 'Structured data', 'llms-txt': 'llms.txt', 'robots-policy': 'AI crawler policy', 'machine-surfaces': 'Machine-readable surfaces' },
+      verdicts: [70, 'Agent-ready. Agents can work with this site deliberately.', 40, 'Partially readable. Agents guess some of the time, fail the rest.', 'Opaque to agents. Every interaction is a screenshot-and-click gamble.'],
+      biz: {
+        'webmcp.fail': { pain: 'Customers increasingly ask AI assistants to run errands for them. AI cannot operate your site — so it runs the errand with a competitor instead.', gain: 'Register WebMCP tools and agents call your service directly: from "mentioned by AI" to "used by AI".' },
+        'webmcp.partial': { pain: 'Agents can only use part of your site — half your customer journeys break the moment an AI tries to complete them.', gain: 'Complete the tool surface and agents can finish the whole journey on your site.' },
+        'tool-security.fail': { pain: 'Your AI tool surface can be poisoned — attackers could inject malicious instructions to AI through your site: brand damage at best, security liability at worst.', gain: 'Fix it and AI platforms can trust your tools enough to recommend you.' },
+        'tool-security.partial': { pain: 'Small flaws in your tool surface make platforms and customers trust it less.', gain: 'Add the recommended annotations and platforms adopt your tools sooner.' },
+        'structured-data.fail': { pain: 'AI cannot read your prices, products or reviews — it stumbles when describing you, or skips you entirely. Like running a shop with the sign covered.', gain: 'Complete the structured data and AI quotes your price, rating and selling points accurately.' },
+        'structured-data.partial': { pain: 'AI only sees fragments — its description of you is incomplete at the exact moment customers compare options.', gain: 'Fill the gaps and AI describes you fully and accurately.' },
+        'llms-txt.fail': { pain: 'You gave AI no "user manual" — it guesses what your business does, and guesses wrong.', gain: 'One llms.txt file (a few dozen lines) lets AI introduce you by your own script.' },
+        'robots-policy.fail': { pain: 'You lock out mainstream AI crawlers — they cannot learn you, so when users ask AI, it recommends someone else.', gain: 'Adjust the policy so AI can learn and cite you.' },
+        'robots-policy.partial': { pain: 'You never told AI whether it is welcome — crawlers may over-scrape you, or mainstream AI may ignore you. You lose either way.', gain: 'State the policy in one line: welcome the AI you want, block the rest — control back in your hands.' },
+        'machine-surfaces.fail': { pain: 'AI has no map of your site — it flips pages like a human, and whatever it cannot reach does not exist.', gain: 'Add sitemap and OpenAPI and AI sees your whole offering at a glance.' },
+        'machine-surfaces.partial': { pain: 'The map is half-drawn — AI only discovers part of your services.', gain: 'Complete the surfaces and AI sees everything you offer.' }
+      },
+      fixes: {
+        'webmcp.fail': 'Register WebMCP tools so agents can operate your site directly',
+        'webmcp.partial': 'Complete your WebMCP tool surface',
+        'tool-security.fail': 'Fix the security issues on your tool surface',
+        'tool-security.partial': 'Add the recommended tool-surface annotations',
+        'structured-data.fail': 'Add JSON-LD structured data (prices, products, reviews)',
+        'structured-data.partial': 'Complete your structured data coverage',
+        'llms-txt.fail': 'Create /llms.txt — one markdown file describing your site',
+        'llms-txt.partial': 'Complete your llms.txt',
+        'robots-policy.fail': 'Update robots.txt to allow AI crawlers',
+        'robots-policy.partial': 'State your AI crawler policy in robots.txt',
+        'machine-surfaces.fail': 'Add sitemap.xml and an OpenAPI spec',
+        'machine-surfaces.partial': 'Add an OpenAPI spec to complete your machine surfaces'
+      }
+    },
+    zh: {
+      labels: { webmcp: 'WebMCP 工具', 'tool-security': '工具面安全', 'structured-data': '结构化数据', 'llms-txt': 'llms.txt', 'robots-policy': 'AI 爬虫政策', 'machine-surfaces': '机器可读入口' },
+      verdicts: [70, '智能体就绪。智能体可以有条理地使用这个网站。', 40, '部分可读。智能体时而靠猜，时而失败。', '对智能体完全不透明。每次交互都是截图加乱点的赌博。'],
+      biz: {
+        'webmcp.fail': { pain: '客户越来越让 AI 助手替他们办事。AI 点不动你的网站——它办不了，就去办你竞争对手的。', gain: '注册 WebMCP 工具后，AI 能直接调用你的服务：从"被 AI 提到"升级为"被 AI 使用"，吃到第一波 Agent 流量。' },
+        'webmcp.partial': { pain: 'AI 只能用你网站的一部分功能——客户旅程走到一半就断在 AI 手里。', gain: '补全工具面后，AI 能在你的网站走完全程。' },
+        'tool-security.fail': { pain: '你的 AI 工具面有被投毒的风险——黑客可能借你的网站向 AI 注入恶意指令，轻则品牌受损，重则有安全责任。', gain: '修复后，AI 平台信任你的工具面，才敢放心把你推荐给用户。' },
+        'tool-security.partial': { pain: '工具面有小瑕疵，平台和客户对它的信任打折扣。', gain: '按官方指南补齐标注后，AI 平台更愿意接入你。' },
+        'structured-data.fail': { pain: 'AI 读不到你的价格、产品、评价这些"硬信息"——推荐你时说不清卖点，甚至直接跳过你。等于把店招蒙了布。', gain: '补全结构化数据后，AI 能准确引用你的价格、评分和卖点——推荐你的时候"话术"又准又漂亮。' },
+        'structured-data.partial': { pain: 'AI 只能看到片段信息——客户货比三家的关键时刻，它对你的介绍是残缺的。', gain: '补齐缺口后，AI 对你的介绍又全又准，推荐质量立刻上一个档次。' },
+        'llms-txt.fail': { pain: '你没给 AI 留"说明书"——AI 只能靠猜来理解你的业务，猜错了就把你介绍错。', gain: '一份 llms.txt（几十行 markdown）让 AI 按你写的剧本介绍你——宣传口径自己定。' },
+        'robots-policy.fail': { pain: '你把主流 AI 爬虫挡在门外——它们学不到你，用户问 AI 时它自然推荐别家。', gain: '调整 robots 政策后，AI 才能学习并引用你的内容。' },
+        'robots-policy.partial': { pain: '你没表态是否欢迎 AI——要么 AI 乱抓你的内容没法管，要么主流 AI 干脆忽略你。两头吃亏。', gain: '一句话写明政策：欢迎的 AI 放进来，不欢迎的挡出去——主动权回到你手里。' },
+        'machine-surfaces.fail': { pain: 'AI 找不到你网站的"地图"——它只能像人一样一页页翻，翻不到的内容等于不存在。', gain: '补上 sitemap 和 OpenAPI 后，AI 一览你的全部服务，被推荐的机会成倍增加。' },
+        'machine-surfaces.partial': { pain: '地图只画了一半——AI 只能发现你的部分服务。', gain: '补全入口后，AI 对你的服务一览无余。' }
+      },
+      fixes: {
+        'webmcp.fail': '注册 WebMCP 工具，让 AI 直接操作你的网站',
+        'webmcp.partial': '补全你的 WebMCP 工具面',
+        'tool-security.fail': '修复工具面的安全问题',
+        'tool-security.partial': '按 Chrome 指南补齐工具面标注',
+        'structured-data.fail': '添加 JSON-LD 结构化数据（价格、产品、评价）',
+        'structured-data.partial': '补全结构化数据覆盖',
+        'llms-txt.fail': '创建 /llms.txt——一份介绍你网站的 markdown',
+        'llms-txt.partial': '补全你的 llms.txt',
+        'robots-policy.fail': '调整 robots.txt 放行 AI 爬虫',
+        'robots-policy.partial': '在 robots.txt 写明 AI 爬虫政策',
+        'machine-surfaces.fail': '添加 sitemap.xml 和 OpenAPI 规范',
+        'machine-surfaces.partial': '补一份 OpenAPI 规范'
+      },
+      details: {
+        'webmcp.pass': '已检测到 WebMCP 工具面——智能体可以直接在本页发现原生工具。',
+        'webmcp.fail': '未注册 WebMCP 工具。智能体只能截图乱点——界面一改，流程就断。',
+        'tool-security.pass': '工具面通过静态安全检查：未发现投毒特征，标注与规范一致（参照 Chrome 官方指南与 OWASP ASI02）。',
+        'tool-security.partial': '工具面有轻微问题（缺少建议标注或超出长度预算）。参照 Chrome WebMCP 安全指南核对。',
+        'tool-security.fail': '检测到工具面安全问题——工具描述对智能体而言就是指令，可能被投毒利用（W3C WebMCP §6.3 / OWASP ASI02）。',
+        'tool-security.na': '本页没有 WebMCP 工具面，此项检查不适用。',
+        'structured-data.pass': 'JSON-LD 与 OpenGraph 标签齐全，智能体可以可靠地提取页面信息。',
+        'structured-data.partial': '有部分结构化数据，智能体只能看到片段而非全貌。',
+        'structured-data.fail': '没有 JSON-LD 或 OpenGraph 数据，智能体只能读原始文本。',
+        'llms-txt.pass': '已提供 llms.txt——你已经在用智能体的语言说话了。',
+        'llms-txt.fail': '缺少 /llms.txt。这是最容易拿到的分：一个描述你网站的 markdown 文件。',
+        'llms-txt.na': '该路径被站点的 bot 防护拦截，无法检测——同一道墙通常也挡住了 AI 智能体。',
+        'robots-policy.pass': '对主流 AI 爬虫有明确的放行政策，智能体受欢迎。',
+        'robots-policy.partial': 'robots.txt 存在但未提及 AI 爬虫。默认放行——但明确的政策更有力。',
+        'robots-policy.fail': 'robots.txt 明确屏蔽了部分主流 AI 爬虫，智能体被拒之门外。',
+        'robots-policy.na': 'robots.txt 被 bot 防护拦截，无法读取——同一道墙通常也挡住了 AI 智能体。',
+        'machine-surfaces.pass': '已提供 sitemap / OpenAPI 等机器可读入口——生成工具的上好素材。',
+        'machine-surfaces.partial': '提供了部分机器可读入口。补一份 OpenAPI 规范后，工具生成几乎全自动。',
+        'machine-surfaces.fail': '未检测到 sitemap.xml 或 OpenAPI 规范，智能体没有你网站的地图。',
+        'machine-surfaces.na': 'sitemap/OpenAPI 探测被 bot 防护拦截，无法检测——同一道墙通常也挡住了 AI 智能体。'
+      }
+    }
+  };
+
+
+  /* V5 report page additions (spliced separately from the landing dict) */
+  Object.assign(LANGS.en, {
+    'report.track.you': 'You', 'report.track.opaque': 'opaque', 'report.track.ready': 'agent-ready',
+    'report.proj.label': 'All fixes applied →', 'report.proj.est': 'est. {s} / 100 · Grade {g}',
+    'report.cta.fine': 'One tag to install. Your site stays yours — payment still needs human confirmation.',
+    'report.vs.improved': '↑ improved', 'report.vs.regressed': '↓ regressed',
+    'report.loading0': ''
+  });
+  Object.assign(LANGS.zh, {
+    'report.track.you': '你', 'report.track.opaque': '对 AI 封闭', 'report.track.ready': '智能体就绪',
+    'report.proj.label': '全部修复完成后 →', 'report.proj.est': '预计 {s} / 100 · {g} 级',
+    'report.cta.fine': '一行代码安装。网站仍是你的——支付仍需人工确认。',
+    'report.vs.improved': '↑ 进步', 'report.vs.regressed': '↓ 退步',
+    'report.loading0': ''
+  });
+
+
+  var lang = 'en';
+  try { lang = localStorage.getItem('tf-lang') || 'en'; } catch (_) {}
+  try {
+    var qp = new URLSearchParams(location.search).get('lang');
+    if (qp === 'zh') lang = 'zh';
+    if (qp === 'en') lang = 'en';
+  } catch (_) {}
+  if (!Object.prototype.hasOwnProperty.call(LANGS, lang)) lang = 'en';
+
+  function t(k) { return (LANGS[lang] && LANGS[lang][k]) || LANGS.en[k] || k; }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"'`]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' }[c];
+    });
+  }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  var resultBox = document.getElementById('scan-result');
+  var lastReport = null, lastError = null, animated = false;
+
+  function cls(score) { return score >= 70 ? 'good' : score >= 40 ? 'mid' : 'bad'; }
+  function localVerdict(score) {
+    var v = CHECKS_L10N[lang].verdicts;
+    return score >= v[0] ? v[1] : score >= v[2] ? v[3] : v[4];
+  }
+  function localDetail(c) {
+    var d = (CHECKS_L10N[lang] && CHECKS_L10N[lang].details) || null;
+    return (d && d[c.id + '.' + c.status]) || c.detail;
+  }
+  function localLabel(c) { return (CHECKS_L10N[lang].labels && CHECKS_L10N[lang].labels[c.id]) || c.label; }
+  function statusRank(s) { return s === 'pass' ? 3 : s === 'partial' ? 2 : s === 'fail' ? 1 : -1; }
+  function statusMark(s) { return s === 'pass' ? '✓' : s === 'partial' ? '~' : s === 'fail' ? '✕' : '–'; }
+
+  var ICONS = {
+    pass: '<svg class="ic" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 6l-5 5L4 7"/></svg>',
+    partial: '<svg class="ic" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 10h8M4 6h12M8 2v12"/></svg>',
+    fail: '<svg class="ic" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="m5.5 5.5 5 5m0-5-5 5"/></svg>',
+    na: '<svg class="ic" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 8h8"/></svg>'
+  };
+  /* Single trusted innerHTML outlet for icons — ICONS is a static literal
+     dictionary keyed by check status; no dynamic data ever reaches it. */
+  function setIcon(node, name) { node.innerHTML = ICONS[name] || ''; }
+
+  function buildHead(r) {
+    var head = el('div', 'rhead');
+    var you = el('span', 'you', t('report.printhead') + ' · ' + t('report.scanned') + ' ' + (r.scannedAt ? String(r.scannedAt).slice(0, 10) : ''));
+    head.appendChild(you);
+    head.appendChild(el('div', 'dom', r.domain));
+    return head;
+  }
+
+  function buildCard(barText, bodyNode, replay) {
+    var card = el('div', 'card' + (replay ? ' replay' : ''));
+    var bar = el('div', 'cbar');
+    bar.appendChild(el('i')); bar.appendChild(el('i')); bar.appendChild(el('i'));
+    bar.appendChild(el('span', 't', barText));
+    card.appendChild(bar);
+    card.appendChild(bodyNode);
+    return card;
+  }
+
+  function buildPills(r) {
+    var pills = el('div', 'pills');
+    (r.checks || []).forEach(function (c) {
+      var st = c.status === 'pass' ? 'p' : c.status === 'partial' ? 'm' : c.status === 'na' ? 'x' : 'f';
+      var p = el('span', 'pill ' + st);
+      setIcon(p, c.status === 'pass' ? 'pass' : c.status === 'partial' ? 'partial' : c.status === 'na' ? 'na' : 'fail');
+      p.appendChild(document.createTextNode(' ' + localLabel(c) + ' '));
+      p.appendChild(el('span', 'pts', c.points === null ? 'N/A' : c.points + '/' + c.max));
+      p.title = localDetail(c);
+      pills.appendChild(p);
+    });
+    return pills;
+  }
+
+  function buildTrack(r, animate) {
+    var tw = el('div', 'trackwrap');
+    var track = el('div', 'track');
+    var cursor = el('div', 'cursor');
+    var pct = (typeof r.score === 'number' && r.scoreMax > 0) ? Math.round((r.score / r.scoreMax) * 100) : 0;
+    cursor.setAttribute('data-label', t('report.track.you') + ' · ' + r.score);
+    if (animate && !reducedMotion()) {
+      cursor.style.left = '0%';
+      setTimeout(function () { cursor.style.left = pct + '%'; }, 1400);
+    } else {
+      cursor.style.left = pct + '%';
+    }
+    track.appendChild(cursor);
+    tw.appendChild(track);
+    var scale = el('div', 'track-scale');
+    [['0 F', t('report.track.opaque')], ['30 D', ''], ['50 C', ''], ['70 B', ''], ['85 A', t('report.track.ready')]].forEach(function (s) {
+      var sp = el('span');
+      sp.appendChild(el('b', null, s[0]));
+      if (s[1]) sp.appendChild(document.createTextNode(' ' + s[1]));
+      scale.appendChild(sp);
+    });
+    tw.appendChild(scale);
+    return tw;
+  }
+
+  function buildVs(r) {
+    var block = el('div', 'vs');
+    block.appendChild(el('div', 'vt', t('report.vs.title')));
+    var prev = null;
+    try { prev = JSON.parse(localStorage.getItem('tf-last:' + r.domain) || 'null'); } catch (_) {}
+    var curTs = r.scannedAt || '';
+    var hasBaseline = !!(prev && Array.isArray(prev.checks) && typeof prev.score === 'number' && typeof r.score === 'number' && prev.ts != null && String(prev.ts) !== String(curTs));
+    if (!hasBaseline) {
+      block.appendChild(el('div', 'vs-item', t('report.vs.first')));
+    } else {
+      block.appendChild(el('div', 'vs-note', t('report.vs.date').replace('{d}', String(prev.ts || '').slice(0, 10))));
+      var prevById = {};
+      (prev.checks || []).forEach(function (c) { prevById[c.id] = c; });
+      var changes = 0;
+      (r.checks || []).forEach(function (c) {
+        var p = prevById[c.id];
+        if (!p) return;
+        var a = statusRank(p.status), b = statusRank(c.status);
+        if (a < 0 || b < 0 || a === b) return;
+        changes++;
+        var row = el('div', 'vs-item');
+        row.appendChild(el('span', null, localLabel(c)));
+        var tr = el('span', 'tr ' + (b > a ? 'up' : 'down'), statusMark(p.status) + ' → ' + statusMark(c.status) + (b > a ? '' : ''));
+        tr.textContent = (b > a ? t('report.vs.improved') : t('report.vs.regressed')) + ' (' + statusMark(p.status) + '→' + statusMark(c.status) + ')';
+        row.appendChild(tr);
+        block.appendChild(row);
+      });
+      if (changes === 0) block.appendChild(el('div', 'vs-item', t('report.vs.unchanged')));
+    }
+    block.appendChild(el('div', 'vs-note', t('report.vs.local')));
+    return block;
+  }
+
+  function buildActs(r) {
+    var acts = el('div', 'acts');
+    var shareBtn = el('button', 'primary'); shareBtn.type = 'button';
+    var pdfBtn = el('button'); pdfBtn.type = 'button';
+    var newBtn = el('button'); newBtn.type = 'button';
+    shareBtn.textContent = '🔗 ' + t('report.share');
+    pdfBtn.textContent = '🖨 ' + t('report.pdf');
+    newBtn.textContent = '↺ ' + t('report.new');
+    shareBtn.addEventListener('click', function () {
+      var url = location.origin + '/report?domain=' + encodeURIComponent(r.domain) + '&lang=' + lang;
+      var done = function () { shareBtn.textContent = t('report.copied'); setTimeout(function () { shareBtn.textContent = '🔗 ' + t('report.share'); }, 2000); };
+      var fail = function () { shareBtn.textContent = t('report.copyfail'); setTimeout(function () { shareBtn.textContent = '🔗 ' + t('report.share'); }, 2600); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(done, function () {
+          var ta = el('textarea'); ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy') ? done() : fail(); } catch (_) { fail(); }
+          document.body.removeChild(ta);
+        });
+      } else { fail(); }
+    });
+    pdfBtn.addEventListener('click', function () { window.print(); });
+    newBtn.addEventListener('click', function () { location.href = '/'; });
+    acts.appendChild(shareBtn); acts.appendChild(pdfBtn); acts.appendChild(newBtn);
+    return acts;
+  }
+
+  function buildBiz(r) {
+    var body = el('div', 'cbody');
+    var biz = el('div', 'biz');
+    var band = r.score >= 70 ? 'report.biz.high' : r.score >= 40 ? 'report.biz.mid' : 'report.biz.low';
+    biz.appendChild(el('div', 'biz-sum', t(band)));
+    var shown = 0;
+    (r.checks || []).forEach(function (c) {
+      if (c.status === 'pass' || c.status === 'na') return;
+      var dict = CHECKS_L10N[lang] && CHECKS_L10N[lang].biz;
+      var b = dict && (dict[c.id + '.' + c.status] || dict[c.id + '.fail']);
+      if (!b) return;
+      shown++;
+      var item = el('div', 'biz-item');
+      var h4 = el('h4'); h4.appendChild(document.createTextNode(localLabel(c)));
+      h4.appendChild(el('span', 'chk', localLabel(c) + ' · ' + c.points + '/' + c.max));
+      item.appendChild(h4);
+      item.appendChild(el('div', 'pain', '⚠ ' + b.pain));
+      var gain = el('div', 'gain');
+      gain.appendChild(el('span', 'arrow', '→'));
+      gain.appendChild(el('span', null, b.gain));
+      item.appendChild(gain);
+      biz.appendChild(item);
+    });
+    if (shown === 0) biz.appendChild(el('div', 'biz-sum', t('report.biz.allgood')));
+    body.appendChild(biz);
+    return body;
+  }
+
+  function buildFixes(r) {
+    var body = el('div', 'cbody');
+    var fixable = (r.checks || []).filter(function (c) { return c.status === 'fail' || c.status === 'partial'; });
+    var fixDict = (CHECKS_L10N[lang] && CHECKS_L10N[lang].fixes) || {};
+    var totalGain = 0;
+    fixable.forEach(function (c) {
+      var fx = fixDict[c.id + '.' + c.status] || fixDict[c.id + '.fail'];
+      if (!fx) return;
+      var gainN = Math.max(0, c.max - (c.points || 0));
+      totalGain += gainN;
+      var key = 'tf-fix:' + r.domain + ':' + c.id;
+      var done = false;
+      try { done = localStorage.getItem(key) === '1'; } catch (_) {}
+      var item = el('label', 'fix');
+      var cb = el('input'); cb.type = 'checkbox'; cb.checked = done;
+      var txt = el('span', 't');
+      txt.appendChild(el('b', null, fx));
+      txt.appendChild(el('span', null, localDetail(c)));
+      item.appendChild(cb); item.appendChild(txt);
+      if (gainN > 0) item.appendChild(el('span', 'gain', '+' + gainN));
+      if (done) item.classList.add('done');
+      cb.addEventListener('change', function () {
+        item.classList.toggle('done', cb.checked);
+        try { localStorage.setItem(key, cb.checked ? '1' : '0'); } catch (_) {}
+        project(r);
+      });
+      body.appendChild(item);
+    });
+    (r.checks || []).forEach(function (c) {
+      if (c.status === 'pass') {
+        var row = el('div', 'fix passed');
+        setIcon(row, 'pass');
+        row.appendChild(document.createTextNode(' ' + localLabel(c) + ' — ' + t('report.fix.passed')));
+        body.appendChild(row);
+      }
+    });
+    if (fixable.length === 0) {
+      var nofix = el('div', 'fix passed');
+      setIcon(nofix, 'pass');
+      nofix.appendChild(document.createTextNode(' ' + t('report.fix.nofixes')));
+      body.appendChild(nofix);
+    }
+    // projection bar (functional motion)
+    var pot = el('div', 'potential');
+    var maxScore = (typeof r.scoreMax === 'number' && r.scoreMax > 0) ? r.scoreMax : 100;
+    pot.appendChild(el('span', 'txt', t('report.proj.label')));
+    var mini = el('div', 'mini');
+    var fill = el('i');
+    var pct = (typeof r.score === 'number' && maxScore > 0) ? Math.round((r.score / maxScore) * 100) : 0;
+    fill.style.width = pct + '%';
+    mini.appendChild(fill);
+    pot.appendChild(mini);
+    var est = el('span', 'est', '');
+    pot.appendChild(est);
+    body.appendChild(pot);
+
+    function project(rr) {
+      var checkedGain = 0;
+      var rows = body.querySelectorAll('.fix');
+      var idx = 0;
+      fixable.forEach(function (c) {
+        var gainN = Math.max(0, c.max - (c.points || 0));
+        var row = rows[idx]; idx++;
+        if (!row) return;
+        var cb = row.querySelector('input');
+        if (cb && cb.checked) checkedGain += gainN;
+      });
+      var sum = Math.min(maxScore, (typeof r.score === 'number' ? r.score : 0) + checkedGain);
+      fill.style.width = Math.round((sum / maxScore) * 100) + '%';
+      est.textContent = t('report.proj.est').replace('{s}', String(sum)).replace('{g}', letter(sum));
+    }
+    function letter(s) { return s >= 85 ? 'A' : s >= 70 ? 'B' : s >= 50 ? 'C' : s >= 30 ? 'D' : 'F'; }
+    project(r);
+    return body;
+  }
+
+  function buildCta(r) {
+    var cta = el('div', 'cta');
+    var copy = el('div');
+    var raise = el('div');
+    raise.innerHTML = t(r.score >= 70 ? 'report.raise.keep' : 'report.raise'); // trusted static dict (contains <b>)
+    copy.appendChild(raise);
+    copy.appendChild(el('div', 'fine', t('report.cta.fine')));
+    cta.appendChild(copy);
+    var wl = el('div', 'scan');
+    var em = el('input'); em.type = 'email'; em.placeholder = t('waitlist.ph'); em.setAttribute('aria-label', 'Email');
+    var btn = el('button'); btn.type = 'button'; btn.textContent = t('report.getfix');
+    wl.appendChild(em); wl.appendChild(btn);
+    cta.appendChild(wl);
+    em.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+    btn.addEventListener('click', go);
+    function go() {
+      var v = (em.value || '').trim();
+      if (!v || v.indexOf('@') < 1) { em.focus(); return; }
+      fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: v, domain: r.domain || null }),
+      }).catch(function () {});
+      var q = el('div', 'queued', t('waitlist.done'));
+      cta.appendChild(q);
+      em.value = '';
+      btn.disabled = true;
+    }
+    return cta;
+  }
+
+  function reducedMotion() {
+    try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (_) { return false; }
+  }
+
+  function renderReport(r, animate) {
+    lastReport = r; lastError = null;
+    resultBox.textContent = '';
+    if (r.blocked) { renderBlocked(r); return; }
+    var first = animate && !animated;
+    if (first) { animated = true; document.body.classList.add('anim'); }
+
+    resultBox.appendChild(buildHead(r));
+
+    // Card 1 — summary
+    var b1 = el('div', 'cbody');
+    b1.appendChild(el('div', 'scan-fx'));
+    b1.scanFx = true;
+    var hero = el('div', 'hero-row');
+    hero.appendChild(el('div', 'grade ' + cls(r.score), r.grade));
+    var nums = el('div', 'nums');
+    var scoreEl = el('span', null, String(r.score));
+    scoreEl.id = 'scoreNum';
+    var score = el('div', 'score');
+    score.appendChild(scoreEl);
+    score.appendChild(el('span', 'of', ' / ' + ((typeof r.scoreMax === 'number' && r.scoreMax > 0) ? r.scoreMax : 100)));
+    var prev = null;
+    try { prev = JSON.parse(localStorage.getItem('tf-last:' + r.domain) || 'null'); } catch (_) {}
+    var curTs = r.scannedAt || '';
+    var hasBaseline = !!(prev && Array.isArray(prev.checks) && typeof prev.score === 'number' && typeof r.score === 'number' && prev.ts != null && String(prev.ts) !== String(curTs));
+    if (hasBaseline) {
+      var d = r.score - prev.score;
+      var dcls = d > 0 ? 'up' : d < 0 ? 'down' : 'same';
+      var dtxt = d > 0 ? '↑ +' + d : d < 0 ? '↓ −' + Math.abs(d) : '0';
+      score.appendChild(el('span', 'delta ' + dcls, dtxt));
+    }
+    nums.appendChild(score);
+    nums.appendChild(el('div', 'grade-label', t('report.label')));
+    hero.appendChild(nums);
+    var vd = el('div', 'verdict');
+    var strong = el('b', null, localVerdict(r.score).split('.')[0] + '.');
+    vd.appendChild(strong);
+    vd.appendChild(document.createTextNode(localVerdict(r.score).slice(localVerdict(r.score).indexOf('.') + 1)));
+    hero.appendChild(vd);
+    b1.appendChild(hero);
+    b1.appendChild(buildTrack(r, first));
+    b1.appendChild(buildPills(r));
+    if (Array.isArray(r.unavailable) && r.unavailable.length) {
+      b1.appendChild(el('div', 'warn-banner', t('report.unavailable.warn').replace('{n}', String(r.unavailable.length))));
+    }
+    b1.appendChild(buildVs(r));
+    b1.appendChild(buildActs(r));
+    resultBox.appendChild(buildCard(t('report.summary'), b1, true));
+
+    // Card 2 — business impact
+    resultBox.appendChild(buildCard(t('report.biz.title'), buildBiz(r), false));
+
+    // Card 3 — fix list
+    resultBox.appendChild(buildCard(t('report.fix.title'), buildFixes(r), false));
+
+    // CTA + link state
+    try { history.replaceState(null, '', '/report?domain=' + encodeURIComponent(r.domain) + '&lang=' + lang); } catch (_) {}
+
+    // persist baseline (guarded so a language re-render cannot self-overwrite)
+    try {
+      if (!prev || String(prev.ts) !== String(curTs)) {
+        localStorage.setItem('tf-last:' + r.domain, JSON.stringify({
+          score: r.score, grade: r.grade, ts: curTs,
+          checks: (r.checks || []).map(function (c) { return { id: c.id, status: c.status, points: c.points }; })
+        }));
+      }
+    } catch (_) {}
+
+    resultBox.appendChild(buildCta(r));
+
+    if (first && !reducedMotion()) {
+      var scoreNum = document.getElementById('scoreNum');
+      var target = r.score, t0 = null, DUR = 1000;
+      setTimeout(function () {
+        function tick(ts) {
+          if (!t0) t0 = ts;
+          var p = Math.min(1, (ts - t0) / DUR);
+          var eased = 1 - Math.pow(1 - p, 3);
+          if (scoreNum) scoreNum.textContent = String(Math.round(target * eased));
+          if (p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }, 1400);
+    }
+  }
+
+  /* Blocked report: bot protection challenged the scanner. Fixed server
+     verdict, no score, no fix list, no CTA — nothing to game. */
+  function renderBlocked(r) {
+    resultBox.textContent = '';
+    resultBox.appendChild(buildHead(r));
+    var b1 = el('div', 'cbody');
+    var hero = el('div', 'hero-row');
+    hero.appendChild(el('div', 'grade na', '–'));
+    var gm = el('div', 'nums');
+    gm.appendChild(el('div', 'grade-label', t('report.blocked.title')));
+    hero.appendChild(gm);
+    b1.appendChild(hero);
+    var pills = el('div', 'pills');
+    (r.checks || []).forEach(function (c) {
+      var p = el('span', 'pill x');
+      setIcon(p, 'na');
+      p.appendChild(document.createTextNode(' ' + localLabel(c)));
+      pills.appendChild(p);
+    });
+    b1.appendChild(pills);
+    var vd = el('div', 'warn-banner', t('report.blocked.note'));
+    vd.style.marginTop = '18px';
+    b1.appendChild(vd);
+    var acts = el('div', 'acts');
+    var newBtn = el('button'); newBtn.type = 'button';
+    newBtn.textContent = '↺ ' + t('report.new');
+    newBtn.addEventListener('click', function () { location.href = '/'; });
+    acts.appendChild(newBtn);
+    b1.appendChild(acts);
+    resultBox.appendChild(buildCard(t('report.blocked.title'), b1, false));
+    try { history.replaceState(null, '', '/report?domain=' + encodeURIComponent(r.domain) + '&lang=' + lang); } catch (_) {}
+  }
+
+  function renderError(msg) {
+    lastError = msg; lastReport = null;
+    resultBox.textContent = '';
+    resultBox.appendChild(el('div', 'scan-error', msg));
+  }
+
+  /* ── language ── */
+  function applyLang() {
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    document.title = 'ToolFront — ' + t('report.label') + (lastReport ? ' · ' + lastReport.domain : '');
+    document.querySelectorAll('[data-i18n]').forEach(function (elx) { elx.textContent = t(elx.getAttribute('data-i18n')); });
+    document.getElementById('lang-en').classList.toggle('on', lang === 'en');
+    document.getElementById('lang-zh').classList.toggle('on', lang === 'zh');
+    if (lastReport) renderReport(lastReport, false);
+    else if (lastError) renderError(lastError);
+  }
+  function setLang(l) {
+    lang = l;
+    try { localStorage.setItem('tf-lang', l); } catch (_) {}
+    applyLang();
+  }
+  document.getElementById('lang-en').addEventListener('click', function () { setLang('en'); });
+  document.getElementById('lang-zh').addEventListener('click', function () { setLang('zh'); });
+
+  /* ── scan (auto-run from deep link) ── */
+  var scanning = false;
+  function runScan(domain) {
+    if (scanning) return;
+    scanning = true;
+    resultBox.textContent = '';
+    var ld = el('div', 'scan-loading');
+    ld.textContent = t('report.loading').replace('{d}', domain);
+    ld.appendChild(el('span', 'dot', '…'));
+    resultBox.appendChild(ld);
+    fetch('/api/scan?domain=' + encodeURIComponent(domain))
+      .then(function (res) { return res.json().then(function (body) { return { ok: res.ok, body: body }; }); })
+      .then(function (out) {
+        if (out.ok && out.body.checks) { renderReport(out.body, true); }
+        else { renderError(out.body.detail || out.body.error || t('report.err.generic')); }
+      })
+      .catch(function () { renderError(t('report.err.network')); })
+      .finally(function () { scanning = false; });
+  }
+
+  applyLang();
+
+  /* deep link: sanitized [A-Za-z0-9.-]; API re-validates server-side.
+     Empty report URL goes back to the landing page. */
+  var qd = '';
+  try { qd = (new URLSearchParams(location.search).get('domain') || '').replace(/[^a-zA-Z0-9.-]/g, ''); } catch (_) {}
+  if (qd) { runScan(qd); }
+  else { location.replace('/'); }
+</script>
+</body>
+</html>

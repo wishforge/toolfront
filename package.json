@@ -1,0 +1,19 @@
+{
+  "name": "toolfront",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "description": "Agent-readiness scanner on Cloudflare Workers — free, instant scan of any website's AI-agent readiness (WebMCP tools, tool-surface security, llms.txt, AI crawler policy).",
+  "scripts": {
+    "dev": "wrangler dev --test-scheduled",
+    "deploy": "wrangler deploy",
+    "test": "node --check worker.js && node tests/sast-scan.mjs && node tests/poison-samples.test.mjs && node tests/sec-regression.test.mjs && node tests/test-unsub.test.mjs && node tests/red14.test.mjs && node tests/red12.test.mjs && node tests/red13.test.mjs",
+    "test:secrets": "python3 tests/gitleaks-scan.py .",
+    "test:live": "node tests/red24.live.mjs && node tests/red28.live.mjs && node tests/red29.live.mjs && node tests/red30.live.mjs && node tests/red31.live.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^30.0.1",
+    "wrangler": "^3.114.0"
+  }
+}

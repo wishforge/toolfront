@@ -1,0 +1,12 @@
+# Cloudflare Workers Static Assets — security headers (applied at the assets
+# layer, which serves static files DIRECTLY and bypasses the worker's
+# harden() — round-22 finding: the landing/privacy/terms pages shipped with
+# ZERO security headers because harden() only runs for worker-handled routes).
+# CSP matches worker.js's harden() exactly (inline script/style allowed for
+# the single-page bundle; everything else locked to 'self').
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  X-Frame-Options: DENY
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; object-src 'none'
+  Permissions-Policy: camera=(), microphone=(), geolocation=()

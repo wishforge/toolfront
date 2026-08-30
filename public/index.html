@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToolFront V5 — Free & Open</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23FFFFFF'/%3E%3Cpath d='M10 44 L10 20 L26 20 M10 32 L22 32' stroke='%230C1222' stroke-width='6' fill='none'/%3E%3Cpath d='M38 44 L54 44 M46 20 L46 44' stroke='%232563EB' stroke-width='6' fill='none'/%3E%3C/svg%3E">
+<style>
+  /* ════════════════ V3 POLISHED ════════════════
+     Design system: 4px base unit · 3-tier type · SVG icons
+     Palette: cool navy ink + electric blue accent + warm paper     */
+  :root {
+    /* ── Colors (refined) ── */
+    --paper: #FAFBFC;
+    --paper-soft: #F1F4F8;
+    --paper-warm: #FFFDF9;
+    --ink: #0C1222;
+    --ink-2: #374151;
+    --ink-3: #6B7280;
+    --ink-4: #9CA3AF;
+    --ink-5: #D1D5DB;
+    --line: #E2E6EE;
+    --line-light: #F0F2F5;
+
+    /* Accent: refined blue */
+    --accent: #2563EB;
+    --accent-deep: #1D4ED8;
+    --accent-soft: #EFF6FF;
+    --accent-glow: rgba(37,99,235,0.12);
+
+    /* Semantic colors */
+    --good: #059669;
+    --good-deep: #047857;
+    --good-soft: #ECFDF5;
+    --mid: #D97706;
+    --mid-soft: #FFFBEB;
+    --bad: #DC2626;
+    --bad-soft: #FEF2F2;
+    --info: #0891B2;
+    --info-soft: #ECFEFF;
+
+    /* Surfaces */
+    --card: #FFFFFF;
+    --surface-dark: #0F172A;
+
+    /* Shadows (layered) */
+    --shadow-xs: 0 1px 2px rgba(12,18,34,0.04);
+    --shadow-sm: 0 2px 8px -2px rgba(12,18,34,0.06), 0 1px 3px rgba(12,18,34,0.04);
+    --shadow-md: 0 4px 16px -4px rgba(12,18,34,0.08), 0 2px 6px -2px rgba(12,18,34,0.04);
+    --shadow-lg: 0 10px 40px -8px rgba(12,18,34,0.12), 0 4px 12px -4px rgba(12,18,34,0.06);
+    --shadow-xl: 0 20px 60px -12px rgba(12,18,34,0.18), 0 8px 24px -6px rgba(12,18,34,0.08);
+    --shadow-report: 0 24px 56px -16px rgba(12,18,34,.22), 0 0 0 1px rgba(12,18,34,.04), inset 0 1px 0 rgba(255,255,255,.6);
+    --shadow-glow-accent: 0 0 20px -4px var(--accent-glow), 0 0 40px -8px rgba(37,99,235,0.06);
+    --shadow-popular: 0 8px 32px -4px rgba(37,99,235,0.18), 0 0 0 1px rgba(37,99,235,0.15);
+
+    /* Kiro-inspired: report card glow border */
+    --shadow-report-glow:
+      0 0 0 1px rgba(37,99,235,0.08),
+      0 0 20px -2px rgba(37,99,235,0.10),
+      0 0 48px -8px rgba(37,99,235,0.06),
+      0 24px 56px -16px rgba(12,18,34,.22);
+    --shadow-report-glow-hover:
+      0 0 0 1px rgba(37,99,235,0.16),
+      0 0 28px -2px rgba(37,99,235,0.15),
+      0 0 60px -8px rgba(37,99,235,0.10),
+      0 24px 64px -12px rgba(12,18,34,.26);
+
+    /* Kiro-inspired: gradient buttons */
+    --grad-primary: linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #3B82F6 100%);
+    --grad-primary-hover: linear-gradient(135deg, #1E40AF 0%, #1D4ED8 50%, #2563EB 100%);
+    --grad-dark: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+    --grad-dark-hover: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+
+    /* Radius (4px grid) */
+    --r-1: 4px;
+    --r-2: 8px;
+    --r-3: 12px;
+    --r-4: 16px;
+    --r-5: 20px;
+    --r-full: 9999px;
+
+    /* Type scale */
+    --sans: "Space Grotesk", "Noto Sans SC", sans-serif;
+    --serif: "Source Serif 4", "Noto Serif SC", serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, "Cascadia Code", monospace;
+
+    /* Transitions */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --dur-fast: 150ms;
+    --dur-normal: 250ms;
+    --dur-slow: 400ms;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: var(--sans); font-weight: 400; font-size: 15px;
+    line-height: 1.62; -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale; overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Focus visible for accessibility */
+  :focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+    border-radius: var(--r-1);
+  }
+
+  /* ═══ ICON SYSTEM (inline SVG) ═══ */
+  .icon { width: 20px; height: 20px; flex-shrink: 0; }
+  .icon-sm { width: 16px; height: 16px; }
+  .icon-lg { width: 24px; height: 24px; }
+
+  .lang-toggle { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-full); overflow: hidden; }
+  .lang-toggle button { border: 0; background: transparent; font-family: var(--sans); font-size: 11px; font-weight: 600; color: var(--ink-3); padding: 5px 11px; cursor: pointer; transition: background var(--dur-fast), color var(--dur-fast); }
+  .lang-toggle button.on { background: var(--ink); color: #FFF; }
+  .lang-toggle button:not(.on):hover { color: var(--ink); background: var(--paper-soft); }
+  /* ═══ NAV ═══ */
+  .nav {
+    position: sticky; top: 0; z-index: 200;
+    background: rgba(250,251,252,0.92);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-bottom: 1px solid var(--line-light);
+  }
+  .nav-inner {
+    max-width: 1160px; margin: 0 auto;
+    padding: 14px clamp(24px, 4vw, 40px);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .wordmark {
+    font-family: var(--mono); font-weight: 700; font-size: 17px;
+    color: var(--ink); text-decoration: none; letter-spacing: -0.02em;
+    display: flex; align-items: center; gap: 1px;
+    transition: opacity var(--dur-fast);
+  }
+  .wordmark:hover { opacity: 0.75; }
+  .wordmark em { font-style: normal; color: var(--accent); position: relative; }
+  .wordmark em::after {
+    content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+    height: 2px; background: var(--accent); border-radius: 1px;
+    opacity: 0.5;
+  }
+
+  .nav-menu { display: flex; gap: 32px; list-style: none; align-items: center; }
+  .nav-menu a {
+    color: var(--ink-3); text-decoration: none;
+    font-family: var(--sans); font-size: 13px; font-weight: 500;
+    transition: color var(--dur-fast) ease;
+    position: relative;
+  }
+  .nav-menu a::after {
+    content: ''; position: absolute; bottom: -3px; left: 0; right: 0;
+    height: 1.5px; background: var(--accent);
+    transform: scaleX(0); transition: transform var(--dur-normal) var(--ease-out);
+    border-radius: 1px;
+  }
+  .nav-menu a:hover { color: var(--ink); }
+  .nav-menu a:hover::after { transform: scaleX(1); }
+
+  .nav-actions { display: flex; gap: 8px; align-items: center; }
+  .nav-link-icon {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-3);
+    text-decoration: none; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 6px 12px; border-radius: var(--r-2);
+    transition: all var(--dur-fast) ease;
+  }
+  .nav-link-icon:hover { color: var(--ink); background: var(--paper-soft); }
+  .btn-nav-ghost {
+    padding: 7px 18px; border-radius: var(--r-full);
+    background: transparent; border: 1px solid var(--line);
+    color: var(--ink); text-decoration: none;
+    font-family: var(--sans); font-size: 12.5px; font-weight: 500;
+    transition: all var(--dur-fast) ease;
+  }
+  .btn-nav-ghost:hover { border-color: var(--ink-3); background: var(--paper-soft); }
+  .btn-nav-solid {
+    padding: 7px 20px; border-radius: var(--r-full);
+    background: var(--grad-primary); color: #FFF; text-decoration: none;
+    font-family: var(--sans); font-size: 12.5px; font-weight: 600;
+    box-shadow: 0 2px 10px rgba(37,99,235,0.18);
+    transition: all var(--dur-fast) ease;
+  }
+  .btn-nav-solid:hover {
+    background: var(--grad-primary-hover);
+    box-shadow: 0 4px 16px rgba(37,99,235,0.28), 0 0 24px rgba(37,99,235,0.08);
+    transform: translateY(-1px);
+  }
+
+  /* ═══ HERO ═══ */
+  .hero {
+    max-width: 1160px; margin: 0 auto;
+    padding: clamp(44px, 7vw, 76px) clamp(24px, 4vw, 40px) clamp(52px, 8vw, 88px);
+    display: grid; grid-template-columns: 1.08fr 0.92fr; gap: clamp(36px, 5.5vw, 68px); align-items: center;
+  }
+  .hero-left { padding-right: 20px; }
+
+  .kicker {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 18px; display: inline-flex; align-items: center; gap: 8px;
+    padding: 4px 12px; background: var(--accent-soft);
+    border-radius: var(--r-full);
+  }
+  .kicker::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); animation: pulse-dot 2s infinite;
+  }
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+  h1 {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 420; font-size: clamp(38px, 5vw, 58px);
+    line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 22px;
+  }
+  h1 .hl-u {
+    box-shadow: inset 0 -0.28em 0 0 var(--accent-soft);
+    transition: box-shadow var(--dur-normal) ease;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+  h1 .hl-u:hover {
+    box-shadow: inset 0 -0.28em 0 0 var(--accent);
+    color: var(--accent-deep);
+  }
+
+  .hero-lede {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 340; font-size: 17px; line-height: 1.63;
+    color: var(--ink-2); max-width: 44ch; margin-bottom: 28px;
+  }
+
+  /* Scan form — polished */
+  .scan-form { display: flex; gap: 0; max-width: 480px; }
+  .scan-input {
+    flex: 1; border: 1.5px solid var(--line); border-right: 0;
+    border-radius: var(--r-3) 0 0 var(--r-3); padding: 14px 18px;
+    font-family: var(--mono); font-size: 13.5px; color: var(--ink);
+    outline: none; transition: all var(--dur-fast) ease;
+    background: var(--card);
+    letter-spacing: -0.01em;
+  }
+  .scan-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  .scan-input::placeholder { color: var(--ink-4); }
+  .scan-btn {
+    border: 0; background: var(--grad-primary); color: #FFF;
+    font-family: var(--sans); font-weight: 600; font-size: 13.5px;
+    padding: 0 28px; border-radius: 0 var(--r-3) var(--r-3) 0;
+    cursor: pointer; transition: all var(--dur-fast) var(--ease-out);
+    white-space: nowrap; letter-spacing: -0.01em;
+    position: relative; overflow: hidden;
+    box-shadow: 0 2px 12px rgba(37,99,235,0.20), inset 0 1px 0 rgba(255,255,255,.15);
+  }
+  .scan-btn::before {
+    content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,.12));
+    opacity: 0; transition: opacity var(--dur-fast);
+  }
+  .scan-btn:hover {
+    background: var(--grad-primary-hover);
+    box-shadow: 0 4px 20px rgba(37,99,235,0.30), 0 0 32px rgba(37,99,235,0.10), inset 0 1px 0 rgba(255,255,255,.2);
+    transform: translateY(-1px);
+  }
+  .scan-btn:hover::before { opacity: 1; }
+  .scan-btn:active { transform: translateY(0); }
+
+  .scan-meta {
+    margin-top: 12px; font-size: 11.5px; color: var(--ink-4);
+    font-family: var(--mono); letter-spacing: 0.01em;
+  }
+  .scan-meta b { color: var(--ink-2); font-weight: 600; }
+
+  /* ═══ REPORT CARD (Kiro-inspired glow border) ═══ */
+  .report-card {
+    position: relative;
+    border: 1px solid rgba(37,99,235,0.10);
+    border-radius: var(--r-4); background: var(--card);
+    box-shadow: var(--shadow-report-glow);
+    overflow: hidden;
+    transition: box-shadow var(--dur-normal) var(--ease-out),
+                border-color var(--dur-normal) ease,
+                transform var(--dur-normal) var(--ease-out);
+  }
+  .report-card:hover {
+    box-shadow: var(--shadow-report-glow-hover);
+    border-color: rgba(37,99,235,0.22);
+    transform: translateY(-4px);
+  }
+
+  /* ═══ FREEMIUM UPGRADE HINT (from V1) ═══ */
+  .upgrade-hint {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 10px;
+  }
+  .upgrade-hint-text {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-4);
+    display: flex; align-items: center; gap: 5px;
+  }
+  .upgrade-hint-text svg { opacity: 0.45; flex-shrink: 0; }
+  .upgrade-link {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    color: var(--accent); text-decoration: none;
+    white-space: nowrap; padding: 3px 0;
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--dur-fast), color var(--dur-fast);
+  }
+  .upgrade-link:hover { color: var(--accent-deep); border-bottom-color: var(--accent); }
+
+  /* ═══ TRUST GRID SECTION (from V2) ═══ */
+  .trust-section {
+    max-width: 1160px; margin: 0 auto;
+    padding: 56px clamp(24px, 4vw, 40px);
+  }
+  .trust-kicker {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .trust-section > h2 {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 430; font-size: clamp(26px, 3.5vw, 38px);
+    line-height: 1.15; letter-spacing: -0.01em;
+    margin-bottom: 36px;
+  }
+  .trust-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+  }
+  .trust-item {
+    text-align: center; padding: 28px 18px;
+    border-radius: var(--r-4); background: var(--card);
+    border: 1px solid var(--line-light);
+    transition: transform var(--dur-normal) var(--ease-out),
+                box-shadow var(--dur-normal) ease,
+                border-color var(--dur-fast) ease;
+  }
+  .trust-item:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--line);
+  }
+  .trust-icon-wrap {
+    width: 44px; height: 44px; margin: 0 auto 14px;
+    border-radius: var(--r-3);
+    display: flex; align-items: center; justify-content: center;
+    background: var(--accent-soft);
+  }
+  .trust-icon-wrap svg { width: 22px; height: 22px; stroke: var(--accent); }
+  .trust-item h4 {
+    font-family: var(--sans); font-weight: 600; font-size: 14px;
+    margin-bottom: 6px; color: var(--ink);
+  }
+  .trust-item p {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 340; font-size: 12px; line-height: 1.5; color: var(--ink-3);
+  }
+  .trust-status {
+    display: inline-block; margin-top: 10px; padding: 3px 10px;
+    border-radius: var(--r-full); font-family: var(--mono);
+    font-size: 9.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .status-live { background: var(--good-soft); color: var(--good); }
+  .status-preview { background: var(--mid-soft); color: var(--mid); }
+
+  /* Scanline animation — enhanced with glow trail (Kiro-inspired) */
+  .scanline {
+    position: absolute; left: 0; right: 0; height: 48px; top: -48px;
+    background:
+      linear-gradient(180deg,
+        transparent 0%,
+        rgba(37,99,235,0.02) 35%,
+        rgba(37,99,235,0.06) 55%,
+        rgba(37,99,235,0.12) 75%,
+        rgba(37,99,235,0.18) 90%,
+        rgba(59,130,246,0.25) 100%
+      );
+    border-bottom: 2px solid rgba(37,99,235,0.50);
+    animation: sweep 3s cubic-bezier(.4,0,.2,1) infinite;
+    pointer-events: none; z-index: 5;
+    filter: blur(0.3px);
+    /* Glow trail behind scanline */
+    box-shadow:
+      0 0 20px 4px rgba(37,99,235,0.08),
+      0 0 40px 8px rgba(37,99,235,0.04);
+  }
+  @keyframes sweep { 0% { top: -48px } 55%,100% { top: 105% } }
+  @media (prefers-reduced-motion: reduce) { .scanline { display: none; } }
+
+  /* Chrome bar — refined */
+  .rp-bar {
+    display: flex; gap: 6px; padding: 11px 14px;
+    border-bottom: 1px solid var(--line-light); align-items: center;
+    background: linear-gradient(180deg, var(--paper) 0%, var(--paper-soft) 100%);
+  }
+  .rp-dot { width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 -1px 1px rgba(0,0,0,.15); }
+  .rp-dot:nth-child(1){background:#FF5F57} .rp-dot:nth-child(2){background:#FEBC2E} .rp-dot:nth-child(3){background:#28C840}
+  .rp-url {
+    margin-left: auto; font-family: var(--mono); font-size: 10.5px;
+    color: var(--ink-4); background: var(--paper); border-radius: var(--r-1);
+    padding: 3px 10px; border: 1px solid var(--line-light);
+    letter-spacing: 0.01em;
+  }
+
+  .rp-body { padding: 22px 24px 24px; }
+  .rp-head { display: flex; gap: 18px; align-items: center; margin-bottom: 18px; }
+
+  /* Grade badge — refined */
+  .grade-badge {
+    width: 68px; height: 68px; min-width: 68px; border-radius: var(--r-3);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--sans); font-weight: 800; font-size: 36px;
+    color: var(--bad); background: linear-gradient(145deg, var(--bad-soft) 0%, #FCE8E8 100%);
+    border: 2px solid var(--bad);
+    box-shadow: 0 2px 8px rgba(220,38,38,0.12), inset 0 1px 0 rgba(255,255,255,.6);
+    position: relative;
+  }
+  .grade-badge::after {
+    content: 'GRADE'; position: absolute; bottom: -8px;
+    font-family: var(--mono); font-size: 7px; font-weight: 700;
+    letter-spacing: 0.15em; color: var(--bad); opacity: 0.5;
+  }
+
+  .rp-score {
+    font-family: var(--mono); font-size: 23px; font-weight: 700;
+    color: var(--ink); letter-spacing: -0.03em;
+  }
+  .rp-score .of { font-size: 12px; color: var(--ink-4); font-weight: 400; }
+  .delta-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    margin-left: 10px; padding: 3px 10px;
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    color: var(--good-deep); background: var(--good-soft);
+    border-radius: var(--r-full); border: 1px solid rgba(5,150,105,0.12);
+    animation: delta-in 0.6s var(--ease-spring) both;
+  }
+  @keyframes delta-in { from { opacity: 0; transform: translateX(-8px) scale(0.95); } }
+  .rp-label {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink-4); font-weight: 600;
+    margin-top: 4px;
+  }
+
+  /* Pill tags — refined */
+  .pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+    padding: 4px 10px; border-radius: var(--r-full);
+    border: 1px solid transparent;
+    transition: all var(--dur-fast) ease;
+  }
+  .pill:hover { transform: translateY(-1px); }
+  .pill.p { color: var(--good-deep); background: var(--good-soft); border-color: rgba(5,150,105,0.1); }
+  .pill.m { color: #92400E; background: var(--mid-soft); border-color: rgba(217,119,6,0.1); }
+  .pill.f { color: #B91C1C; background: var(--bad-soft); border-color: rgba(220,38,38,0.1); }
+  .pill.x { color: var(--ink-4); background: var(--paper-soft); border-color: var(--line); }
+
+  /* Fastest win — refined typography */
+  .rp-fix {
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px dashed var(--line);
+    font-size: 13px; color: var(--ink-2);
+    font-family: var(--serif); font-optical-sizing: auto; font-weight: 340;
+    line-height: 1.58;
+  }
+  .rp-fix b { font-weight: 600; color: var(--ink); }
+  .rp-fix code {
+    font-family: var(--mono); font-size: 12px; color: var(--accent);
+    font-weight: 600; background: var(--accent-soft);
+    padding: 2px 7px; border-radius: var(--r-1);
+    border: 1px solid rgba(37,99,235,0.1);
+  }
+
+  /* ═══ PILLS STRIP ═══ */
+  .pills-strip {
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, var(--paper-soft) 0%, var(--paper) 100%);
+  }
+  .pills-strip-inner {
+    max-width: 1160px; margin: 0 auto;
+    display: flex; flex-wrap: wrap; gap: 8px 32px;
+    padding: 18px clamp(24px, 4vw, 40px);
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-3);
+    align-items: center; justify-content: center;
+    letter-spacing: 0.005em;
+  }
+  .pills-strip-inner b { color: var(--ink); font-weight: 600; }
+  .strip-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    display: inline-block; margin-right: 8px; vertical-align: 0;
+    box-shadow: 0 0 0 2px currentColor;
+    opacity: 0.7;
+  }
+
+  /* ═══ BEFORE / AFTER BAND ═══ */
+  .ba-section {
+    max-width: 1160px; margin: 0 auto;
+    padding: clamp(52px, 8vw, 92px) clamp(24px, 4vw, 40px);
+  }
+  .ba-kicker {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent);
+    margin-bottom: 12px; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .ba-kicker::before, .ba-kicker::after {
+    content: ''; width: 20px; height: 1px; background: var(--accent);
+    border-radius: 1px; opacity: 0.4;
+  }
+  .ba-section > h2 {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 430; font-size: clamp(30px, 3.6vw, 42px);
+    line-height: 1.1; letter-spacing: -0.015em; margin-bottom: 14px;
+  }
+  .ba-sub {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 340; font-size: 15px; color: var(--ink-2);
+    max-width: 56ch; margin-bottom: 40px; line-height: 1.57;
+  }
+  .ba-grid {
+    display: grid; grid-template-columns: 1fr 48px 1fr; gap: 0; align-items: stretch;
+  }
+  .ba-card {
+    border: 1.5px solid var(--line); border-radius: var(--r-4);
+    padding: 26px 28px;
+    transition: box-shadow var(--dur-normal) var(--ease-out), transform var(--dur-normal) var(--ease-out);
+  }
+  .ba-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .ba-card.after {
+    border-color: var(--good); background: linear-gradient(165deg, var(--good-soft) 0%, #FAFDFB 100%);
+    box-shadow: 0 0 0 1px var(--good), var(--shadow-xs);
+  }
+  .ba-tag {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.13em;
+    text-transform: uppercase; font-weight: 700; color: var(--ink-4);
+    margin-bottom: 18px; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .ba-tag svg { width: 14px; height: 14px; }
+  .ba-card.after .ba-tag { color: var(--good-deep); }
+  .ba-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--mono); font-size: 12.5px;
+    padding: 10px 0; border-bottom: 1px dashed var(--line);
+    transition: background var(--dur-fast);
+  }
+  .ba-row:last-child { border-bottom: 0; }
+  .ba-row:hover { background: rgba(0,0,0,.015); border-radius: var(--r-1); }
+  .ba-no {
+    color: var(--bad); font-weight: 700;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .ba-yes {
+    color: var(--good-deep); font-weight: 700;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .ba-arrow {
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 24px; color: var(--ink-4);
+    transition: all var(--dur-normal) var(--ease-spring);
+  }
+  .ba-grid:hover .ba-arrow { color: var(--good); transform: translateX(3px); }
+
+  /* ═══ STEPS ═══ */
+  .steps-section {
+    max-width: 1160px; margin: 0 auto;
+    padding: 0 clamp(24px, 4vw, 40px) clamp(52px, 8vw, 92px);
+  }
+  .steps-section > h2 {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 430; font-size: clamp(30px, 3.6vw, 42px);
+    line-height: 1.1; letter-spacing: -0.015em; margin-bottom: 14px;
+  }
+  .steps-sub {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 340; font-size: 15px; color: var(--ink-2);
+    max-width: 52ch; margin-bottom: 40px; line-height: 1.57;
+  }
+  .step-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+  .step-card {
+    border: 1.5px solid var(--line); border-radius: var(--r-4);
+    padding: 28px 24px;
+    transition: all var(--dur-normal) var(--ease-out);
+    position: relative; overflow: hidden;
+    background: var(--card);
+  }
+  .step-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0; transition: opacity var(--dur-normal);
+  }
+  .step-card:hover {
+    box-shadow: var(--shadow-lg); transform: translateY(-4px);
+    border-color: var(--accent-glow);
+  }
+  .step-card:hover::before { opacity: 1; }
+  .step-n {
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    color: var(--accent); background: var(--accent-soft);
+    border-radius: var(--r-1); padding: 4px 10px;
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-bottom: 16px; letter-spacing: 0.08em;
+    border: 1px solid rgba(37,99,235,0.1);
+  }
+  .step-n svg { width: 12px; height: 12px; opacity: 0.6; }
+  .step-card h3 {
+    font-family: var(--sans); font-weight: 700; font-size: 17.5px;
+    letter-spacing: -0.015em; margin-bottom: 10px;
+  }
+  .step-card p {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 340; font-size: 13.5px; line-height: 1.6; color: var(--ink-2);
+  }
+
+  /* ═══ CODE SECTION ═══ */
+  .code-section {
+    max-width: 1160px; margin: 0 auto;
+    padding: 0 clamp(24px, 4vw, 40px) clamp(52px, 8vw, 92px);
+    border-top: 1px solid var(--line-light); padding-top: 68px;
+  }
+  .code-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+    margin-top: 36px;
+  }
+  .code-text h3 {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 430; font-size: 29px; line-height: 1.14;
+    letter-spacing: -0.01em; margin-bottom: 18px;
+  }
+  .code-text p {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 340; font-size: 14.5px; line-height: 1.62; color: var(--ink-2);
+    margin-bottom: 24px;
+  }
+  .code-block {
+    background: var(--surface-dark); border-radius: var(--r-4);
+    overflow: hidden; box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .code-hdr {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 20px; background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .code-hdr span { font-family: var(--mono); font-size: 11px; color: #555; }
+  .code-lang {
+    font-family: var(--sans); font-size: 10px; font-weight: 600;
+    color: #777; letter-spacing: 0.05em; padding: 4px 10px;
+    background: rgba(255,255,255,0.06); border-radius: var(--r-1);
+  }
+  .code-pre { padding: 24px; overflow-x: auto; }
+  pre {
+    font-family: var(--mono); font-size: 12px; line-height: 1.78; color: #A1AAB8; margin: 0;
+    tab-size: 2;
+  }
+  .ck { color: #C678DD; } .cs { color: #98C379; }
+  .cc { color: #5C6370; font-style: italic; }
+  .cf { color: #61AFEF; } .cp { color: #E5C07B; }
+  .cn { color: #56B6C2; }
+
+  /* ═══ FEATURES GRID (SVG Icons) ═══ */
+  .features-section {
+    max-width: 1160px; margin: 0 auto;
+    padding: 0 clamp(24px, 4vw, 40px) clamp(52px, 8vw, 92px);
+    border-top: 1px solid var(--line-light); padding-top: 68px;
+  }
+  .features-section > h2 {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 430; font-size: clamp(30px, 3.6vw, 42px);
+    line-height: 1.1; letter-spacing: -0.015em;
+    max-width: 520px; margin-bottom: 40px;
+  }
+  .feat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .feat-item {
+    display: flex; gap: 18px; padding: 24px;
+    border-radius: var(--r-3);
+    transition: all var(--dur-normal) var(--ease-out);
+    border: 1px solid transparent;
+  }
+  .feat-item:hover {
+    background: var(--paper-soft);
+    border-color: var(--line);
+    transform: translateX(4px);
+  }
+  .feat-icon {
+    width: 44px; height: 44px; min-width: 44px;
+    border-radius: var(--r-3); display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(145deg, var(--accent-soft) 0%, #F0F4FF 100%);
+    color: var(--accent); transition: all var(--dur-normal) var(--ease-out);
+  }
+  .feat-item:hover .feat-icon {
+    background: linear-gradient(145deg, var(--accent) 0%, var(--accent-deep) 100%);
+    color: #FFF; box-shadow: var(--shadow-sm), var(--shadow-glow-accent);
+    transform: scale(1.05) rotate(-3deg);
+  }
+  .feat-text h4 {
+    font-family: var(--sans); font-weight: 600; font-size: 14.5px;
+    margin-bottom: 5px; letter-spacing: -0.01em;
+  }
+  .feat-text p {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 340; font-size: 12.5px; color: var(--ink-3); line-height: 1.54;
+  }
+
+  /* ═══ DOGFOOD ═══ */
+  .dogfood-section {
+    max-width: 1160px; margin: 0 auto;
+    padding: 0 clamp(24px, 4vw, 40px) clamp(52px, 8vw, 92px);
+    border-top: 1px solid var(--line-light); padding-top: 68px;
+  }
+  .dogfood-inner {
+    display: grid; grid-template-columns: 1fr 380px; gap: 44px; align-items: start;
+  }
+  .dogfood-content h2 {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 430; font-size: clamp(27px, 3.3vw, 39px);
+    line-height: 1.14; letter-spacing: -0.01em; margin-bottom: 20px;
+  }
+  .dogfood-content h3 {
+    font-family: var(--sans); font-weight: 600; font-size: 15px;
+    color: var(--good); margin-bottom: 14px;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .dogfood-content h3 code {
+    background: var(--good-soft); color: var(--good);
+    padding: 3px 9px; border-radius: var(--r-1); font-size: 14px;
+    font-family: var(--mono); font-weight: 600;
+    border: 1px solid rgba(5,150,105,0.1);
+  }
+  .dogfood-content p {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 340; font-size: 14.5px; line-height: 1.62; color: var(--ink-2);
+  }
+  .dogfood-content p em { font-style: italic; color: var(--ink); font-weight: 420; }
+  .dogfood-card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--r-5); padding: 28px;
+    box-shadow: var(--shadow-lg);
+    transition: box-shadow var(--dur-normal) var(--ease-out);
+    position: relative; overflow: hidden;
+  }
+  .dogfood-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; background: linear-gradient(90deg, var(--good), var(--info), var(--accent));
+  }
+  .dogfood-card:hover { box-shadow: var(--shadow-xl); }
+  .dogfood-card-hdr {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 18px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--line-light);
+  }
+  .dogfood-card-label {
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-4);
+  }
+  .dogfood-live-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    color: var(--good); letter-spacing: 0.05em;
+    padding: 3px 10px; background: var(--good-soft);
+    border-radius: var(--r-full); border: 1px solid rgba(5,150,105,0.1);
+  }
+  .dogfood-live-badge.standby {
+    color: var(--ink-3); background: var(--paper-soft);
+    border: 1px solid var(--line);
+  }
+  .dogfood-live-badge::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--good); animation: pulse 1.5s infinite;
+    box-shadow: 0 0 0 2px var(--good-soft);
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.35;transform:scale(0.9)} }
+  .dogfood-fn-name {
+    font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--ink);
+    padding: 14px 18px; background: var(--paper-soft);
+    border-radius: var(--r-2); margin-bottom: 14px;
+    border: 1px solid var(--line-light);
+    letter-spacing: -0.02em;
+  }
+  .dogfood-fn-desc {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-size: 12.5px; line-height: 1.57; color: var(--ink-3);
+  }
+
+  /* ═══ EMAIL SIGNUP ═══ */
+  .email-section {
+    max-width: 1160px; margin: 0 auto;
+    padding: 0 clamp(24px, 4vw, 40px) clamp(52px, 8vw, 92px);
+    border-top: 1px solid var(--line-light); padding-top: 68px;
+    text-align: center;
+  }
+  .email-section h2 {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 430; font-size: clamp(27px, 3.3vw, 37px);
+    line-height: 1.14; letter-spacing: -0.008em; margin-bottom: 22px;
+  }
+  .email-form-wrap {
+    display: flex; justify-content: center; gap: 8px;
+    max-width: 520px; margin: 0 auto 14px;
+  }
+  .email-input {
+    flex: 1; padding: 14px 22px;
+    border: 1.5px solid var(--line); border-radius: var(--r-full);
+    font-family: var(--mono); font-size: 13.5px; color: var(--ink);
+    outline: none; transition: all var(--dur-fast) ease;
+    letter-spacing: -0.01em;
+  }
+  .email-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .email-input::placeholder { color: var(--ink-4); }
+  .email-btn {
+    padding: 14px 30px; border-radius: var(--r-full);
+    background: var(--grad-primary); color: #FFF; border: none;
+    font-family: var(--sans); font-size: 13px; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+    transition: all var(--dur-fast) var(--ease-out);
+    letter-spacing: -0.01em;
+    box-shadow: 0 2px 12px rgba(37,99,235,0.20);
+  }
+  .email-btn:hover {
+    background: var(--grad-primary-hover);
+    box-shadow: 0 4px 20px rgba(37,99,235,0.30), 0 0 32px rgba(37,99,235,0.10);
+    transform: translateY(-1px);
+  }
+  .email-note {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-4);
+    letter-spacing: 0.01em;
+  }
+  .email-note a { color: var(--ink-3); text-decoration: underline; text-underline-offset: 2px; }
+  .email-note a:hover { color: var(--accent); }
+
+  /* ═══ EMAIL SECTION V5 (lightweight, left-aligned) ═══ */
+  .email-section-v5 {
+    max-width: 1160px; margin: 0 auto;
+    padding: clamp(40px, 6vw, 72px) clamp(24px, 4vw, 48px);
+    border-top: 1px solid var(--line-light);
+  }
+  .email-v5-inner {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 36px;
+    align-items: center;
+  }
+  .email-v5-kicker {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .email-v5-text h2 {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 420; font-size: clamp(22px, 2.8vw, 32px);
+    line-height: 1.15; letter-spacing: -0.01em; color: var(--ink);
+  }
+  .email-v5-form {
+    display: flex; gap: 8px;
+  }
+  .email-v5-form .email-input {
+    flex: 1; padding: 13px 20px;
+    border: 1.5px solid var(--line); border-radius: var(--r-full);
+    font-family: var(--mono); font-size: 13px; color: var(--ink);
+    outline: none; transition: all var(--dur-fast) ease;
+    background: var(--card);
+  }
+  .email-v5-form .email-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .email-v5-form .email-btn {
+    padding: 13px 24px; border-radius: var(--r-full);
+    background: var(--grad-primary); color: #FFF; border: none;
+    font-family: var(--sans); font-size: 13px; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+    transition: all var(--dur-fast) var(--ease-out);
+    box-shadow: 0 2px 10px rgba(37,99,235,0.18);
+  }
+  .email-v5-form .email-btn:hover {
+    background: var(--grad-primary-hover);
+    box-shadow: 0 4px 16px rgba(37,99,235,0.28), 0 0 24px rgba(37,99,235,0.08);
+    transform: translateY(-1px);
+  }
+  .email-section-v5 .email-note {
+    grid-column: 1 / -1;
+    text-align: left; margin-top: 10px;
+  }
+
+  /* ═══ FOOTER V5 (lightweight) ═══ */
+  .footer-v5 {
+    border-top: 1px solid var(--line);
+    background: var(--paper-soft);
+    padding: 40px clamp(24px, 4vw, 44px) 32px;
+  }
+  /* Single centred column: no left/right columns means no dead space in the
+     middle (the previous space-between layout left a wide empty gap). */
+  .footer-v5-inner {
+    max-width: 720px; margin: 0 auto;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center;
+  }
+  .footer-v5-brand { max-width: 420px; display: flex; flex-direction: column; align-items: center; }
+  .footer-tagline {
+    font-family: var(--serif); font-size: 12px; color: var(--ink-4);
+    font-style: italic; margin-top: 6px;
+  }
+  .footer-example { margin-top: 10px; font-family: var(--mono); font-size: 11.5px; }
+  .footer-example a { color: var(--accent); text-decoration: none; transition: opacity var(--dur-fast); }
+  .footer-example a:hover { opacity: 0.75; }
+  .footer-v5-meta {
+    font-family: var(--mono); font-size: 11px; color: var(--ink-4);
+    display: flex; flex-direction: column; gap: 6px; align-items: center;
+    width: 100%; margin-top: 24px; padding-top: 20px;
+    border-top: 1px solid var(--line-light);
+  }
+  .footer-v5-meta a { color: var(--ink-3); text-decoration: none; }
+  .footer-v5-meta a:hover { color: var(--accent); }
+
+  /* ═══ DARK FOOTER CTA ═══ */
+  .footer-cta {
+    border-top: 1px solid var(--line); background: var(--surface-dark); color: #EEE;
+  }
+  .footer-cta-inner {
+    max-width: 1160px; margin: 0 auto;
+    padding: clamp(48px, 7vw, 72px) clamp(24px, 4vw, 44px);
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: 36px; align-items: center;
+  }
+  .footer-cta h2 {
+    font-family: var(--serif); font-optical-sizing: auto;
+    font-weight: 440; font-size: clamp(26px, 3.2vw, 36px);
+    line-height: 1.14; letter-spacing: -0.01em;
+  }
+  .footer-cta h2 em { font-style: normal; color: #60A5FA; }
+  .footer-cta .fine {
+    margin-top: 12px; font-size: 13.5px; color: #94A3B8;
+    font-family: var(--serif); font-optical-sizing: auto; font-weight: 340;
+    line-height: 1.54;
+  }
+  .footer-cta .scan-form input {
+    background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12);
+    color: #EEE; border-radius: var(--r-3) 0 0 var(--r-3);
+  }
+  .footer-cta .scan-form input::placeholder { color: #64748B; }
+  .footer-cta .scan-form input:focus {
+    border-color: rgba(96,165,250,0.5);
+    box-shadow: 0 0 0 3px rgba(96,165,250,0.1);
+  }
+  .footer-cta .scan-btn {
+    background: var(--grad-primary); color: #FFF;
+    border-radius: 0 var(--r-3) var(--r-3) 0;
+    font-weight: 700; box-shadow: 0 2px 12px rgba(37,99,235,0.25);
+  }
+  .footer-cta .scan-btn:hover {
+    background: var(--grad-primary-hover);
+    box-shadow: 0 4px 20px rgba(37,99,235,0.35), 0 0 32px rgba(37,99,235,0.12);
+  }
+
+  /* Colophon */
+  .colophon {
+    border-top: 1px solid rgba(255,255,255,0.06); padding: 18px 0;
+    font-size: 11.5px; color: #64748B;
+    display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+    font-family: var(--mono); letter-spacing: 0.01em;
+  }
+  .colophon-inner { max-width: 1160px; margin: 0 auto; padding: 0 clamp(24px, 4vw, 44px); }
+  .colophon a { color: #94A3B8; text-decoration: none; transition: color var(--dur-fast); }
+  .colophon a:hover { color: #E2E8F0; }
+
+  /* ═══ FONT BAR ═══ */
+  .font-bar-v3 {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface-dark); color: #64748B;
+    padding: 11px 28px; font-family: var(--mono); font-size: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 300; letter-spacing: 0.025em;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .font-bar-v3 .hl { color: #60A5FA; font-weight: 600; }
+
+  main { padding-bottom: 48px; }
+
+  /* ═══ RESPONSIVE ═══ */
+  @media (max-width: 920px) {
+    .hero { grid-template-columns: 1fr; gap: 44px; }
+    .hero-right { position: static; }
+    .report-card { max-width: 480px; margin: 0 auto; }
+    .ba-grid { grid-template-columns: 1fr; }
+    .ba-arrow { transform: rotate(90deg); padding: 12px 0; }
+    .step-grid { grid-template-columns: 1fr; }
+    .code-grid { grid-template-columns: 1fr; }
+    .feat-grid { grid-template-columns: 1fr; }
+    .dogfood-inner { grid-template-columns: 1fr; }
+    .trust-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .footer-cta-inner { grid-template-columns: 1fr; }
+    .nav-menu { display: none; }
+    /* narrow screens: keep the octocat, drop the word — the header stays tight */
+    .nav-github-text { display: none; }
+    .nav-link-icon { padding: 6px; }
+  }
+  @media (max-width: 680px) {
+    .pills-strip-inner { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .hero-left { padding-right: 0; }
+    .trust-grid { grid-template-columns: 1fr; }
+    .email-v5-inner { grid-template-columns: 1fr; gap: 20px; }
+    .email-v5-form { max-width: 400px; }
+    .footer-v5-inner { flex-direction: column; gap: 0; }
+    .footer-v5-meta { text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="wordmark">toolfront<em>_</em></a>
+    <ul class="nav-menu">
+      <li><a href="#band" data-i18n="nav.why">Why</a></li>
+      <li><a href="#steps" data-i18n="nav.how">How it works</a></li>
+    </ul>
+    <div class="nav-actions" style="display:flex;align-items:center;gap:10px;">
+    <span class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" id="lang-en">EN</button><button type="button" id="lang-zh">中文</button>
+    </span>
+
+      <a href="https://github.com/wishforge/toolfront" target="_blank" rel="noopener" class="nav-link-icon" aria-label="ToolFront on GitHub — source code" id="nav-github">
+        <!-- GitHub Icon -->
+        <svg class="icon icon-sm" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 1 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        <span class="nav-github-text">GitHub</span>
+      </a>
+      <a href="#scan" class="btn-nav-solid" id="nav-cta" data-i18n="nav.cta">Get started →</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-left">
+    <span class="kicker" data-i18n="hero.kicker">Agent-readiness scan · free · ~5s</span>
+
+    <h1 data-i18n-html="hero.h1">Your next customers send<br><span class="hl-u">AI agents</span>,<br>not browsers.</h1>
+
+    <p class="hero-lede" data-i18n="hero.lede">
+      Agents browse, compare and buy on your site's behalf. If your site is a black box to them,
+      they complete the errand with a competitor. Scan it — get the grade agents see.
+    </p>
+
+    <form class="scan-form" id="scan" onsubmit="return false;">
+      <input type="text" class="scan-input" placeholder="yourdomain.com" aria-label="Domain to scan" data-i18n-ph="hero.ph" data-i18n-aria="hero.aria">
+      <button type="button" class="scan-btn" data-i18n="hero.scanbtn">Scan free</button>
+    </form>
+
+    <div  class="scan-meta" data-i18n-html="hero.meta">no signup · checks <b>WebMCP · structured data · llms.txt · robots · sitemap</b></div>
+  </div>
+
+  <!-- REPORT CARD -->
+  <div class="report-card" aria-label="Sample scan report">
+    <div class="scanline"></div>
+    <div class="rp-bar">
+      <div class="rp-dot"></div><div class="rp-dot"></div><div class="rp-dot"></div>
+      <span class="rp-url">acme-store.com</span>
+    </div>
+    <div class="rp-body">
+      <div class="rp-head">
+        <div class="grade-badge">D</div>
+        <div>
+          <div class="rp-score">37<span class="of">/ 100</span><span class="delta-badge">↑ +28</span></div>
+          <div class="rp-label" data-i18n="rp.label">Agent readiness score</div>
+        </div>
+      </div>
+      <div class="pill-row">
+        <span class="pill p" data-i18n="rp.p1">✓ WebMCP tools</span>
+        <span class="pill m" data-i18n="rp.p2">~ Structured data</span>
+        <span class="pill f" data-i18n="rp.p3">✕ llms.txt</span>
+        <span class="pill p" data-i18n="rp.p4">✓ Crawler policy</span>
+        <span class="pill f" data-i18n="rp.p5">✕ Sitemap / OpenAPI</span>
+      </div>
+      <div  class="rp-fix" data-i18n-html="rp.fix">
+        <b>Fastest win:</b> add <code>/llms.txt</code> — one markdown file so agents introduce you by your own script. <b>+15 pts</b>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero stays a single thesis: headline + the grade card + one action.
+       The "we're a live WebMCP tool" proof now lives only in the dedicated
+       dogfood section below (it was saying the same claim twice). -->
+</section>
+
+<!-- ═══ PILLS STRIP ═══ -->
+<div class="pills-strip">
+  <div class="pills-strip-inner">
+    <span data-i18n-html="strip.1"><b>WebMCP tools</b> — agents operate, not just read</span>
+    <span data-i18n-html="strip.2"><b>Structured data</b> — prices &amp; facts, quotable</span>
+    <span data-i18n-html="strip.3"><b>llms.txt</b> — your own script for AI</span>
+    <span data-i18n-html="strip.4"><b>Sitemap / OpenAPI</b> — the site map for machines</span>
+  </div>
+</div>
+
+<!-- ═══ TRUST GRID (from V2) ═══ -->
+<section class="trust-section">
+  <p class="trust-kicker" data-i18n="trust.kicker">Supported everywhere</p>
+  <h2 data-i18n="trust.h2">Built for the agent ecosystem of tomorrow.</h2>
+  <div class="trust-grid">
+    <div class="trust-item">
+      <div class="trust-icon-wrap">
+        <!-- Chrome/Globe icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/></svg>
+      </div>
+      <h4 data-i18n="trust.1t">Chrome Origin Trial</h4>
+      <p data-i18n="trust.1d">WebMCP native support in Chrome 146+</p>
+      <span class="trust-status status-live" data-i18n="trust.1s">● Active</span>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon-wrap" style="background:var(--good-soft)">
+        <!-- Robot/AI icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8V6a5 5 0 0110 0v2"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg>
+      </div>
+      <h4 data-i18n="trust.2t">OpenAI Site Tools</h4>
+      <p data-i18n="trust.2d">Crawling & tool discovery for GPT agents</p>
+      <span class="trust-status status-live">● Live</span>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon-wrap" style="background:var(--mid-soft)">
+        <!-- Shopping bag icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.68 11.8A2 2 0 0117.36 20H6.64A2 2 0 014.66 17.8L3 6H6z"/><path d="M3 6h18M9 6V4a3 3 0 116 0v2"/></svg>
+      </div>
+      <h4 data-i18n="trust.3t">Shopify Storefronts</h4>
+      <p data-i18n="trust.3d">E-commerce product & cart tools</p>
+      <span class="trust-status status-live">● Live</span>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon-wrap" style="background:var(--info-soft)">
+        <!-- Cloud icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 110-14h.5a5.5 5.5 0 1111 5.5V19a2 2 0 01-2 2v0a2 2 0 01-2-2v-2"/></svg>
+      </div>
+      <h4 data-i18n="trust.4t">Cloudflare Bridge</h4>
+      <p data-i18n="trust.4d">Edge-level agent routing & policy</p>
+      <span class="trust-status status-preview" data-i18n="trust.4s">● Preview</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ BEFORE / AFTER ═══ -->
+<section class="ba-section" id="band">
+  <p class="ba-kicker" data-i18n="ba.kicker">The problem → The fix</p>
+  <h2 data-i18n="ba.h2">Same store. Two very different agents.</h2>
+  <p class="ba-sub" data-i18n="ba.sub">The checks aren't academic — each one decides whether an AI can describe you accurately, quote your price, or finish a checkout.</p>
+  <div class="ba-grid">
+    <div class="ba-card">
+      <div class="ba-tag">
+        <!-- X Icon -->
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="m5 5 6 6m0-6-6 6"/></svg>
+        <span data-i18n="ba.tag1">Today — black box</span>
+      </div>
+      <div class="ba-row"><span data-i18n="ba.r1">AI describes your business</span><span class="ba-no"><!-- Arrow Right --><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10m-3-3 3 3-3 3"/></svg><span data-i18n="ba.r1no">guesses</span></span></div>
+      <div class="ba-row"><span data-i18n="ba.r2">AI quotes your pricing</span><span class="ba-no"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10m-3-3 3 3-3 3"/></svg><span data-i18n="ba.r2no">hallucinated</span></span></div>
+      <div class="ba-row"><span data-i18n="ba.r3">AI completes a purchase</span><span class="ba-no"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10m-3-3 3 3-3 3"/></svg><span data-i18n="ba.r3no">impossible</span></span></div>
+      <div class="ba-row"><span data-i18n="ba.r4">When AI can't finish</span><span class="ba-no"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10m-3-3 3 3-3 3"/></svg><span data-i18n="ba.r4no">→ competitor</span></span></div>
+    </div>
+    <div class="ba-arrow">→</div>
+    <div class="ba-card after">
+      <div class="ba-tag">
+        <!-- Check Icon -->
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="m5 8 2 2 4-4"/></svg>
+        <span data-i18n="ba.tag2">After fixes — glass box</span>
+      </div>
+      <div class="ba-row"><span data-i18n="ba.r1">AI describes your business</span><span class="ba-yes"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10m-3-3 3 3-3 3"/></svg><span data-i18n="ba.r1yes">your script</span></span></div>
+      <div class="ba-row"><span data-i18n="ba.r2">AI quotes your pricing</span><span class="ba-yes"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10m-3-3 3 3-3 3"/></svg><span data-i18n="ba.r2yes">exact facts</span></span></div>
+      <div class="ba-row"><span data-i18n="ba.r3">AI completes a purchase</span><span class="ba-yes"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10m-3-3 3 3-3 3"/></svg><span data-i18n="ba.r3yes">via WebMCP tool</span></span></div>
+      <div class="ba-row"><span>Where the errand ends</span><span class="ba-yes"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h10m-3-3 3 3-3 3"/></svg><span data-i18n="ba.r4yes">→ on your site</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section class="steps-section" id="steps">
+  <h2 data-i18n="steps.h2">From black box to open door.</h2>
+  <p class="steps-sub" data-i18n="steps.sub">No rebuild, no framework migration. You keep your site; agents get a way in.</p>
+  <div class="step-grid">
+    <article class="step-card">
+      <span class="step-n">
+        <!-- Scan Icon -->
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="5"/><path d="M8 5v3l2 1.5"/></svg>
+        STEP 1
+      </span>
+      <h3 data-i18n="step1t">Scan it</h3>
+      <p data-i18n="step1d">See your site exactly how AI agents see it. Get a plain-language score and a prioritized fix list you don't need to be an engineer to follow.</p>
+    </article>
+    <article class="step-card">
+      <span class="step-n">
+        <!-- Generate Icon -->
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 6l5-3 5 3v5l-5 3-5-3V6z"/><path d="M8 3v10"/></svg>
+        STEP 2
+      </span>
+      <h3 data-i18n="step2t">Generate tools</h3>
+      <p data-i18n="step2d">ToolFront writes the machine-readable tool definitions your site is missing — inferred from what you already have. One tag to install, zero rebuild.</p>
+    </article>
+    <article class="step-card">
+      <span class="step-n">
+        <!-- Shield Icon -->
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 2L3 4v3c0 3.5 2 6 5 7 3-1 5-3.5 5-7V4L8 2z"/></svg>
+        STEP 3
+      </span>
+      <h3 data-i18n="step3t">Stay in control</h3>
+      <p data-i18n="step3d">Agents can use your site, but sensitive actions still require human confirmation. You keep the keys — with a full audit trail of every interaction.</p>
+    </article>
+  </div>
+</section>
+
+<!-- ═══ CODE / TECH ═══ -->
+<section class="code-section">
+  <div class="code-text">
+    <p class="kicker" style="margin-bottom:12px;" data-i18n="code.kicker">What we generate</p>
+    <h3 data-i18n-html="code.h3">One line of code.<br>Your site becomes agent-ready.</h3>
+    <p data-i18n="code.p">We generate WebMCP tool definitions, structured data schemas, llms.txt files, and AI crawler policies — all from analyzing your existing frontend. No backend changes needed.</p>
+    <a href="https://github.com/wishforge/toolfront" target="_blank" rel="noopener" class="btn-nav-solid" style="display:inline-flex;font-size:12.5px;padding:12px 26px;" data-i18n="code.btn">View on GitHub →</a>
+  </div>
+  <div class="code-block">
+    <div class="code-hdr">
+      <span class="code-lang">toolfront-generated.js</span>
+      <span>JavaScript · TypeScript</span>
+    </div>
+    <div class="code-pre">
+<pre><span class="cc">// This page registered a live tool: scan_domain</span>
+<span class="ck">document</span>.modelContext.<span class="cf">registerTool</span>({
+  <span class="cp">name</span>: <span class="cs">"add-to-cart"</span>,
+  <span class="cp">description</span>: <span class="cs">"Add a product variant to visitor's cart"</span>,
+  <span class="cp">inputSchema</span>: {
+    <span class="cp">sku</span>: <span class="cs">"string"</span>,
+    <span class="cp">qty</span>: <span class="cs">"number"</span>
+  },
+  <span class="cp">risk</span>: <span class="cs">"low"</span>,   <span class="cc">// auto-confirmed by default</span>
+}, addToCart);
+
+<span class="cc">// Your existing function, reused as-is — no rewrite needed</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FEATURES (SVG Icons) ═══ -->
+<section class="features-section">
+  <h2>Everything an agent needs to use your site.</h2>
+  <div class="feat-grid">
+    <div class="feat-item">
+      <div class="feat-icon">
+        <!-- Wrench/Tool Icon -->
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 9.3l-1.4-1.4c.4-1 .6-2.1.6-3.2 0-3.9-3.1-7-7-7-1.1 0-2.2.2-3.2.6L2.3 2.7C4.1 1.3 6.4.5 9 .5c5.8 0 10.5 4.7 10.5 10.5 0 2.6-.8 4.9-2.2 6.7zM9 13a4 4 0 110-8 4 4 0 010 8z"/></svg>
+      </div>
+      <div class="feat-text"><h4 data-i18n="f1t">WebMCP tool definitions</h4><p data-i18n="f1d">Structured actions agents can call directly — search, add-to-cart, book appointments, subscribe.</p></div>
+    </div>
+    <div class="feat-item">
+      <div class="feat-icon">
+        <!-- Database/Table Icon -->
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="10" cy="5" rx="7" ry="2"/><path d="M3 5v4c0 1.1 3.1 2 7 2s7-.9 7-2V5"/><path d="M3 9v4c0 1.1 3.1 2 7 2s7-.9 7-2V9"/></svg>
+      </div>
+      <div class="feat-text"><h4 data-i18n="f2t">Structured data &amp; schema.org</h4><p data-i18n="f2d">Product catalogs, pricing, availability — machine-readable from day one without manual markup.</p></div>
+    </div>
+    <div class="feat-item">
+      <div class="feat-icon">
+        <!-- File/Document Icon -->
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h8l4 4v12a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M14 2v4h4M8 8h4M8 12h4"/></svg>
+      </div>
+      <div class="feat-text"><h4 data-i18n="f3t">llms.txt / robots-for-ai</h4><p data-i18n="f3d">Tell agents what your site does in their own language. One file, instant understanding.</p></div>
+    </div>
+    <div class="feat-item">
+      <div class="feat-icon">
+        <!-- Robot/AI Icon -->
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="14" height="10" rx="2"/><circle cx="7" cy="12" r="1"/><circle cx="13" cy="12" r="1"/><path d="M7 7V5a3 3 0 016 0v2"/><line x1="10" y1="2" x2="10" y2="4"/></svg>
+      </div>
+      <div class="feat-text"><h4 data-i18n="f4t">AI crawler policy</h4><p data-i18n="f4d">Control which agents access what. Block bad actors, welcome verified partners.</p></div>
+    </div>
+    <div class="feat-item">
+      <div class="feat-icon">
+        <!-- Map/Sitemap Icon -->
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 17 10 3 17 17"/><path d="M10 3v14"/><path d="M3 17h14"/><circle cx="10" cy="12" r="2"/></svg>
+      </div>
+      <div class="feat-text"><h4 data-i18n="f5t">Sitemap optimization</h4><p data-i18n="f5d">Ensure agents discover every page that matters. No orphaned content, no missed opportunities.</p></div>
+    </div>
+    <div class="feat-item">
+      <div class="feat-icon">
+        <!-- Chart/Score Icon -->
+        <svg class="icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17V9l4 4 3-3 3 3 4-4v8H3z"/><path d="M3 3h14"/></svg>
+      </div>
+      <div class="feat-text"><h4 data-i18n="f6t">Readiness score &amp; tracking</h4><p data-i18n="f6d">A single number showing how agent-friendly your site is. Track improvement over time with history.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DOGFOOD ═══ -->
+<section class="dogfood-section">
+  <p class="kicker" style="margin-bottom:12px;" data-i18n="dog.kicker">We eat our own cooking</p>
+  <div class="dogfood-inner">
+    <div class="dogfood-content">
+      <h2 data-i18n="dog.h2">This page is itself a WebMCP tool.</h2>
+      <h3 data-i18n-html="dog.h3">This page registered a live tool: <code>scan_domain</code></h3>
+      <p data-i18n-html="dog.p">If you're viewing this in a WebMCP-enabled browser (Chrome 146+ Origin Trial), an AI agent on this page can call <code style="font-family:var(--mono);background:var(--good-soft);color:var(--good);padding:2px 7px;border-radius:4px;font-size:13px;">scan_domain</code> right now and scan any website — same as the form above. That's the whole idea: your pages become places agents can <em>work</em>, not just read.</p>
+    </div>
+    <div class="dogfood-card">
+      <div class="dogfood-card-hdr">
+        <span class="dogfood-card-label" data-i18n="dog.cardlabel">Live tool status</span>
+        <span class="dogfood-live-badge standby" id="dogfood-status">● STANDBY</span>
+      </div>
+      <div class="dogfood-fn-name">scan_domain(domain)</div>
+      <p class="dogfood-fn-desc" data-i18n="dog.fndesc">Scans any domain for AI agent readiness. Returns structured score + fix list. No auth required for public sites.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ EMAIL SIGNUP (V5 lightweight) ═══ -->
+<section class="email-section-v5">
+  <div class="email-v5-inner">
+    <div class="email-v5-text">
+      <p class="email-v5-kicker" data-i18n="email.kicker">Stay updated</p>
+      <h2 data-i18n="email.h2">No spam — just launch notes &amp; WebMCP spec changes.</h2>
+    </div>
+    <form class="email-v5-form" onsubmit="return false;">
+      <input type="email" class="email-input" placeholder="you@company.com" aria-label="Email for updates" data-i18n-ph="email.ph" data-i18n-aria="email.aria">
+      <button type="button" class="email-btn" data-i18n="email.btn">Notify me →</button>
+    </form>
+    <p class="email-note">One confirmation email, then only when it matters. <a href="#">Privacy policy →</a></p>
+  </div>
+</section>
+
+</main>
+
+<!-- ═══ FOOTER (V5 light) ═══ -->
+<footer class="footer-v5">
+  <div class="footer-v5-inner">
+    <div class="footer-v5-brand">
+      <a href="/" class="wordmark" style="color:var(--ink-2)">toolfront<em style="color:var(--accent)">_</em></a>
+      <p class="footer-tagline" data-i18n="foot.tagline">Built on the open WebMCP proposal.</p>
+      <p class="footer-example"><a href="/report?domain=vercel.com" data-i18n="foot.example">See an example report →</a></p>
+    </div>
+    <!-- One link row only: the V5 mockup also had a second links column whose
+         items duplicated this row (Scanner info / Security / GitHub twice). -->
+    <div class="footer-v5-meta">
+      <span data-i18n="foot.copy">&copy; 2026 ToolFront — Free &amp; Open</span>
+      <span><a href="/privacy">Privacy</a> · <a href="/security" data-i18n="foot.security">Security</a> · <a href="/terms">Terms</a> · <a href="/bot" data-i18n="foot.scanner">Scanner info</a> · <a href="https://github.com/wishforge/toolfront" target="_blank" rel="noopener">GitHub</a></span>
+      <span><a href="mailto:privacy@toolfront.dev">privacy@toolfront.dev</a></span>
+    </div>
+  </div>
+</footer>
+
+
+<script>
+  var LANGS = { en: {
+  "nav.why": "Why",
+  "nav.how": "How it works",
+  "nav.cta": "Get started →",
+  "hero.kicker": "Agent-readiness scan · free · ~5s",
+  "hero.lede": "Agents browse, compare and buy on your site's behalf. If your site is a black box to them, they complete the errand with a competitor. Scan it — get the grade agents see.",
+  "hero.scanbtn": "Scan free",
+  "hero.ph": "yourdomain.com",
+  "hero.aria": "Domain to scan",
+  "rp.label": "Agent readiness score",
+  "rp.p1": "✓ WebMCP tools",
+  "rp.p2": "~ Structured data",
+  "rp.p3": "✕ llms.txt",
+  "rp.p4": "✓ Crawler policy",
+  "rp.p5": "✕ Sitemap / OpenAPI",
+  "trust.kicker": "Supported everywhere",
+  "trust.h2": "Built for the agent ecosystem of tomorrow.",
+  "trust.1t": "Chrome Origin Trial",
+  "trust.1d": "WebMCP native support in Chrome 146+",
+  "trust.1s": "● Active",
+  "trust.2t": "OpenAI Site Tools",
+  "trust.2d": "Crawling & tool discovery for GPT agents",
+  "trust.3t": "Shopify Storefronts",
+  "trust.3d": "E-commerce product & cart tools",
+  "trust.4t": "Cloudflare Bridge",
+  "trust.4d": "Edge-level agent routing & policy",
+  "trust.4s": "● Preview",
+  "ba.kicker": "The problem → The fix",
+  "ba.h2": "Same store. Two very different agents.",
+  "ba.sub": "The checks aren't academic — each one decides whether an AI can describe you accurately, quote your price, or finish a checkout.",
+  "ba.tag1": "Today — black box",
+  "ba.tag2": "After fixes — glass box",
+  "ba.r1": "AI describes your business",
+  "ba.r2": "AI quotes your pricing",
+  "ba.r3": "AI completes a purchase",
+  "ba.r4": "When AI can't finish",
+  "ba.r1no": "guesses",
+  "ba.r2no": "hallucinated",
+  "ba.r3no": "impossible",
+  "ba.r4no": "→ competitor",
+  "ba.r1yes": "your script",
+  "ba.r2yes": "exact facts",
+  "ba.r3yes": "via WebMCP tool",
+  "ba.r4yes": "→ on your site",
+  "steps.h2": "From black box to open door.",
+  "steps.sub": "No rebuild, no framework migration. You keep your site; agents get a way in.",
+  "step1t": "Scan it",
+  "step1d": "See your site exactly how AI agents see it. Get a plain-language score and a prioritized fix list you don't need to be an engineer to follow.",
+  "step2t": "Generate tools",
+  "step2d": "ToolFront writes the machine-readable tool definitions your site is missing — inferred from what you already have. One tag to install, zero rebuild.",
+  "step3t": "Stay in control",
+  "step3d": "Agents can use your site, but sensitive actions still require human confirmation. You keep the keys — with a full audit trail of every interaction.",
+  "code.kicker": "What we generate",
+  "code.p": "We generate WebMCP tool definitions, structured data schemas, llms.txt files, and AI crawler policies — all from analyzing your existing frontend. No backend changes needed.",
+  "code.btn": "View on GitHub →",
+  "f1t": "WebMCP tool definitions",
+  "f1d": "Structured actions agents can call directly — search, add-to-cart, book appointments, subscriptions.",
+  "f2t": "Structured data & schema.org",
+  "f2d": "Product catalogs, pricing, availability — machine-readable from day one without manual markup work.",
+  "f3t": "llms.txt / robots-for-ai",
+  "f3d": "Tell agents what your site does in their own language. One file, instant understanding.",
+  "f4t": "AI crawler policy",
+  "f4d": "Control which agents access what. Block bad actors, welcome verified partners.",
+  "f5t": "Sitemap optimization",
+  "f5d": "Ensure agents discover every page that matters. No orphaned content, no missed opportunities.",
+  "f6t": "Readiness score & tracking",
+  "f6d": "A single number showing how agent-friendly your site is. Track improvement over time with scheduled scans.",
+  "dog.kicker": "We eat our own cooking",
+  "dog.h2": "This page is itself a WebMCP tool.",
+  "dog.cardlabel": "Live tool status",
+  "dog.fndesc": "Scans any domain for AI agent readiness. Returns structured score + fix list. No auth required for public sites.",
+  "dog.standby": "● STANDBY",
+  "dog.active": "● ACTIVE",
+  "email.kicker": "Stay updated",
+  "email.h2": "No spam — just launch notes & WebMCP spec changes.",
+  "email.btn": "Notify me →",
+  "email.ph": "you@company.com",
+  "email.aria": "Email for updates",
+  "email.err": "Enter a valid email address.",
+  "email.ok": "Check your inbox — we sent a confirmation link.",
+  "foot.tagline": "Built on the open WebMCP proposal.",
+  "foot.example": "See an example report →",
+  "foot.scanner": "Scanner info",
+  "foot.security": "Security",
+  "foot.copy": "© 2026 ToolFront — Free & Open",
+  "doc.title": "ToolFront — Is your site ready for AI agents?",
+  "hero.h1": "Your next customers send<br><span class=\"hl-u\">AI agents</span>,<br>not browsers.",
+  "hero.meta": "no signup · checks <b>WebMCP · structured data · llms.txt · robots · sitemap</b>",
+  "rp.fix": "<b>Fastest win:</b> add <code>/llms.txt</code> — one markdown file so agents introduce you by your own script. <b>+15 pts</b>",
+  "code.h3": "One line of code.<br>Your site becomes agent-ready.",
+  "dog.h3": "This page registered a live tool: <code>scan_domain</code>",
+  "dog.p": "If you're viewing this in a WebMCP-enabled browser (Chrome 146+ Origin Trial), an AI agent on this page can call <code style=\"font-family:var(--mono);background:var(--good-soft);color:var(--good);padding:2px 7px;border-radius:4px;font-size:13px;\">scan_domain</code> right now and scan any website — same as the form above. That's the whole idea: your pages become places agents can <em>work</em>, not just read.",
+  "strip.1": "<b>WebMCP tools</b> — agents operate, not just read",
+  "strip.2": "<b>Structured data</b> — prices &amp; facts, quotable",
+  "strip.3": "<b>llms.txt</b> — your own script for AI",
+  "strip.4": "<b>Sitemap / OpenAPI</b> — the site map for machines"
+}, zh: {
+  "nav.why": "为什么",
+  "nav.how": "工作原理",
+  "nav.cta": "立即开始 →",
+  "hero.kicker": "智能体就绪度扫描 · 免费 · 约 5 秒",
+  "hero.lede": "智能体替你的客户浏览、比价、下单。如果你的网站对它们是黑盒，它们会转身去竞争对手那里把事办完。扫一下——拿到智能体眼中的分数。",
+  "hero.scanbtn": "免费扫描",
+  "hero.ph": "你的域名.com",
+  "hero.aria": "要扫描的域名",
+  "rp.label": "智能体就绪度评分",
+  "rp.p1": "✓ WebMCP 工具",
+  "rp.p2": "~ 结构化数据",
+  "rp.p3": "✕ llms.txt",
+  "rp.p4": "✓ 爬虫政策",
+  "rp.p5": "✕ Sitemap / OpenAPI",
+  "trust.kicker": "生态全面支持",
+  "trust.h2": "为明天的智能体生态而建。",
+  "trust.1t": "Chrome Origin Trial",
+  "trust.1d": "Chrome 146+ 原生支持 WebMCP",
+  "trust.1s": "● 已生效",
+  "trust.2t": "OpenAI 站点工具",
+  "trust.2d": "面向 GPT 智能体的抓取与工具发现",
+  "trust.3t": "Shopify 店铺前台",
+  "trust.3d": "电商商品与购物车工具",
+  "trust.4t": "Cloudflare 桥接",
+  "trust.4d": "边缘层的智能体路由与策略",
+  "trust.4s": "● 预览",
+  "ba.kicker": "问题 → 解法",
+  "ba.h2": "同一家店，两种截然不同的智能体。",
+  "ba.sub": "这些检查不是纸上谈兵——每一项都决定 AI 能否准确描述你、正确引用你的价格、顺利完成结账。",
+  "ba.tag1": "今天——黑盒",
+  "ba.tag2": "修复后——玻璃盒",
+  "ba.r1": "AI 如何描述你的业务",
+  "ba.r2": "AI 如何引用你的价格",
+  "ba.r3": "AI 完成一次购买",
+  "ba.r4": "AI 办不成时",
+  "ba.r1no": "靠猜",
+  "ba.r2no": "编造",
+  "ba.r3no": "做不到",
+  "ba.r4no": "→ 转向竞争对手",
+  "ba.r1yes": "用你的剧本",
+  "ba.r2yes": "准确事实",
+  "ba.r3yes": "通过 WebMCP 工具",
+  "ba.r4yes": "→ 落在你的站内",
+  "steps.h2": "从黑盒，到敞开的门。",
+  "steps.sub": "不用重构、不用换框架。网站还是你的，智能体多了一条进来的路。",
+  "step1t": "扫一扫",
+  "step1d": "看看智能体眼中的你的网站：一句人话的分数，加上一份不需要工程师背景也能照着做的改进清单。",
+  "step2t": "生成工具",
+  "step2d": "ToolFront 依据你已有的能力，自动生成网站缺失的机器可读工具定义。一行代码安装，零重构。",
+  "step3t": "保持掌控",
+  "step3d": "智能体能使用你的网站，但敏感操作仍需人工确认。钥匙始终在你手里，每次交互全程留痕。",
+  "code.kicker": "我们生成什么",
+  "code.p": "我们生成 WebMCP 工具定义、结构化数据 schema、llms.txt 文件与 AI 爬虫策略——全部基于对你现有前端的分析，后端零改动。",
+  "code.btn": "在 GitHub 上查看 →",
+  "f1t": "WebMCP 工具定义",
+  "f1d": "智能体可直接调用的结构化动作——搜索、加购、预约、订阅。",
+  "f2t": "结构化数据 & schema.org",
+  "f2d": "商品目录、价格、库存状态——开箱即可被机器读取，不用手写一堆标记。",
+  "f3t": "llms.txt / 面向 AI 的 robots",
+  "f3d": "用智能体的语言说明你的网站是干什么的。一个文件，立刻被理解。",
+  "f4t": "AI 爬虫政策",
+  "f4d": "掌控哪些智能体能访问什么。挡住恶意抓取，欢迎已验证的伙伴。",
+  "f5t": "站点地图优化",
+  "f5d": "确保智能体能发现每一个重要页面。没有孤岛内容，不错过任何机会。",
+  "f6t": "就绪度评分与追踪",
+  "f6d": "一个数字说明你的网站对智能体有多友好，配合定时扫描追踪改善曲线。",
+  "dog.kicker": "我们吃自己的狗粮",
+  "dog.h2": "这个页面本身就是一个 WebMCP 工具。",
+  "dog.cardlabel": "工具状态",
+  "dog.fndesc": "扫描任意域名的智能体就绪度，返回结构化分数与修复清单。公开站点无需鉴权。",
+  "dog.standby": "● 待命",
+  "dog.active": "● 已生效",
+  "email.kicker": "保持更新",
+  "email.h2": "不发垃圾邮件——只有发布动态和 WebMCP 规范变更。",
+  "email.btn": "通知我 →",
+  "email.ph": "你的邮箱@公司.com",
+  "email.aria": "接收更新的邮箱",
+  "email.err": "请输入有效的邮箱地址。",
+  "email.ok": "请查收邮箱——我们刚发了一封确认邮件。",
+  "foot.tagline": "基于开放的 WebMCP 提案构建。",
+  "foot.example": "看一份报告样例 →",
+  "foot.scanner": "扫描器说明",
+  "foot.security": "安全",
+  "foot.copy": "© 2026 ToolFront — 自由开放",
+  "doc.title": "ToolFront — 你的网站准备好迎接 AI 智能体了吗？",
+  "hero.h1": "你的下一批客户派来的<br>不是浏览器，<br>是<span class=\"hl-u\">AI 智能体</span>。",
+  "hero.meta": "无需注册 · 检测 <b>WebMCP · 结构化数据 · llms.txt · robots · sitemap</b>",
+  "rp.fix": "<b>最快拿分：</b>加一个 <code>/llms.txt</code>——一份 markdown，让智能体按你的剧本介绍你。<b>+15 分</b>",
+  "code.h3": "一行代码。<br>你的网站就对智能体敞开了。",
+  "dog.h3": "本页已注册一个真实工具：<code>scan_domain</code>",
+  "dog.p": "如果你用的是支持 WebMCP 的浏览器（Chrome 146+ Origin Trial），本页上的 AI 智能体现在就能调用 <code style=\"font-family:var(--mono);background:var(--good-soft);color:var(--good);padding:2px 7px;border-radius:4px;font-size:13px;\">scan_domain</code> 扫描任意网站——和上面的表单完全一样。这就是全部理念：让你的页面成为智能体能<em>干活</em>的地方，而不只是能读的地方。",
+  "strip.1": "<span class=\"strip-dot\" style=\"background:var(--good)\"></span><b>WebMCP 工具</b>——智能体能操作，不只是读取",
+  "strip.2": "<span class=\"strip-dot\" style=\"background:var(--mid)\"></span><b>结构化数据</b>——价格与事实，可被准确引用",
+  "strip.3": "<span class=\"strip-dot\" style=\"background:var(--bad)\"></span><b>llms.txt</b>——你为 AI 写的说明书",
+  "strip.4": "<span class=\"strip-dot\" style=\"background:var(--accent)\"></span><b>Sitemap / OpenAPI</b>——给机器的网站地图"
+} };
+
+  (function () {
+    var lang = 'en';
+    try { lang = localStorage.getItem('tf-lang') || 'en'; } catch (_) {}
+    try {
+      var qp = new URLSearchParams(location.search).get('lang');
+      if (qp === 'zh') lang = 'zh';
+      if (qp === 'en') lang = 'en';
+    } catch (_) {}
+    if (!Object.prototype.hasOwnProperty.call(LANGS, lang)) lang = 'en';
+    function t(k) { return (LANGS[lang] && LANGS[lang][k]) || LANGS.en[k] || k; }
+
+    function applyLang() {
+      document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+      document.title = t('doc.title');
+      // Text: textContent only. HTML: from the static LANGS dictionary (never
+      // from request data) — this is the one trusted innerHTML outlet.
+      document.querySelectorAll('[data-i18n]').forEach(function (e) { e.textContent = t(e.getAttribute('data-i18n')); });
+      document.querySelectorAll('[data-i18n-html]').forEach(function (e) { e.innerHTML = t(e.getAttribute('data-i18n-html')); });
+      document.querySelectorAll('[data-i18n-ph]').forEach(function (e) { e.placeholder = t(e.getAttribute('data-i18n-ph')); });
+      document.querySelectorAll('[data-i18n-aria]').forEach(function (e) { e.setAttribute('aria-label', t(e.getAttribute('data-i18n-aria'))); });
+      var en = document.getElementById('lang-en'), zh = document.getElementById('lang-zh');
+      if (en) en.classList.toggle('on', lang === 'en');
+      if (zh) zh.classList.toggle('on', lang === 'zh');
+      // example-report link keeps the chosen language
+      var ex = document.querySelector('[data-i18n="foot.example"]');
+      if (ex) ex.href = '/report?domain=vercel.com&lang=' + lang;
+    }
+    function setLang(l) {
+      lang = l;
+      try { localStorage.setItem('tf-lang', l); } catch (_) {}
+      applyLang();
+    }
+    var len = document.getElementById('lang-en'), lzh = document.getElementById('lang-zh');
+    if (len) len.addEventListener('click', function () { setLang('en'); });
+    if (lzh) lzh.addEventListener('click', function () { setLang('zh'); });
+
+    function goScan() {
+      var input = document.querySelector('.scan-input');
+      var v = (input.value || '').trim().replace(/[^a-zA-Z0-9.-]/g, '');
+      if (!v) { input.focus(); return; }
+      location.href = '/report?domain=' + encodeURIComponent(v) + '&lang=' + lang;
+    }
+    var btn = document.querySelector('.scan-btn');
+    var input = document.querySelector('.scan-input');
+    if (btn) btn.addEventListener('click', goScan);
+    if (input) input.addEventListener('keydown', function (e) { if (e.key === 'Enter') goScan(); });
+    var cta = document.getElementById('nav-cta');
+    if (cta) cta.addEventListener('click', function (e) {
+      var el = document.getElementById('scan');
+      if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); if (input) input.focus(); }
+    });
+
+    var eBtn = document.querySelector('.email-btn');
+    var eIn = document.querySelector('.email-input');
+    var form = document.querySelector('.email-v5-form');
+    function note(msg, bad) {
+      if (!form) return;
+      var old = form.parentNode.querySelector('.email-note');
+      if (old) old.remove();
+      var n = document.createElement('div');
+      n.className = 'email-note';
+      n.textContent = msg;
+      n.style.cssText = 'margin-top:10px;font-family:var(--mono);font-size:12px;color:' + (bad ? 'var(--bad)' : 'var(--good)');
+      form.parentNode.appendChild(n);
+    }
+    function join() {
+      var v = (eIn.value || '').trim();
+      if (!v || v.indexOf('@') < 1) { note(t('email.err'), true); eIn.focus(); return; }
+      fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: v, domain: null }),
+      }).catch(function () {});
+      note(t('email.ok'), false);
+      eIn.value = '';
+    }
+    if (eBtn) eBtn.addEventListener('click', join);
+    if (eIn) eIn.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); join(); } });
+
+    try {
+      var mc = document.modelContext || navigator.modelContext;
+      if (mc && typeof mc.addTool === 'function') {
+        mc.addTool({
+          name: 'scan_domain',
+          description: 'Scan any public website for AI-agent readiness. Returns a 0-100 score with per-check results (WebMCP tools, structured data, llms.txt, AI crawler policy, machine-readable surfaces) and improvement suggestions.',
+          inputSchema: { type: 'object', properties: { domain: { type: 'string', description: 'The domain to scan, e.g. example.com' } }, required: ['domain'] },
+          readOnlyHint: true,
+          execute: function (args) {
+            return fetch('/api/scan?domain=' + encodeURIComponent(args.domain))
+              .then(function (r) { return r.json(); })
+              .then(function (report) {
+                return JSON.stringify({ domain: report.domain, score: report.score, grade: report.grade, verdict: report.verdict, checks: (report.checks || []).map(function (c) { return { label: c.label, status: c.status, points: c.points, max: c.max }; }) }, null, 2);
+              });
+          },
+        }).then(function () { setDogfood(true); }).catch(function () { setDogfood(false); });
+      } else {
+        setDogfood(false);
+      }
+    } catch (_) { setDogfood(false); }
+
+    function setDogfood(live) {
+      var badge = document.getElementById('dogfood-status');
+      if (!badge) return;
+      badge.classList.toggle('standby', !live);
+      badge.textContent = live ? t('dog.active') : t('dog.standby');
+    }
+
+    applyLang();
+    // re-render the WebMCP badge when the language changes
+    if (len) len.addEventListener('click', function () { setDogfood(document.getElementById('dogfood-status').textContent.indexOf('ACTIVE') >= 0); });
+    if (lzh) lzh.addEventListener('click', function () { setDogfood(document.getElementById('dogfood-status').textContent.indexOf('ACTIVE') >= 0); });
+  })();
+</script>
+
+</body>
+</html>

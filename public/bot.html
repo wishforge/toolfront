@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToolFront Scanner — bot information / 爬虫说明</title>
+<meta name="description" content="What ToolFront-Scanner requests, how often, and how to opt out.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23FFFFFF'/%3E%3Cpath d='M10 44 L10 20 L26 20 M10 32 L22 32' stroke='%230C1222' stroke-width='6' fill='none'/%3E%3Cpath d='M38 44 L54 44 M46 20 L46 44' stroke='%232563EB' stroke-width='6' fill='none'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+  /* V5 tokens (design-system-v5.md): cool navy ink + electric blue accent + warm paper.
+     V5 aliases (--paper/--accent/--good/--line/--serif) are declared too, so future V5
+     components can be dropped into these pages without re-mapping. */
+  :root { --bg:#FAFBFC; --bg-soft:#F1F4F8; --ink:#0C1222; --ink-soft:#374151; --ink-faint:#6B7280; --green:#059669; --blue:#2563EB; --border:#E2E6EE; --sans:"Space Grotesk","Noto Sans SC",sans-serif; --serif:"Source Serif 4","Noto Serif SC",serif; --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace; --paper:#FAFBFC; --paper-soft:#F1F4F8; --accent:#2563EB; --accent-soft:#EFF6FF; --good:#059669; --good-soft:#ECFDF5; --line:#E2E6EE; --line-light:#F0F2F5; --r-1:4px; --r-2:8px; --r-3:12px; --r-4:16px; --r-full:9999px; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--ink); font-family:var(--serif); font-optical-sizing:auto; text-rendering:optimizeLegibility;
+         font-size:15.5px; font-weight:340; line-height:1.75; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:var(--r-1); }
+  .frame { max-width: 760px; margin: 0 auto; padding: 0 clamp(20px,5vw,48px) 72px; }
+  header { padding: 22px 0 8px; display:flex; justify-content:space-between; align-items:center; }
+  .wordmark { font-family:var(--mono); font-weight:700; font-size:17px; text-decoration:none; color:var(--ink); }
+  /* V5 wordmark signature: the trailing underscore is electric blue with an underline */
+  .wordmark .u { color:var(--accent); position:relative; }
+  .wordmark .u::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px; background:var(--accent); border-radius:1px; opacity:0.5; }
+  .zh { display: none; }
+  body.lang-zh .en { display:none; }
+  body.lang-zh .zh { display:block; }
+  .lang-switch { display:inline-flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; }
+  .lang-switch button { border:0; cursor:pointer; background:transparent; font-family:var(--sans); font-size:12px; font-weight:600; color:var(--ink-faint); padding:5px 12px; transition:background .15s ease, color .15s ease; }
+  .lang-switch button.on { background:var(--ink); color:#fff; }
+  .lang-switch button:not(.on):hover { color:var(--ink); background:var(--bg-soft); }
+  .i18n-zh { display:none; }
+  body.lang-zh .i18n-zh { display:inline; }
+  body.lang-zh .i18n-en { display:none; }
+  h1 { font-family:var(--serif); font-optical-sizing:auto; font-size:clamp(26px, 4vw, 36px); font-weight:430; letter-spacing:-0.02em; margin:34px 0 6px; }
+  .meta { color: var(--ink-faint); font-size: 13px; margin-bottom: 34px; }
+  h2 { font-family:var(--serif); font-optical-sizing:auto; font-size:18px; font-weight:600; letter-spacing:-0.01em; margin:34px 0 8px; }
+  p, li { color: var(--ink-soft); }
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { margin-bottom: 6px; }
+  code { font-family: var(--mono); font-size: 13px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; color: var(--ink); }
+  pre { font-family: var(--mono); font-size: 13px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 10px 0; line-height: 1.6; }
+  footer { border-top: 1px solid var(--border); margin-top: 48px; padding-top: 20px; font-size: 12.5px; color: var(--ink-faint); }
+  a { color: var(--blue); }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <header>
+    <a class="wordmark" href="/">toolfront<span class="u">_</span></a>
+    <div class="lang-switch" role="group" aria-label="Language / 语言">
+      <button type="button" data-lang="en">English</button>
+      <button type="button" data-lang="zh">简体中文</button>
+    </div>
+  </header>
+
+  <div class="en">
+    <h1>About ToolFront-Scanner</h1>
+    <p class="meta">User-Agent: <code>Mozilla/5.0-compatible · ToolFront-Scanner/0.3 (+https://toolfront.dev/bot)</code></p>
+
+    <h2>Who we are</h2>
+    <p>ToolFront is a website agent-readiness scanner operated by an independent developer (<a href="https://toolfront.dev">toolfront.dev</a>). Our scanner, <strong>ToolFront-Scanner</strong>, fetches a handful of <strong>publicly accessible files</strong> from domains that a visitor explicitly submits for a free scan. We are not a crawler: we never follow links, never index content, and never scan a domain nobody asked us to scan.</p>
+
+    <h2>What we request</h2>
+    <p>For each submitted domain, at most these five public paths, once per scan:</p>
+    <ul>
+      <li><code>/</code> (homepage HTML)</li>
+      <li><code>/robots.txt</code></li>
+      <li><code>/llms.txt</code></li>
+      <li><code>/sitemap.xml</code></li>
+      <li><code>/openapi.json</code></li>
+    </ul>
+    <p>Requests come from Cloudflare Workers (datacenter IPs) with the User-Agent shown above. We do not execute JavaScript, set cookies, or submit any forms.</p>
+
+    <h2>How often</h2>
+    <p>Only when a scan is requested. Results are cached for up to 24 hours; repeat scans of the same domain within that window do not touch your server.</p>
+
+    <h2>How to opt out</h2>
+    <p>Add this to your <code>robots.txt</code> — our scanner honors an explicit ban on its own name before any other request is scored:</p>
+    <pre>User-agent: ToolFront-Scanner
+Disallow: /</pre>
+    <p>A wildcard <code>User-agent: *</code> block is <strong>not</strong> treated as an opt-out for the one-shot readiness probe (we fetch 5 public files, not crawl). If you want us fully out regardless, use the rule above, or email <a href="mailto:privacy@toolfront.dev">privacy@toolfront.dev</a>.</p>
+
+    <h2>Seeing a "blocked" result?</h2>
+    <p>If your bot protection (e.g. Cloudflare challenge pages) intercepts our scanner, the report says so honestly instead of scoring your site as a failure. The same wall usually stops AI agents — if that is not your intent, consider allowing verified automated readers.</p>
+
+    <h2>Contact</h2>
+    <p>Questions or block requests: <a href="mailto:privacy@toolfront.dev">privacy@toolfront.dev</a>. See also our <a href="/privacy">privacy policy</a>.</p>
+  </div>
+
+  <div class="zh">
+    <h1>关于 ToolFront-Scanner</h1>
+    <p class="meta">User-Agent：<code>Mozilla/5.0-compatible · ToolFront-Scanner/0.3 (+https://toolfront.dev/bot)</code></p>
+
+    <h2>我们是谁</h2>
+    <p>ToolFront 是一个网站 Agent 就绪度扫描器（<a href="https://toolfront.dev">toolfront.dev</a>）。我们的爬虫 <strong>ToolFront-Scanner</strong> 只在访客<strong>主动提交某个域名</strong>进行免费扫描时，抓取该域名的少量<strong>公开可访问文件</strong>。我们不是爬虫：不追踪链接、不索引内容、绝不扫描没有人提交过的域名。</p>
+
+    <h2>我们请求什么</h2>
+    <p>对每个被提交的域名，每次扫描最多请求以下 5 个公开路径：</p>
+    <ul>
+      <li><code>/</code>（首页 HTML）</li>
+      <li><code>/robots.txt</code></li>
+      <li><code>/llms.txt</code></li>
+      <li><code>/sitemap.xml</code></li>
+      <li><code>/openapi.json</code></li>
+    </ul>
+    <p>请求来自 Cloudflare Workers（数据中心 IP），User-Agent 如上所示。我们不执行 JavaScript、不设置 Cookie、不提交任何表单。</p>
+
+    <h2>频率</h2>
+    <p>仅在有扫描请求时访问。扫描结果最长缓存 24 小时；缓存窗口内对同一域名的重复扫描不会触达你的服务器。</p>
+
+    <h2>如何退出</h2>
+    <p>在 <code>robots.txt</code> 中加入以下规则——我们的扫描器在执行任何其他请求前，会优先遵守针对自身名称的明确禁令：</p>
+    <pre>User-agent: ToolFront-Scanner
+Disallow: /</pre>
+    <p>通配符 <code>User-agent: *</code> 的封禁<strong>不会</strong>被视为对本工具的退出（我们只抓取 5 个公开文件，不进行爬取）。如需完全屏蔽，请使用上面的规则，或发邮件至 <a href="mailto:privacy@toolfront.dev">privacy@toolfront.dev</a>。</p>
+
+    <h2>看到「被拦截」结果？</h2>
+    <p>如果你的 bot 防护（如 Cloudflare 挑战页）拦截了我们的扫描器，报告会如实说明，而不是把你的站点判为不及格。同一道墙通常也会挡住 AI agent——如果这不是你的本意，建议放行经验证的自动化读取方。</p>
+
+    <h2>联系方式</h2>
+    <p>疑问或屏蔽请求：<a href="mailto:privacy@toolfront.dev">privacy@toolfront.dev</a>。另见<a href="/privacy">隐私政策</a>。</p>
+  </div>
+
+  <footer>
+    © 2026 ToolFront · <a href="/">toolfront.dev</a> · <a href="/privacy"><span class="i18n-en">Privacy</span><span class="i18n-zh">隐私政策</span></a> · <a href="/security"><span class="i18n-en">Security</span><span class="i18n-zh">安全</span></a> · privacy@toolfront.dev
+  </footer>
+
+</div>
+<script>
+  (function () {
+    var body = document.body;
+    var btns = document.querySelectorAll('.lang-switch button');
+    function setLang(zh) {
+      body.classList.toggle('lang-zh', zh);
+      try { localStorage.setItem('tf-lang', zh ? 'zh' : 'en'); } catch (_) {}
+      btns.forEach(function (b) { b.classList.toggle('on', (b.dataset.lang === 'zh') === zh); });
+    }
+    var saved = 'en';
+    try { saved = localStorage.getItem('tf-lang') || 'en'; } catch (_) {}
+    setLang(saved === 'zh');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () { setLang(b.dataset.lang === 'zh'); });
+    });
+  })();
+</script>
+</body>
+</html>

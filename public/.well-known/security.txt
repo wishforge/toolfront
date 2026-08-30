@@ -1,0 +1,5 @@
+Contact: mailto:security@toolfront.dev
+Expires: 2027-08-29T00:00:00.000Z
+Preferred-Languages: en, zh
+Canonical: https://toolfront.dev/.well-known/security.txt
+Policy: https://toolfront.dev/security

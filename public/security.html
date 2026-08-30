@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToolFront — Security / Vulnerability Disclosure</title>
+<meta name="description" content="How to report a security issue to ToolFront, and how we respond.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23FFFFFF'/%3E%3Cpath d='M10 44 L10 20 L26 20 M10 32 L22 32' stroke='%230C1222' stroke-width='6' fill='none'/%3E%3Cpath d='M38 44 L54 44 M46 20 L46 44' stroke='%232563EB' stroke-width='6' fill='none'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+  /* V5 tokens (design-system-v5.md): cool navy ink + electric blue accent + warm paper.
+     V5 aliases (--paper/--accent/--good/--line/--serif) are declared too, so future V5
+     components can be dropped into these pages without re-mapping. */
+  :root { --bg:#FAFBFC; --bg-soft:#F1F4F8; --ink:#0C1222; --ink-soft:#374151; --ink-faint:#6B7280; --green:#059669; --blue:#2563EB; --border:#E2E6EE; --sans:"Space Grotesk","Noto Sans SC",sans-serif; --serif:"Source Serif 4","Noto Serif SC",serif; --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace; --paper:#FAFBFC; --paper-soft:#F1F4F8; --accent:#2563EB; --accent-soft:#EFF6FF; --good:#059669; --good-soft:#ECFDF5; --line:#E2E6EE; --line-light:#F0F2F5; --r-1:4px; --r-2:8px; --r-3:12px; --r-4:16px; --r-full:9999px; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--ink); font-family:var(--serif); font-optical-sizing:auto; text-rendering:optimizeLegibility;
+         font-size:15.5px; font-weight:340; line-height:1.75; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:var(--r-1); }
+  .frame { max-width: 760px; margin: 0 auto; padding: 0 clamp(20px,5vw,48px) 72px; }
+  header { padding: 22px 0 8px; display:flex; justify-content:space-between; align-items:center; }
+  .wordmark { font-family:var(--mono); font-weight:700; font-size:17px; text-decoration:none; color:var(--ink); }
+  /* V5 wordmark signature: the trailing underscore is electric blue with an underline */
+  .wordmark .u { color:var(--accent); position:relative; }
+  .wordmark .u::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:2px; background:var(--accent); border-radius:1px; opacity:0.5; }
+  .lang { font-size:13px; color:var(--blue); cursor:pointer; background:none; border:none; font-family:var(--sans); }
+  h1 { font-family:var(--serif); font-optical-sizing:auto; font-size:clamp(26px, 4vw, 36px); font-weight:430; letter-spacing:-0.02em; margin:34px 0 6px; }
+  .meta { color: var(--ink-faint); font-size: 13px; margin-bottom: 34px; }
+  h2 { font-family:var(--serif); font-optical-sizing:auto; font-size:18px; font-weight:600; letter-spacing:-0.01em; margin:34px 0 8px; }
+  p, li { color: var(--ink-soft); }
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { margin-bottom: 6px; }
+  code { font-family: var(--mono); font-size: 13px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; color: var(--ink); }
+  .zh { display: none; }
+  body.lang-zh .en { display:none; }
+  body.lang-zh .zh { display:block; }
+  .lang-switch { display:inline-flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; }
+  .lang-switch button { border:0; cursor:pointer; background:transparent; font-family:var(--sans); font-size:12px; font-weight:600; color:var(--ink-faint); padding:5px 12px; transition:background .15s ease, color .15s ease; }
+  .lang-switch button.on { background:var(--ink); color:#fff; }
+  .lang-switch button:not(.on):hover { color:var(--ink); background:var(--bg-soft); }
+  .i18n-zh { display:none; }
+  body.lang-zh .i18n-zh { display:inline; }
+  body.lang-zh .i18n-en { display:none; }
+  footer { border-top: 1px solid var(--border); margin-top: 48px; padding-top: 20px; font-size: 12.5px; color: var(--ink-faint); }
+  a { color: var(--blue); }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <header>
+    <a class="wordmark" href="/">toolfront<span class="u">_</span></a>
+    <div class="lang-switch" role="group" aria-label="Language / 语言">
+      <button type="button" data-lang="en">English</button>
+      <button type="button" data-lang="zh">简体中文</button>
+    </div>
+  </header>
+
+  <div class="en">
+    <h1>Security &amp; Vulnerability Disclosure</h1>
+    <p class="meta">Version 1.0 · toolfront.dev</p>
+
+    <h2>How to report</h2>
+    <p>Email <a href="mailto:security@toolfront.dev">security@toolfront.dev</a>. Please include: a description of the issue, steps to reproduce (or a PoC), the affected URL or endpoint, and an estimate of impact. You may encrypt your report — our PGP key is available on request.</p>
+
+    <h2>Our commitment</h2>
+    <ul>
+      <li><strong>Acknowledgement within 72 hours</strong> of receiving your report.</li>
+      <li><strong>Triage within 7 days</strong> — we will tell you whether we accept it and our planned timeline.</li>
+      <li><strong>No legal action</strong> against good-faith research that respects the scope below.</li>
+      <li><strong>Credit</strong> in our release notes if you wish (opt-in).</li>
+    </ul>
+
+    <h2>Scope</h2>
+    <p><strong>In scope:</strong> toolfront.dev and its API endpoints (<code>/api/scan</code>, <code>/api/waitlist</code>, <code>/api/resend</code>, <code>/confirm</code>, <code>/unsubscribe</code>).<br>
+    <strong>Out of scope:</strong> volumetric denial-of-service, social engineering, physical attacks, spam, automated scanner output without a demonstrated vulnerability, issues on third-party services (report those to Cloudflare or Resend).</p>
+
+    <h2>Safe harbor</h2>
+    <p>If you make a good-faith effort to comply with this policy during your research, we will consider your activity authorized, will not initiate legal action, and will work with you to understand and resolve the issue quickly.</p>
+  </div>
+
+  <div class="zh">
+    <h1>安全与漏洞披露政策</h1>
+    <p class="meta">版本 1.0 · toolfront.dev</p>
+
+    <h2>如何报告</h2>
+    <p>请发送邮件至 <a href="mailto:security@toolfront.dev">security@toolfront.dev</a>，内容请包含：问题描述、复现步骤（或概念验证）、受影响的 URL 或端点、以及影响评估。如需加密报告，可来信索取我们的 PGP 公钥。</p>
+
+    <h2>我们的承诺</h2>
+    <ul>
+      <li>收到报告后 <strong>72 小时内确认</strong>。</li>
+      <li><strong>7 天内完成分诊</strong>——告知你是否受理以及计划的修复时间表。</li>
+      <li>对遵守下述范围、出于善意的研究者<strong>不采取法律行动</strong>。</li>
+      <li>经你同意后，在发布说明中<strong>致谢</strong>。</li>
+    </ul>
+
+    <h2>范围</h2>
+    <p><strong>范围内：</strong>toolfront.dev 及其 API 端点（<code>/api/scan</code>、<code>/api/waitlist</code>、<code>/api/resend</code>、<code>/confirm</code>、<code>/unsubscribe</code>）。<br>
+    <strong>范围外：</strong>容量型拒绝服务、社会工程、物理攻击、垃圾邮件、未演示出实际漏洞的扫描器原始输出、以及第三方服务上的问题（请报告给 Cloudflare 或 Resend）。</p>
+
+    <h2>安全港</h2>
+    <p>如果你在研究过程中善意遵守本政策，我们将视你的行为为已获授权，不会对其提起法律诉讼，并将与你合作快速理解与解决问题。</p>
+  </div>
+
+  <footer>
+    © 2026 ToolFront · <a href="/">toolfront.dev</a> · <a href="/privacy"><span class="i18n-en">Privacy</span><span class="i18n-zh">隐私</span></a> · <a href="/terms"><span class="i18n-en">Terms</span><span class="i18n-zh">服务条款</span></a>
+  </footer>
+
+</div>
+<script>
+  (function () {
+    var body = document.body;
+    var btns = document.querySelectorAll('.lang-switch button');
+    function setLang(zh) {
+      body.classList.toggle('lang-zh', zh);
+      try { localStorage.setItem('tf-lang', zh ? 'zh' : 'en'); } catch (_) {}
+      btns.forEach(function (b) { b.classList.toggle('on', (b.dataset.lang === 'zh') === zh); });
+    }
+    var saved = 'en';
+    try { saved = localStorage.getItem('tf-lang') || 'en'; } catch (_) {}
+    setLang(saved === 'zh');
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () { setLang(b.dataset.lang === 'zh'); });
+    });
+  })();
+</script>
+</body>
+</html>
