@@ -113,7 +113,11 @@
   .trackwrap { margin-top: 24px; padding-top: 20px; border-top: 1px dashed var(--line); }
   .track { height: 12px; border-radius: var(--r-full); position: relative; background: linear-gradient(90deg, var(--bad) 0 30%, var(--mid) 30% 50%, #F59E0B 50% 70%, var(--good-deep) 70% 85%, var(--good) 85% 100%); opacity: 0.92; }
   .track .cursor { position: absolute; top: -6px; bottom: -6px; width: 3px; background: var(--ink); border-radius: 2px; }
+  /* Edge-aware: near the ends the label would overflow the card, so it anchors
+     by its inner edge instead of its centre. */
   .track .cursor::after { content: attr(data-label); position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: 10.5px; font-weight: 600; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 5px; padding: 2px 8px; white-space: nowrap; }
+  .track .cursor[data-edge="end"]::after { left: 100%; transform: translateX(-100%); }
+  .track .cursor[data-edge="start"]::after { left: 0; transform: translateX(0); }
   .track-scale { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--ink-3); margin-top: 8px; }
   .track-scale span b { color: var(--ink-2); }
 
@@ -141,6 +145,14 @@
 
   /* ═══ ACTION BUTTONS ═══ */
   .acts { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+  /* Social share panel */
+  .share-panel { display:none; position:absolute; bottom:100%; left:50%; transform:translateX(-50%); margin-bottom:10px; background:var(--card); border:1.5px solid var(--line); border-radius:var(--r-3); padding:14px 16px; box-shadow:0 8px 30px rgba(0,0,0,.12); z-index:100; white-space:nowrap; animation:shareIn .15s ease }
+  .share-panel.open { display:block }
+  @keyframes shareIn { from{opacity:0;transform:translateX(-50%) translateY(6px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+  .share-panel-row { display:flex; gap:10px; align-items:center; justify-content:center }
+  .share-icon { width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:10px;border:1.5px solid var(--line);background:var(--card);color:var(--ink-2);cursor:pointer;transition:all .15s ease;text-decoration:none }
+  .share-icon:hover { border-color:var(--accent);color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 12px rgba(37,99,235,.12) }
+  .share-icon svg { width:18px;height:18px;fill:currentColor }
   .acts button { font-family: var(--sans); font-weight: 600; font-size: 12.5px; border-radius: var(--r-3); padding: 9px 18px; cursor: pointer; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); transition: all var(--dur-fast) ease; display: inline-flex; align-items: center; gap: 6px; }
   .acts button:hover { border-color: var(--ink-3); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
   .acts .primary { background: var(--grad-primary); border-color: transparent; color: #FFF; box-shadow: 0 2px 10px rgba(37,99,235,0.18); }
@@ -258,7 +270,7 @@
 
   <div class="colo">
     <span>© 2026 ToolFront · Free &amp; Open</span>
-    <span><a href="/privacy">Privacy</a> · <a href="/security">Security</a> · <a href="/bot">/bot</a></span>
+    <span><a href="/privacy" data-i18n="rfoot.privacy">Privacy</a> · <a href="/security" data-i18n="rfoot.security">Security</a> · <a href="/bot" data-i18n="rfoot.bot">/bot</a></span>
   </div>
 </div>
 
@@ -306,6 +318,11 @@
       'report.raise': '<b>Want to raise this score?</b> ToolFront generates the missing tools for you:',
       'report.raise.keep': '<b>Great score — keep it that way.</b> A redesign can silently break it. Leave your email and we\u2019ll alert you if it drops:',
       'report.fix.title': 'Fix list', 'report.fix.passed': 'already in place', 'report.fix.alldone': 'All fixes applied! Re-scan to see your new score.', 'report.fix.nofixes': 'Nothing to fix — everything is already in place.',
+    'rfoot.privacy': 'Privacy',
+    'rfoot.security': 'Security',
+    'rfoot.bot': '/bot docs',
+    'report.email.placeholder': 'Email',
+    'report.email.aria': 'Email',
       'report.vs.title': 'Since your last scan', 'report.vs.first': 'First scan for this domain — check back after you make changes.', 'report.vs.local': 'Stored only in this browser — clear it anytime in browser settings.', 'report.vs.unchanged': 'No change since your last scan.', 'report.vs.date': 'Compared to your scan on {d}',
       'report.getfix': 'Get the fix list',
       'report.loading': 'Scanning {d} — checking how agents see your site',
@@ -318,21 +335,21 @@
     },
     zh: {
       'doc.title': 'ToolFront — 你的网站准备好迎接 AI 智能体了吗？',
-      'hero.title': '你的网站准备好迎接 <span class="hl">AI 智能体</span>了吗？',
-      'hero.sub': 'AI 助手已经开始替你的客户浏览、比价、下单。对它们而言，大多数网站是一个<strong>只能截图乱猜的黑盒</strong>。ToolFront 让你的网站<strong>容易被智能体理解和使用</strong>——并免费告诉你现在站在哪。',
+      'hero.title': '你的网站准备好迎接 <span class="hl">AI</span> 了吗？',
+      'hero.sub': 'AI 正在帮你的客户找产品、比价、下单。对大多数网站来说，AI 只能<strong>截图乱猜</strong>——像个黑盒。ToolFront 让你的网站<strong>变得 AI 友好</strong>，并免费告诉你现在的水平。',
       'scan.free': '免费扫描', 'scan.secs': '约 5 秒', 'scan.btn': '扫描',
       'scan.placeholder': '你的域名，如 example.com',
       'scan.meta': '检测项：<b>WebMCP 工具 · 结构化数据 · llms.txt · AI 爬虫政策 · sitemap</b>。无需注册。',
       'shift.kicker': '时代变了',
-      'shift.h2': '你网站的下一批访客，将不再是人类。',
-      'shift.sub': '搜索引擎读你的网站，是为了把人带进来；智能体读你的网站，是为了直接办事——购物、预订、比价、订阅。规则已经变了，大多数网站还没跟上。',
+      'shift.h2': '下一个访问你网站的，可能不是人。',
+      'shift.sub': '搜索引擎读你的网站是为了引流量；AI 读你的网站是为了直接办事——购物、比价、下单。规则已经变了，但大多数网站还没跟上。',
       'proof.active': '进行中', 'proof.live': '已上线', 'proof.preview': '预览',
       'proof.incubated': '由 <b>Google + Microsoft</b> 孵化',
       'how.kicker': '工作原理', 'how.h2': '从黑盒，到敞开的门。',
-      'step1.title': '扫一扫', 'step1.text': '看看智能体眼中的你的网站。得到一份不需要工程师背景也能照着做的分数和改进清单。',
-      'step2.title': '生成工具', 'step2.text': 'ToolFront 根据你已有的能力，自动补写网站缺失的机器可读工具定义。一行代码安装，无需重构。',
-      'step3.title': '保持掌控', 'step3.text': '智能体可以使用你的网站，但支付和注册仍需人工确认。钥匙在你手里——全程留痕、可审计。',
-      'dogfood.kicker': '以身作则',
+      'step1.title': '扫一扫', 'step1.text': '看看 AI 怎么看你：一个直观的分数，加上一份照着就能改的清单——不用懂代码。',
+      'step2.title': '生成工具', 'step2.text': '根据你现有的功能，自动补上缺失的工具定义。一行代码装上，不改原有架构。',
+      'step3.title': '保持掌控', 'step3.text': 'AI 可以操作你的网站，但关键动作还是你说了算。每次操作都有记录，随时可查。',
+      'dogfood.kicker': '我们吃自己的狗粮',
       'dogfood.h2': '这个页面本身就是一个 WebMCP 工具。',
       'dogfood.title': '本页注册了一个真实的工具：',
       'dogfood.tool.live': 'scan_domain — 已注册并生效',
@@ -342,22 +359,27 @@
       'waitlist.msg': '不发垃圾邮件。你只会收到一封确认邮件。参见隐私政策。',
       'waitlist.enter': '请输入有效的邮箱。',
       'waitlist.done': '请查收邮箱——我们刚给你发了一封确认邮件。',
-      'waitlist.queued': '已为 {d} 排队生成改进清单，我们会尽快联系你。',
+      'waitlist.queued': '已收到 {d} 的定制改进清单请求——做好后第一时间通知你。',
       'colophon.built': '基于开源 WebMCP 提案构建',
       'colophon.privacy': '隐私',
       'colophon.terms': '条款',
       'colophon.security': '安全',
-      'report.yours': '你的报告', 'report.summary': '报告总结', 'report.label': '智能体就绪度', 'report.scanned': '扫描于',
+      'report.yours': '你的报告', 'report.summary': '报告摘要', 'report.label': '智能体就绪度', 'report.scanned': '扫描于',
       'report.biz.title': '这对你的生意意味着什么', 'report.tech.title': '技术详情',
-      'report.biz.low': '总结：你的网站对 AI 是"黑盒"。让 AI 推荐的客户正在流向竞争对手——每拖一天都在丢单。',
-      'report.biz.mid': '总结：AI 只看懂了你的一半——关键时刻仍然说不清你、推不动你。补齐下面几项，立刻见效。',
-      'report.biz.high': '总结：你的网站已经"会说 AI 的语言"——领先大多数对手。保持住，并持续监控。',
-      'report.biz.allgood': '暂无需紧急处理：AI 已经能读懂并使用你的网站。保持监控，别让改版把它改坏。',
+      'report.biz.low': '总结：你的网站对 AI 来说是个黑盒。本来应该流向你的客户，正在被 AI 指向对手——每拖一天都在丢单。',
+      'report.biz.mid': '总结：AI 只读懂了你的一半——关键时刻还是说不清、推不动。补齐下面几项，立刻见效。',
+      'report.biz.high': '总结：你的网站已经"会说 AI 的语言"——领先大多数对手。保持住，定期复查。',
+      'report.biz.allgood': '暂时不用改：AI 已经能读懂并使用你的网站。保持监控，别让下次改版把它搞坏。',
       'report.share': '分享', 'report.pdf': '存为 PDF', 'report.new': '重新扫描', 'report.copied': '链接已复制', 'report.copyfail': '复制失败——请从地址栏复制',
       'report.printhead': '智能体就绪度报告 — toolfront.dev',
       'report.raise': '<b>想提高这个分数？</b> ToolFront 为你生成缺失的工具：',
-      'report.raise.keep': '<b>保持住这个成绩。</b>一次改版就可能悄悄破坏它。留个邮箱，掉了立刻告诉你：',
+      'report.raise.keep': '<b>保持住这个成绩。</b>一次改版就可能悄悄掉分。留个邮箱，掉了第一时间通知你：',
       'report.fix.title': '修复清单', 'report.fix.passed': '已就绪', 'report.fix.alldone': '全部修复完成！重新扫描看看新分数。', 'report.fix.nofixes': '无需修复——一切已就绪。',
+    'rfoot.privacy': '隐私政策',
+    'rfoot.security': '安全说明',
+    'rfoot.bot': '扫描器说明',
+    'report.email.placeholder': '你的邮箱地址',
+    'report.email.aria': '邮箱地址',
       'report.vs.title': '对比上次扫描', 'report.vs.first': '首次扫描该域名——改完再来看看变化。', 'report.vs.local': '数据仅存于本浏览器——可随时在浏览器设置中清除。', 'report.vs.unchanged': '与上次扫描相比无变化。', 'report.vs.date': '对比 {d} 的扫描结果',
       'report.getfix': '获取改进清单',
       'report.loading': '正在扫描 {d}——看看智能体眼中的你的网站',
@@ -405,7 +427,7 @@
     },
     zh: {
       labels: { webmcp: 'WebMCP 工具', 'tool-security': '工具面安全', 'structured-data': '结构化数据', 'llms-txt': 'llms.txt', 'robots-policy': 'AI 爬虫政策', 'machine-surfaces': '机器可读入口' },
-      verdicts: [70, '智能体就绪。智能体可以有条理地使用这个网站。', 40, '部分可读。智能体时而靠猜，时而失败。', '对智能体完全不透明。每次交互都是截图加乱点的赌博。'],
+      verdicts: [70, '已就绪。AI 可以顺畅地使用你的网站。', 40, '部分可读。AI 有时能看懂，有时只能瞎猜。', '对 AI 完全不透明。每次交互都是截图加乱点的赌博。'],
       biz: {
         'webmcp.fail': { pain: '客户越来越让 AI 助手替他们办事。AI 点不动你的网站——它办不了，就去办你竞争对手的。', gain: '注册 WebMCP 工具后，AI 能直接调用你的服务：从"被 AI 提到"升级为"被 AI 使用"，吃到第一波 Agent 流量。' },
         'webmcp.partial': { pain: 'AI 只能用你网站的一部分功能——客户旅程走到一半就断在 AI 手里。', gain: '补全工具面后，AI 能在你的网站走完全程。' },
@@ -434,23 +456,28 @@
         'machine-surfaces.partial': '补一份 OpenAPI 规范'
       },
       details: {
-        'webmcp.pass': '已检测到 WebMCP 工具面——智能体可以直接在本页发现原生工具。',
+        'webmcp.pass': '已检测到 WebMCP 工具——AI 可以直接在本页调用它们。',
         'webmcp.fail': '未注册 WebMCP 工具。智能体只能截图乱点——界面一改，流程就断。',
-        'tool-security.pass': '工具面通过静态安全检查：未发现投毒特征，标注与规范一致（参照 Chrome 官方指南与 OWASP ASI02）。',
+        'tool-security.pass': '通过安全检查：没发现投毒风险，标注符合规范（参照 Chrome 官方指南与 OWASP ASI02）。',
         'tool-security.partial': '工具面有轻微问题（缺少建议标注或超出长度预算）。参照 Chrome WebMCP 安全指南核对。',
-        'tool-security.fail': '检测到工具面安全问题——工具描述对智能体而言就是指令，可能被投毒利用（W3C WebMCP §6.3 / OWASP ASI02）。',
+        'tool-security.fail': '检测到安全问题——工具描述会被 AI 当成指令执行，可能被利用来投毒（W3C WebMCP §6.3 / OWASP ASI02）。',
         'tool-security.na': '本页没有 WebMCP 工具面，此项检查不适用。',
         'structured-data.pass': 'JSON-LD 与 OpenGraph 标签齐全，智能体可以可靠地提取页面信息。',
         'structured-data.partial': '有部分结构化数据，智能体只能看到片段而非全貌。',
         'structured-data.fail': '没有 JSON-LD 或 OpenGraph 数据，智能体只能读原始文本。',
-        'llms-txt.pass': '已提供 llms.txt——你已经在用智能体的语言说话了。',
+        'llms-txt.pass': '已提供 llms.txt——你已经会用 AI 能读懂的格式介绍自己了。',
         'llms-txt.fail': '缺少 /llms.txt。这是最容易拿到的分：一个描述你网站的 markdown 文件。',
         'llms-txt.na': '该路径被站点的 bot 防护拦截，无法检测——同一道墙通常也挡住了 AI 智能体。',
-        'robots-policy.pass': '对主流 AI 爬虫有明确的放行政策，智能体受欢迎。',
+    'webmcp.partial': '已注册 WebMCP 工具，但工具面还不完整——补全后智能体能完成更多任务。',
+    'webmcp.na': '主页被 bot 防护拦截，此项无法检测——同一道墙通常也挡住了 AI 智能体。',
+    'structured-data.na': '主页被 bot 防护拦截，此项无法检测——同一道墙通常也挡住了 AI 智能体。',
+    'llms-txt.partial': 'llms.txt 存在但内容太短或缺少关键段落——补全后智能体理解更准。',
+
+        'robots-policy.pass': '明确放行了主流 AI 爬虫——AI 来访问不会被挡。',
         'robots-policy.partial': 'robots.txt 存在但未提及 AI 爬虫。默认放行——但明确的政策更有力。',
         'robots-policy.fail': 'robots.txt 明确屏蔽了部分主流 AI 爬虫，智能体被拒之门外。',
         'robots-policy.na': 'robots.txt 被 bot 防护拦截，无法读取——同一道墙通常也挡住了 AI 智能体。',
-        'machine-surfaces.pass': '已提供 sitemap / OpenAPI 等机器可读入口——生成工具的上好素材。',
+        'machine-surfaces.pass': '已有 sitemap / OpenAPI 等机器可读入口——这些是自动生成工具的好底料。',
         'machine-surfaces.partial': '提供了部分机器可读入口。补一份 OpenAPI 规范后，工具生成几乎全自动。',
         'machine-surfaces.fail': '未检测到 sitemap.xml 或 OpenAPI 规范，智能体没有你网站的地图。',
         'machine-surfaces.na': 'sitemap/OpenAPI 探测被 bot 防护拦截，无法检测——同一道墙通常也挡住了 AI 智能体。'
@@ -563,13 +590,17 @@
     var tw = el('div', 'trackwrap');
     var track = el('div', 'track');
     var cursor = el('div', 'cursor');
-    var pct = (typeof r.score === 'number' && r.scoreMax > 0) ? Math.round((r.score / r.scoreMax) * 100) : 0;
+    var sm = (typeof r.scoreMax === 'number' && r.scoreMax > 0) ? r.scoreMax : 100;
+    var pct = (typeof r.score === 'number') ? Math.round((r.score / sm) * 100) : 0;
     cursor.setAttribute('data-label', t('report.track.you') + ' · ' + r.score);
       // The cursor is always at the correct position from the first frame.
     // (The card-level scanline sweep already carries the "scanning" motion;
     // animating the cursor from 0 → pct was both fragile — it could stick at
     // 0% if setTimeout was throttled in a backgrounded tab — and visually
     // misleading, since the score position is data, not a transition.)
+    // Label alignment: centre by default, but anchor inward near the edges so
+    // a 0 or 100 score never pushes the tooltip outside the card.
+    cursor.dataset.edge = pct >= 90 ? 'end' : pct <= 10 ? 'start' : 'mid';
     cursor.style.left = pct + '%';
     track.appendChild(cursor);
     tw.appendChild(track);
@@ -625,18 +656,86 @@
     shareBtn.textContent = '🔗 ' + t('report.share');
     pdfBtn.textContent = '🖨 ' + t('report.pdf');
     newBtn.textContent = '↺ ' + t('report.new');
-    shareBtn.addEventListener('click', function () {
-      var url = location.origin + '/report?domain=' + encodeURIComponent(r.domain) + '&lang=' + lang;
-      var done = function () { shareBtn.textContent = t('report.copied'); setTimeout(function () { shareBtn.textContent = '🔗 ' + t('report.share'); }, 2000); };
-      var fail = function () { shareBtn.textContent = t('report.copyfail'); setTimeout(function () { shareBtn.textContent = '🔗 ' + t('report.share'); }, 2600); };
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url).then(done, function () {
-          var ta = el('textarea'); ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
-          document.body.appendChild(ta); ta.select();
-          try { document.execCommand('copy') ? done() : fail(); } catch (_) { fail(); }
-          document.body.removeChild(ta);
-        });
-      } else { fail(); }
+    // Social share panel
+    var shareUrl = location.origin + '/report?domain=' + encodeURIComponent(r.domain) + '&lang=' + lang;
+    var shareTitle = document.title;
+    var panel = null;
+
+    function makeIcon(label, svg, fn) {
+      var a = document.createElement('a');
+      a.className = 'share-icon';
+      a.setAttribute('aria-label', 'Share on ' + label);
+      a.innerHTML = '<svg viewBox="0 0 24 24">' + svg + '</svg>';
+      a.addEventListener('click', function(e) { e.preventDefault(); fn(); if (panel) panel.classList.remove('open'); });
+      return a;
+    }
+
+    function buildPanel() {
+      panel = document.createElement('div');
+      panel.className = 'share-panel';
+      var row = document.createElement('div');
+      row.className = 'share-panel-row';
+
+      // X
+      row.appendChild(makeIcon('X',
+        '<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>',
+        function() { window.open('https://twitter.com/intent/tweet?url='+encodeURIComponent(shareUrl)+'&text='+encodeURIComponent(shareTitle),'_blank','width=550,height=420'); }
+      ));
+
+      // LinkedIn
+      row.appendChild(makeIcon('LinkedIn',
+        '<path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.065 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0z"/>',
+        function() { window.open('https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(shareUrl),'_blank','width=550,height=420'); }
+      ));
+
+      // YouTube
+      row.appendChild(makeIcon('YouTube',
+        '<path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>',
+        function() { window.open('https://www.youtube.com/','_blank'); }
+      ));
+
+      // Instagram
+      row.appendChild(makeIcon('Instagram',
+        '<path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.026 4.671.35 5.84 2.073 1.175 1.727 2.047 3.587 2.073 5.84.058 1.266.07 1.645.07 4.85v0c3.204 0 3.584-.012 4.85-.07 3.252-.026 4.671-.35 5.84-2.073 1.175-1.727 2.047-3.587 2.073-5.84.058-1.266.07-1.645.07-4.85zM12 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>',
+        function() { window.open('https://www.instagram.com/','_blank'); }
+      ));
+
+      // TikTok
+      row.appendChild(makeIcon('TikTok',
+        '<path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 3.59 2.28.94 4.57 1.65 6.99 1.85.02.82.03 1.64.01 2.46-.34 0-.68.01-1.02.01-1.55.02-3.03-.18-6.05-.62-8.96-1.43-1.73-.48-3.41-1.11-5.01-1.89-.86-.41-1.69-.89-2.48-1.43-.79-.54-1.54-1.14-2.24-1.81-.7-.67-1.35-1.4-1.94-2.18-.59-.78-1.12-1.62-1.59-2.5-.47-.88-.87-1.8-1.21-2.76-.34-.96-.61-1.96-.82-2.98-.21-1.02-.36-2.07-.44-3.13-.08-1.06-.1-2.13-.06-3.2.04-1.07.14-2.13.3-3.18.16-1.05.38-2.08.66-3.09.28-1.01.62-1.99 1.01-2.94.39-.95.83-1.86 1.33-2.73.5-.87 1.05-1.69 1.65-2.46.6-.77 1.25-1.48 1.95-2.13.7-.65 1.45-1.24 2.25-1.76.8-.52 1.64-.97 2.52-1.35.88-.38 1.79-.69 2.73-.92.94-.23 1.9-.38 2.87-.45.97-.07 1.95-.06 2.92.01z"/>',
+        function() { window.open('https://www.tiktok.com/search?q='+encodeURIComponent(shareUrl),'_blank','width=550,height=600'); }
+      ));
+
+      // 小红书
+      row.appendChild(makeIcon('小红书',
+        '<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="12" y="16" text-anchor="middle" font-size="8" font-weight="bold" fill="currentColor">RED</text>',
+        function() { window.open('https://www.xiaohongshu.com/','_blank','width=550,height=600'); }
+      ));
+
+      // 微信
+      row.appendChild(makeIcon('微信',
+        '<path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.534c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.132.295.295.295a.326.326 0 0 0 .167-.047l1.903-1.114a.591.591 0 0 1 .462-.063c.71.203 1.46.312 2.23.312 4.8 0 8.691-3.288 8.691-7.346 0-4.058-3.891-7.346-8.691-7.346zm-2.787 5.211c-.631 0-1.143-.512-1.143-1.143s.512-1.143 1.143-1.143 1.143.512 1.143 1.143-.512 1.143-1.143zm5.574 0c-.631 0-1.143-.512-1.143-1.143s.512-1.143 1.143-1.143 1.143.512 1.143 1.143-.512 1.143-1.143zM23.5 14.188c0-3.356-3.172-6.075-7.085-6.075-.575 0-1.13.071-1.656.203l-.004-.001a.493.493 0 0 1-.386.053l-1.555.91a.272.272 0 0 0-.135.238c0 .133.108.24.24.24a.267.267 0 0 0 .137-.038l.318-1.205a.493.493 0 0 1 .174-.544C12.587 7.579 11.5 6.113 10 5.075v3.112c0 .53-.428.958-.958.958s-.958-.428-.958-.958V3.5c0-.53.428-.958.958-.958s.958.428.958.958v.202c1.785 1.218 4.147 1.958 6.733 1.958 4.318 0 7.822 2.72 7.822 6.075z"/>',
+        function() {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(shareUrl).then(function() {
+              shareBtn.textContent = '已复制（微信可粘贴）';
+              setTimeout(function(){shareBtn.textContent='\u{1f517} '+t('report.share')},2500);
+            });
+          }
+        }
+      ));
+
+      panel.appendChild(row);
+      return panel;
+    }
+
+    shareBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (!panel) { panel = buildPanel(); shareBtn.parentNode.style.position='relative'; shareBtn.parentNode.appendChild(panel); }
+      panel.classList.toggle('open');
+    });
+    document.addEventListener('click', function(e) {
+      if (panel && panel.classList.contains('open') && !panel.contains(e.target) && e.target !== shareBtn) panel.classList.remove('open');
     });
     pdfBtn.addEventListener('click', function () { window.print(); });
     newBtn.addEventListener('click', function () { location.href = '/'; });
@@ -757,7 +856,7 @@
     copy.appendChild(el('div', 'fine', t('report.cta.fine')));
     cta.appendChild(copy);
     var wl = el('div', 'scan');
-    var em = el('input'); em.type = 'email'; em.placeholder = t('waitlist.ph'); em.setAttribute('aria-label', 'Email');
+    var em = el('input'); em.type = 'email'; em.placeholder = t('waitlist.ph'); em.setAttribute('aria-label', t('report.email.aria'));
     var btn = el('button'); btn.type = 'button'; btn.textContent = t('report.getfix');
     wl.appendChild(em); wl.appendChild(btn);
     cta.appendChild(wl);
@@ -824,9 +923,12 @@
     nums.appendChild(el('div', 'grade-label', t('report.label')));
     hero.appendChild(nums);
     var vd = el('div', 'verdict');
-    var strong = el('b', null, localVerdict(r.score).split('.')[0] + '.');
+    // Split on first sentence-ending punctuation (. or 。) for bold/plain rendering
+    var vt = localVerdict(r.score);
+    var dotIdx = Math.max(vt.indexOf('.'), vt.indexOf('。'));
+    var strong = el('b', null, dotIdx > -1 ? vt.slice(0, dotIdx + 1) : vt);
     vd.appendChild(strong);
-    vd.appendChild(document.createTextNode(localVerdict(r.score).slice(localVerdict(r.score).indexOf('.') + 1)));
+    vd.appendChild(document.createTextNode(dotIdx > -1 ? vt.slice(dotIdx + 1) : ''));
     hero.appendChild(vd);
     b1.appendChild(hero);
     b1.appendChild(buildTrack(r, first));
