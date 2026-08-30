@@ -39,18 +39,18 @@ The four suites `dogfood`, `email-lang`, `red32`, `report-dom` exist but run now
 **Interfaces:**
 - Produces: `npm test` runs all 12 offline suites; CI static job depends only on `npm ci` + secret scan + `npm test`.
 
-- [ ] **Step 1: Update `package.json` test script**
+- [x] **Step 1: Update `package.json` test script**
 
 ```json
 "test": "node --check worker.js && node tests/sast-scan.mjs && node tests/poison-samples.test.mjs && node tests/sec-regression.test.mjs && node tests/test-unsub.test.mjs && node tests/red14.test.mjs && node tests/red12.test.mjs && node tests/red13.test.mjs && node tests/dogfood.test.mjs && node tests/email-lang.test.mjs && node tests/red32.test.mjs && node tests/report-dom.test.mjs"
 ```
 
-- [ ] **Step 2: Run it**
+- [x] **Step 2: Run it**
 
 Run: `npm ci && npm test`
 Expected: all 12 suites pass, exit 0.
 
-- [ ] **Step 3: Collapse the workflow's per-test steps**
+- [x] **Step 3: Collapse the workflow's per-test steps**
 
 In `.github/workflows/security-bas.yml` static job: replace the individual steps "Syntax check", "SAST rules", "Malicious tool-surface sample library", "Security regression suite", "Unsubscribe semantics", "Response-header audit", "Tool-surface detection probes" (7 `run:` steps) with a single step. KEEP the "Install dev dependencies" (`npm ci`) and "Secret scan" steps unchanged; KEEP the job `name:` verbatim.
 
@@ -59,7 +59,7 @@ In `.github/workflows/security-bas.yml` static job: replace the individual steps
         run: npm test
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add package.json .github/workflows/security-bas.yml
@@ -395,7 +395,7 @@ git commit -m "ci: rules gate — schema, compile whitelist, differential sample
 - [ ] Docs-only PR: no code or rules touched
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add CONTRIBUTING.md .github/PULL_REQUEST_TEMPLATE.md
@@ -420,7 +420,7 @@ tests/rules-samples.json  @wishforge
 
 - [ ] **Step 2: Verify** — after pushing the branch, confirm GitHub shows these paths as "Review required: wishforge" on the PR. (Declarative for a solo account; auto-enforced once a second collaborator exists and "Require review from Code Owners" is enabled.)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add .github/CODEOWNERS
@@ -473,7 +473,7 @@ Safety note: `--auto` only queues; the actual merge is still governed by the bra
 
 - [ ] **Step 2: Verify** — after this branch's PR lands, open a throwaway PR that edits only `docs/` and confirm auto-merge queues; then open a mixed PR (docs + one code file) and confirm the guard step fails. The dangerous direction (mixed PR slipping through) MUST be verified.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add .github/workflows/docs-automerge.yml
