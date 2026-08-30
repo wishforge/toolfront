@@ -1,0 +1,26 @@
+name: Rules gate
+
+# Mechanical gates for community rule PRs (semgrep/nuclei model — spec §2/§4):
+#   schema → compile whitelist → dynamic ReDoS probe → differential samples.
+# A green gate does NOT auto-merge: the maintainer still approves semantics.
+on:
+  pull_request:
+    paths: ["rules/**"]
+permissions:
+  contents: read
+jobs:
+  gate:
+    name: Rules gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Schema + compile + differential gates
+        run: node scripts/rules-gate.mjs
+      - name: ReDoS dynamic probe over all rule regexes
+        run: node tests/redos-guard.test.mjs
+      - name: Generated file in sync
+        run: npm run build:rules --silent && git diff --exit-code rules/poisoning.mjs

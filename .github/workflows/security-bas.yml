@@ -41,6 +41,9 @@ jobs:
       - name: Offline suites (single entrypoint)
         run: npm test
 
+      - name: Generated rules in sync
+        run: npm run build:rules --silent && git diff --exit-code rules/poisoning.mjs
+
       - name: Secret scan (full git history)
         run: python tests/gitleaks-scan.py .
 
