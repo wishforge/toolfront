@@ -612,7 +612,7 @@
   /* V5 report page additions (spliced separately from the landing dict) */
   Object.assign(LANGS.en, {
     'report.track.you': 'You', 'report.track.opaque': 'opaque', 'report.track.ready': 'agent-ready',
-    'report.proj.label': 'All fixes applied →', 'report.proj.est': 'est. {s} / 100 · Grade {g}',
+    'report.proj.label': 'All fixes applied →', 'report.proj.est': '{s} / 100 · {g}',
     'report.cta.fine': 'One tag to install. Your site stays yours — payment still needs human confirmation.',
     'report.vs.improved': '↑ improved', 'report.vs.regressed': '↓ regressed',
     'report.loading0': '',
@@ -620,7 +620,7 @@
   });
   Object.assign(LANGS.zh, {
     'report.track.you': '你', 'report.track.opaque': '对 AI 封闭', 'report.track.ready': '智能体就绪',
-    'report.proj.label': '全部修复完成后 →', 'report.proj.est': '预计 {s} / 100 · {g} 级',
+    'report.proj.label': '全部修复完成后 →', 'report.proj.est': '{s} 分 · {g} 级',
     'report.cta.fine': '装一行代码就行。网站还是你的——付款仍由人工确认。',
     'report.vs.improved': '↑ 进步', 'report.vs.regressed': '↓ 退步',
     'report.loading0': '',
@@ -1020,7 +1020,11 @@
       // Show both current estimate and remaining potential
       var label = t('report.proj.est').replace('{s}', String(sum)).replace('{g}', letter(sum));
       if (availableMax > 0 && sum < maxScore) {
-        label += '  (+ ' + (availableMax - checkedGain) + ' available)';
+        var remain = availableMax - checkedGain;
+        var moreHint = (lang === 'zh')
+          ? '· 剩下还能 +' + remain + ' 分'
+          : '· +' + remain + ' more left';
+        label += moreHint;
       }
       est.textContent = label;
     }
