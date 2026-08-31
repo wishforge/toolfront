@@ -4,6 +4,12 @@
 
 ToolFront scans any public website for *agent-readiness* — can AI agents (ChatGPT, Claude, browser agents) reliably read, understand, and operate your site? Free, instant, no signup.
 
+## Demo
+
+[![Demo Video](assets/demo-thumbnail.jpg)](https://toolfront.dev/demo)
+
+*Click to watch: scanning a real DTC brand site in 60 seconds*
+
 ## What it checks (100-point score)
 
 | Check | Max | What it means for you |
