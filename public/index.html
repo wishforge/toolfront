@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>ToolFront V5 — Free & Open</title>
 <link rel="stylesheet" href="/fonts/fonts.css">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23FFFFFF'/%3E%3Cpath d='M10 44 L10 20 L26 20 M10 32 L22 32' stroke='%230C1222' stroke-width='6' fill='none'/%3E%3Cpath d='M38 44 L54 44 M46 20 L46 44' stroke='%232563EB' stroke-width='6' fill='none'/%3E%3C/svg%3E">
@@ -1671,7 +1672,7 @@
       var input = document.querySelector('.scan-input');
       var v = (input.value || '').trim().replace(/[^a-zA-Z0-9.-]/g, '');
       if (!v) { input.focus(); return; }
-      location.href = '/report?domain=' + encodeURIComponent(v) + '&lang=' + lang;
+      location.href = '/report?domain=' + encodeURIComponent(v) + '&lang=' + lang + '&_t=' + Date.now();
     }
     var btn = document.querySelector('.scan-btn');
     var input = document.querySelector('.scan-input');

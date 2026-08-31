@@ -832,16 +832,21 @@ async function handleScan(url, request, env) {
   const domain = normalizeDomain(url.searchParams.get("domain"));
   if (!domain) return json({ error: "invalid_domain", detail: "Provide a public domain like example.com" }, 400);
 
-  // Rate limit FIRST (KV or in-memory fallback) — cached responses must not
-  // bypass the counter (defense in depth: hammering cached domains burns quota).
+  // Rate limit FIRST — prevent abuse.
   const ip = request.headers.get("CF-Connecting-IP") || "anon";
   if (!(await rateLimitAllow(ip, env))) {
     return json({ error: "rate_limited", detail: "Too many scans. Try again later." }, 429);
   }
 
-  if (env.KV) {
+  // KV cache with short TTL (300s = 5 min):
+  // - Prevents accidental double-click spam (second hit returns cached instantly)
+  // - Reduces cost on popular domains (nike.com etc.)
+  // - Short enough that users who fixed their site see new data within minutes
+  // - Force-bypass: ?fresh=1 skips cache (for demo / re-scan after fixes)
+  const forceFresh = url.searchParams.get("fresh") === "1";
+  if (env.KV && !forceFresh) {
     const cached = await env.KV.get("scan:" + domain, "json");
-    if (cached) return json({ ...cached, cached: true }, 200, { "Cache-Control": "public, max-age=300" });
+    if (cached) return json({ ...cached, cached: true }, 200, { "Cache-Control": "public, max-age=60" });
   }
 
   const report = await scanDomainCore(domain, env);
@@ -876,8 +881,10 @@ async function handleScan(url, request, env) {
   // tool_surface_hash (round 31) are internal: the hash exists for the monitor's
   // rug-pull diffs and ships via /internal/scan — the public UI never renders it.
   const { report_json, tool_surface_hash, ...publicReport } = report;
-  if (env.KV) { try { await env.KV.put("scan:" + domain, JSON.stringify(publicReport), { expirationTtl: CACHE_TTL_S }); } catch (_) {} }
-  return json(publicReport, 200, { "Cache-Control": "public, max-age=300" });
+  // Cache write: short TTL (300s) so data stays fresh.
+  // Blocked reports use shorter TTL (1800s) above since WAF state is sticky.
+  if (env.KV) { try { await env.KV.put("scan:" + domain, JSON.stringify(publicReport), { expirationTtl: 300 }); } catch (_) {} }
+  return json(publicReport, 200, { "Cache-Control": "public, max-age=60" });
 }
 
 /* ————— unsubscribe infrastructure (CAN-SPAM / CASL / GDPR Art.7) —————
