@@ -38,8 +38,8 @@
 ## Key pages
 
 - [Home](https://toolfront.dev/) — what ToolFront does and how to start a scan
-- [Example report](https://toolfront.dev/report?domain=vercel.com) — a live
-  agent-readiness report for a real site
+- [Example report](https://toolfront.dev/report?domain=toolfront.dev) — a live
+  agent-readiness report, ToolFront scanning itself
 - [Scanner declaration](https://toolfront.dev/bot) — what our crawler reads, and
   how to opt out
 - [Privacy policy](https://toolfront.dev/privacy) — what we store and for how long

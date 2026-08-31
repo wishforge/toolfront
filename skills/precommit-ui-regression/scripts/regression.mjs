@@ -163,9 +163,17 @@ for (const vp of VIEWPORTS) {
       const scanBtn = page.locator('button:has-text("Scan"), button:has-text("扫描")').first();
       if (await scanBtn.count()) {
         await scanBtn.click();
-        // scan is async: wait for URL to hit the report page, then strictly wait for .fix
+        /* The scan is async, and .fix cards are built by JS only after the scan
+           result arrives — strictly later than the URL flipping to /report.
+           Waiting on (URL || cards) resolves the moment the URL flips, so the
+           count below ran against an empty DOM and reported count=0 on every
+           viewport. Wait for the navigation first, then for the cards. */
         await page.waitForFunction(
-          () => location.pathname.includes("report") || document.querySelectorAll(".fix").length > 0,
+          () => location.pathname.includes("report"),
+          { timeout: 20000 }
+        ).catch(() => {});
+        await page.waitForFunction(
+          () => document.querySelectorAll(".fix").length > 0,
           { timeout: 20000 }
         ).catch(() => {});
         const fixCount = await page.locator(".fix").count();
