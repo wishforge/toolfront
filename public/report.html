@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>ToolFront Report</title>
 <meta name="description" content="Agent-readiness report — what AI agents see when they read this site.">
 <meta name="robots" content="noindex">
@@ -261,8 +264,22 @@
     color: var(--ink-2); background: var(--paper-soft);
     border-color: var(--ink-4);
   }
-  .fix.done .fix-btn-apply { display: none; }
-  .fix.done .fix-btn-dismiss { display: none; }
+    .fix.done .fix-btn-apply { display: none; }
+    .fix.done .fix-btn-dismiss { display: none; }
+
+    /* Dismissed items — dimmed, strikethrough, excluded from projection */
+    .fix.dismissed {
+      opacity: 0.4 !important;
+      transition: opacity 0.2s ease;
+    }
+    .fix.dismissed .fix-title,
+    .fix.dismissed .fix-desc {
+      text-decoration: line-through;
+      color: var(--ink-4);
+    }
+    .fix.dismissed .gain {
+      visibility: hidden;
+    }
 
   /* Passed items — clean green strip style */
   .fix.passed {
@@ -882,6 +899,25 @@
     var fixable = (r.checks || []).filter(function (c) { return c.status === 'fail' || c.status === 'partial'; });
     var fixDict = (CHECKS_L10N[lang] && CHECKS_L10N[lang].fixes) || {};
     var totalGain = 0;
+
+    // Fresh-scan detection: if this report's scannedAt is newer than stored,
+    // clear stale fix states so every new scan starts clean
+    var scanKey = 'tf-scan:' + r.domain;
+    var prevScan = null;
+    try { prevScan = localStorage.getItem(scanKey); } catch (_) {}
+    var currScan = r.scannedAt || '';
+    if (prevScan && prevScan !== currScan) {
+      // New scan detected — wipe old fix states for this domain
+      try {
+        var keysToRemove = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          if (k && k.indexOf('tf-fix:' + r.domain + ':') === 0) keysToRemove.push(k);
+        }
+        keysToRemove.forEach(function (k) { localStorage.removeItem(k); });
+      } catch (_) {}
+    }
+    try { localStorage.setItem(scanKey, currScan); } catch (_) {}
     fixable.forEach(function (c) {
       var fx = fixDict[c.id + '.' + c.status] || fixDict[c.id + '.fail'];
       if (!fx) return;
@@ -910,6 +946,22 @@
       var btnDismiss = el('button', 'fix-btn fix-btn-dismiss');
       btnDismiss.textContent = t('report.fix.dismiss') || 'Dismiss';
       btnDismiss.type = 'button';
+      btnDismiss.addEventListener('click', function () {
+        // Dismiss: mark as ignored (dim + remove from projection)
+        if (!item.classList.contains('dismissed')) {
+          item.classList.add('dismissed');
+          item.style.opacity = '0.4';
+          // If this fix was applied, un-apply it first
+          if (cb.checked) { cb.checked = false; cb.dispatchEvent(new Event('change')); }
+          // Recalculate projection without this item's potential gain
+          project(r);
+        } else {
+          // Toggle back: restore
+          item.classList.remove('dismissed');
+          item.style.opacity = '';
+          project(r);
+        }
+      });
       acts.appendChild(btnApply); acts.appendChild(btnDismiss);
       item.appendChild(acts);
       if (done) item.classList.add('done');
@@ -950,18 +1002,27 @@
 
     function project(rr) {
       var checkedGain = 0;
+      var availableMax = 0;
       var rows = body.querySelectorAll('.fix');
       var idx = 0;
       fixable.forEach(function (c) {
         var gainN = Math.max(0, c.max - (c.points || 0));
         var row = rows[idx]; idx++;
         if (!row) return;
+        // Skip dismissed items from projection entirely
+        if (row.classList.contains('dismissed')) return;
+        availableMax += gainN; // track remaining potential
         var cb = row.querySelector('input');
         if (cb && cb.checked) checkedGain += gainN;
       });
       var sum = Math.min(maxScore, (typeof r.score === 'number' ? r.score : 0) + checkedGain);
       fill.style.width = Math.round((sum / maxScore) * 100) + '%';
-      est.textContent = t('report.proj.est').replace('{s}', String(sum)).replace('{g}', letter(sum));
+      // Show both current estimate and remaining potential
+      var label = t('report.proj.est').replace('{s}', String(sum)).replace('{g}', letter(sum));
+      if (availableMax > 0 && sum < maxScore) {
+        label += '  (+ ' + (availableMax - checkedGain) + ' available)';
+      }
+      est.textContent = label;
     }
     function letter(s) { return s >= 85 ? 'A' : s >= 70 ? 'B' : s >= 50 ? 'C' : s >= 30 ? 'D' : 'F'; }
     project(r);
@@ -1165,7 +1226,7 @@
     ld.textContent = t('report.loading').replace('{d}', domain);
     ld.appendChild(el('span', 'dot', '…'));
     resultBox.appendChild(ld);
-    fetch('/api/scan?domain=' + encodeURIComponent(domain))
+    fetch('/api/scan?domain=' + encodeURIComponent(domain) + '&fresh=1')
       .then(function (res) { return res.json().then(function (body) { return { ok: res.ok, body: body }; }); })
       .then(function (out) {
         if (out.ok && out.body.checks) { renderReport(out.body, true); }
