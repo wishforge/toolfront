@@ -65,6 +65,16 @@ The script:
 - secret-scan prints `✓ No secrets found` AND regression prints `TOTAL: N PASS: N FAIL: 0` -> both pass, safe to commit
 - Any FAIL -> **do not commit**, fix first. Distinguish real bugs from over-strict assertions (e.g. when the i18n assertion does not match the Chinese h1 copy, check whether the assertion itself is too narrow before treating it as a bug)
 
+### 3a. Known false failures
+
+- **`finding cards render | count=0` on every viewport** — the gate waits for the
+  report page in two steps on purpose. `.fix` cards are built by JS only *after*
+  the scan result arrives, which is strictly later than the URL flipping to
+  `/report`. A combined `(URL || cards)` condition resolves on the URL flip and
+  counts against an empty DOM. This has been "fixed" twice: first a wide
+  `waitForSelector` that matched the landing page, then a `waitForFunction` that
+  kept the OR. **Do not collapse the two `waitForFunction` calls back into one.**
+
 ### 4. Custom UI checks (optional)
 
 The script checks `nav` / hero / footer by default. Pass project-specific elements via `--custom-checks` JSON:
