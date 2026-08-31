@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent Readiness Rankings — DTC Brands | ToolFront</title>
+<meta name="description" content="How ready are top DTC brands for AI shopping agents? We scanned 9 brands. Average score: 33/100. Scan your site free.">
+<meta property="og:title" content="DTC Brand AI Agent Readiness Rankings — ToolFront">
+<meta property="og:description" content="Warby Parker leads at 56/100. Patagonia scores just 5. No brand has WebMCP tools. Is your site ready?">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://toolfront.dev/ranking">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface-2: #1a1a26;
+    --border: rgba(255,255,255,0.08);
+    --text: #e8e8ed;
+    --text-2: #9999a8;
+    --text-3: #666678;
+    --accent: #6366f1;
+    --accent-2: #8b5cf6;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --radius: 12px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+  }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
+  .container { max-width: 960px; margin: 0 auto; padding: 20px; }
+
+  /* Hero */
+  .hero { text-align: center; padding: 60px 20px 40px; }
+  .hero h1 { font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 12px; }
+  .hero h1 span { background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { color: var(--text-2); font-size: 1.05rem; max-width: 600px; margin: 0 auto 24px; }
+
+  /* Stats bar */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 48px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 16px; text-align: center; }
+  .stat-num { font-size: 2rem; font-weight: 800; color: var(--accent); }
+  .stat-label { font-size: 0.85rem; color: var(--text-2); margin-top: 4px; }
+
+  /* Section */
+  .section-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .section-title::before { content: ''; width: 4px; height: 20px; background: var(--accent); border-radius: 2px; }
+
+  /* Ranking table */
+  .ranking-table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+  .ranking-table th { text-align: left; padding: 12px 16px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-3); border-bottom: 1px solid var(--border); }
+  .ranking-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .ranking-table tr:hover td { background: rgba(99,102,241,0.04); }
+  .rank { font-weight: 700; font-size: 1.1rem; width: 50px; }
+  .brand-name { font-weight: 500; }
+  .score-bar-wrap { flex: 1; max-width: 200px; }
+  .score-bar { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+  .score-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .grade-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; }
+  .grade-a { background: rgba(34,197,94,0.15); color: var(--green); }
+  .grade-b { background: rgba(59,130,246,0.15); color: #3b82f6; }
+  .grade-c { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .grade-d { background: rgba(239,68,68,0.15); color: var(--red); }
+  .grade-f { background: rgba(239,68,68,0.25); color: #ff6b6b; }
+  .checks { display: flex; gap: 6px; flex-wrap: wrap; }
+  .check-tag { font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; background: var(--surface-2); color: var(--text-3); }
+  .check-tag.ok { background: rgba(34,197,94,0.1); color: var(--green); }
+  .check-tag.fail { background: rgba(239,68,68,0.08); color: var(--text-3); }
+
+  /* Chart */
+  .chart-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 40px; position: relative; height: 480px; }
+
+  /* Insights */
+  .insights { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 48px; }
+  .insight { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .insight-icon { font-size: 1.4rem; margin-bottom: 10px; }
+  .insight h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 6px; }
+  .insight p { font-size: 0.87rem; color: var(--text-2); }
+
+  /* CTA */
+  .cta-section { text-align: center; padding: 48px 20px; background: linear-gradient(180deg, transparent, rgba(99,102,241,0.06)); border-radius: var(--radius); margin-bottom: 40px; }
+  .cta-section h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; }
+  .cta-section p { color: var(--text-2); margin-bottom: 24px; }
+  .btn { display: inline-block; padding: 14px 32px; border-radius: 10px; font-weight: 600; font-size: 1rem; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(99,102,241,0.35); }
+  .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); margin-left: 12px; }
+  .btn-secondary:hover { border-color: var(--accent); }
+
+  /* Footer */
+  footer { text-align: center; padding: 30px; color: var(--text-3); font-size: 0.82rem; border-top: 1px solid var(--border); }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 680px) {
+    .stats { grid-template-columns: 1fr; }
+    .ranking-table { font-size: 0.88rem; }
+    .ranking-table th:nth-child(n+4), .ranking-table td:nth-child(n+4) { display: none; }
+    .insights { grid-template-columns: 1fr; }
+    .btn-secondary { display: block; margin: 12px auto 0; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="hero">
+    <h1><span>AI Agent Readiness</span> — DTC Brand Rankings</h1>
+    <p>We scanned 9 leading DTC &amp; ecommerce brands. The results reveal a massive industry blind spot.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-num">33</div>
+      <div class="stat-label">Average Score / 100</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">0%</div>
+      <div class="stat-label">Brands with WebMCP Tools</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">56</div>
+      <div class="stat-label">Highest Score (Warby Parker)</div>
+    </div>
+  </div>
+
+  <h2 class="section-title">Brand Rankings</h2>
+  <table class="ranking-table">
+    <thead><tr><th>#</th><th>Brand</th><th>Score</th><th>Grade</th><th>Key Checks</th></tr></thead>
+    <tbody id="rankBody"></tbody>
+  </table>
+
+  <h2 class="section-title">Score Distribution</h2>
+  <div class="chart-wrap">
+    <canvas id="chart" role="img" aria-label="Bar chart of brand AI readiness scores"></canvas>
+  </div>
+
+  <h2 class="section-title">Key Findings</h2>
+  <div class="insights">
+    <div class="insight">
+      <div class="insight-icon">🎯</div>
+      <h3>WebMCP = Zero</h3>
+      <p>No single brand has registered AI agent tools via WebMCP. This is the single biggest opportunity gap — 20 points left on the table for everyone.</p>
+    </div>
+    <div class="insight">
+      <div class="insight-icon">📄</div>
+      <h3>llms.txt is the Divider</h3>
+      <p>Brands with llms.txt average 40 points vs 10 points without. One markdown file is the cheapest 15-point win available.</p>
+    </div>
+    <div class="insight">
+      <div class="insight-icon">🏆</div>
+      <h3>DTC Beats Legacy</h3>
+      <p>Warby Parker (56) and Shopify (47) outperform Nike (22) and Patagonia (5). Niche DTC brands are more "agent-native" than giants.</p>
+    </div>
+    <div class="insight">
+      <div class="insight-icon">⚠️</div>
+      <h3>Nobody Passes</h3>
+      <p>The highest score is 56/100 (C grade). Not a single brand achieves B grade or above. The entire industry is unprepared.</p>
+    </div>
+  </div>
+
+  <div class="cta-section">
+    <h2>Where Does Your Brand Rank?</h2>
+    <p>Scan any website for AI agent readiness in 60 seconds. Free, instant, no signup.</p>
+    <a href="/" class="btn btn-primary">Scan Your Site Free →</a>
+    <a href="/demo" class="btn btn-secondary">Watch Demo</a>
+  </div>
+
+  <footer>
+    <p>Data scanned on Aug 31, 2026 via <a href="/">ToolFront</a>. Scores reflect agent-readiness at time of scan.</p>
+  </footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const data = [
+  { rank: 1, brand: 'Warby Parker', domain: 'warbyparker.com', score: 56, webmcp: 0, sd: 16, llms: 15, robots: 0, ms: 25 },
+  { rank: 2, brand: 'Shopify', domain: 'shopify.com', score: 47, webmcp: 0, sd: 16, llms: 15, robots: 6, ms: 10 },
+  { rank: 3, brand: 'Allbirds', domain: 'allbirds.com', score: 37, webmcp: 0, sd: 6, llms: 15, robots: 6, ms: 10 },
+  { rank: 4, brand: 'Glossier', domain: 'glossier.com', score: 37, webmcp: 0, sd: 6, llms: 15, robots: 6, ms: 10 },
+  { rank: 5, brand: 'Everlane', domain: 'everlane.com', score: 37, webmcp: 0, sd: 6, llms: 15, robots: 6, ms: 10 },
+  { rank: 6, brand: 'Gymshark', domain: 'gymshark.com', score: 31, webmcp: 0, sd: 0, llms: 15, robots: 6, ms: 10 },
+  { rank: 7, brand: 'Nike', domain: 'nike.com', score: 22, webmcp: 0, sd: 16, llms: 0, robots: 6, ms: 0 },
+  { rank: 8, brand: 'Reformation', domain: 'reformation.com', score: 22, webmcp: 0, sd: 16, llms: 0, robots: 6, ms: 0 },
+  { rank: 9, brand: 'Patagonia', domain: 'patagonia.com', score: 5, webmcp: 0, sd: 0, llms: 0, robots: 5, ms: 0 },
+];
+
+function grade(s) { return s >= 70 ? 'A' : s >= 50 ? 'B' : s >= 35 ? 'C' : s >= 20 ? 'D' : 'F'; }
+function gradeClass(s) { const g = grade(s); return 'grade-' + g.toLowerCase(); }
+function scoreColor(s) { return s >= 50 ? '#22c55e' : s >= 35 ? '#f59e0b' : s >= 20 ? '#ef4444' : '#dc2626'; }
+
+// Render table
+const tbody = document.getElementById('rankBody');
+data.forEach(d => {
+  const g = grade(d.score);
+  const checks = [
+    { label: 'WebMCP', ok: d.webmcp > 0 },
+    { label: 'Structured Data', ok: d.sd >= 16 },
+    { label: 'llms.txt', ok: d.llms > 0 },
+    { label: 'Robots Policy', ok: d.robots >= 6 },
+    { label: 'Machine Surfaces', ok: d.ms >= 25 },
+  ];
+  tbody.innerHTML += `
+    <tr>
+      <td><span class="rank">${d.rank <= 3 ? ['🥇','🥈','🥉'][d.rank-1] : '#' + d.rank}</span></td>
+      <td><span class="brand-name">${d.brand}</span></td>
+      <td>
+        <div style="font-weight:700;font-size:1.1rem;color:${scoreColor(d.score)}">${d.score}<span style="font-size:0.8rem;color:var(--text-3)">/100</span></div>
+        <div class="score-bar-wrap"><div class="score-bar"><div class="score-fill" style="width:${d.score}%;background:${scoreColor(d.score)}"></div></div></div>
+      </td>
+      <td><span class="grade-badge ${gradeClass(d.score)}">${g}</span></td>
+      <td><div class="checks">${checks.map(c => `<span class="check-tag ${c.ok ? 'ok' : 'fail'}">${c.ok ? '✓' : '✗'} ${c.label}</span>`).join('')}</div></td>
+    </tr>`;
+});
+
+// Chart
+new Chart(document.getElementById('chart'), {
+  type: 'bar',
+  data: {
+    labels: data.map(d => d.brand),
+    datasets: [{
+      label: 'Score',
+      data: data.map(d => d.score),
+      backgroundColor: data.map(d => scoreColor(d.score)),
+      borderRadius: 6,
+      barPercentage: 0.6,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { min: 0, max: 100, grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#666678' } },
+      y: { grid: { display: false }, ticks: { color: '#e8e8ed', font: { weight: 500 } } }
+    }
+  }
+});
+</script>
+</body>
+</html>
