@@ -491,6 +491,39 @@
     border: 1px solid rgba(37,99,235,0.1);
   }
 
+  /* ═══ HERO PREVIEW — Blume-inspired interactive enhancements ═══ */
+  .rp-live {
+    margin-left: auto; display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--mono); font-size: 9px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--good-deep);
+    background: var(--good-soft); border: 1px solid rgba(5,150,105,0.15);
+    border-radius: var(--r-full); padding: 3px 10px;
+  }
+  .rp-live i {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--good);
+    display: inline-block; animation: live-pulse 2s ease-in-out infinite;
+    box-shadow: 0 0 6px rgba(5,150,105,0.5);
+  }
+  @keyframes live-pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* Staggered pill entrance */
+  .pill-in {
+    opacity: 0; transform: translateY(6px);
+    animation: pill-enter .4s var(--ease-out) both;
+    animation-delay: calc(var(--d, 0) * 80ms + 1.2s);
+  }
+  @keyframes pill-enter { to { opacity: 1; transform: translateY(0); } }
+
+  /* Grade badge subtle pulse on load */
+  .grade-badge { animation: badge-pop .6s var(--ease-spring) .8s both; }
+  @keyframes badge-pop {
+    from { transform: scale(0.7); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  /* Score counter — monospace for stable width during count-up */
+  #hero-score-num { display: inline-block; min-width: 2ch; }
+
   /* ═══ PILLS STRIP ═══ */
   .pills-strip {
     border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
@@ -996,7 +1029,7 @@
   @media (max-width: 920px) {
     .hero { grid-template-columns: 1fr; gap: 44px; }
     .hero-right { position: static; }
-    .report-card { max-width: 480px; margin: 0 auto; }
+    .report-card { min-width: 0; width: 100%; max-width: 480px; margin: 0 auto; }
     .ba-grid { grid-template-columns: 1fr; }
     .ba-arrow { transform: rotate(90deg); padding: 12px 0; }
     .step-grid { grid-template-columns: 1fr; }
@@ -1018,6 +1051,27 @@
     .email-v5-form { max-width: 400px; }
     .footer-v5-inner { flex-direction: column; gap: 0; }
     .footer-v5-meta { text-align: center; }
+    /* Mobile: hero report card must never overflow 375px screens */
+    .hero { padding-left: 16px; padding-right: 16px; }
+    .report-card { max-width: 100%; border-radius: var(--r-3); }
+    .rp-body { padding: 18px 18px 20px; }
+    .rp-head { gap: 12px; }
+    .grade-badge { width: 56px; height: 56px; min-width: 56px; font-size: 30px; }
+    .rp-score { font-size: 20px; }
+    .delta-badge { margin-left: 6px; padding: 2px 8px; font-size: 10px; }
+    /* Pills: tighter so 5 pills fit in 2 rows, no overflow */
+    .pill-row { gap: 5px; margin-bottom: 12px; }
+    .pill { font-size: 10px; padding: 3px 8px; }
+    .rp-fix { font-size: 12.5px; }
+    /* LIVE badge must not collide with traffic-light dots on tiny screens */
+    .rp-bar { flex-wrap: wrap; gap: 6px 8px; }
+    .rp-url { max-width: 55%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: auto; }
+    .rp-live { margin-left: 0; }
+    /* Nav: prevent CTA button from line-wrapping on tiny screens */
+    .nav-inner { gap: 6px; }
+    .nav-actions { gap: 6px; }
+    .btn-nav-solid { padding: 6px 14px; font-size: 12px; white-space: nowrap; }
+    .lang-toggle button { padding: 5px 9px; font-size: 11px; }
   }
 </style>
 </head>
@@ -1068,27 +1122,28 @@
     <div  class="scan-meta" data-i18n-html="hero.meta">no signup · checks <b>WebMCP · structured data · llms.txt · robots · sitemap</b></div>
   </div>
 
-  <!-- REPORT CARD -->
+  <!-- REPORT CARD — interactive preview (Blume-inspired) -->
   <div class="report-card" aria-label="Sample scan report">
     <div class="scanline"></div>
     <div class="rp-bar">
       <div class="rp-dot"></div><div class="rp-dot"></div><div class="rp-dot"></div>
       <span class="rp-url">acme-store.com</span>
+      <span class="rp-live"><i></i>live</span>
     </div>
     <div class="rp-body">
       <div class="rp-head">
-        <div class="grade-badge">D</div>
+        <div class="grade-badge" id="hero-grade">D</div>
         <div>
-          <div class="rp-score">37<span class="of">/ 100</span><span class="delta-badge">↑ +28</span></div>
+          <div class="rp-score"><span id="hero-score-num">0</span><span class="of">/ 100</span><span class="delta-badge">↑ +28</span></div>
           <div class="rp-label" data-i18n="rp.label">Agent readiness score</div>
         </div>
       </div>
       <div class="pill-row">
-        <span class="pill p" data-i18n="rp.p1">✓ WebMCP tools</span>
-        <span class="pill m" data-i18n="rp.p2">~ Structured data</span>
-        <span class="pill f" data-i18n="rp.p3">✕ llms.txt</span>
-        <span class="pill p" data-i18n="rp.p4">✓ Crawler policy</span>
-        <span class="pill f" data-i18n="rp.p5">✕ Sitemap / OpenAPI</span>
+        <span class="pill p pill-in" data-i18n="rp.p1">✓ WebMCP tools</span>
+        <span class="pill m pill-in" style="--d:1" data-i18n="rp.p2">~ Structured data</span>
+        <span class="pill f pill-in" style="--d:2" data-i18n="rp.p3">✕ llms.txt</span>
+        <span class="pill p pill-in" style="--d:3" data-i18n="rp.p4">✓ Crawler policy</span>
+        <span class="pill f pill-in" style="--d:4" data-i18n="rp.p5">✕ Sitemap / OpenAPI</span>
       </div>
       <div  class="rp-fix" data-i18n-html="rp.fix">
         <b>Fastest win:</b> add <code>/llms.txt</code> — one markdown file so agents introduce you by your own script. <b>+15 pts</b>
@@ -1622,6 +1677,23 @@
     var input = document.querySelector('.scan-input');
     if (btn) btn.addEventListener('click', goScan);
     if (input) input.addEventListener('keydown', function (e) { if (e.key === 'Enter') goScan(); });
+
+    /* Hero preview: animated score count-up */
+    (function () {
+      var el = document.getElementById('hero-score-num');
+      if (!el) return;
+      var target = 37, start = 0, dur = 1200, t0 = null;
+      function tick(ts) {
+        if (!t0) t0 = ts;
+        var p = Math.min((ts - t0) / dur, 1);
+        // ease-out cubic
+        var ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = String(Math.round(start + (target - start) * ease));
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      // Delay until hero is likely visible
+      setTimeout(function () { requestAnimationFrame(tick); }, 600);
+    })();
     var cta = document.getElementById('nav-cta');
     if (cta) cta.addEventListener('click', function (e) {
       var el = document.getElementById('scan');
