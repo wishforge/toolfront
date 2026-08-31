@@ -9,6 +9,5 @@ node_modules/
 .env.*
 !.env.example
 
-# Design workbench scratch — kept out of the repo even if a local copy exists.
-# (Specs/plans live in-repo under docs/superpowers/ since 2026-08-31.)
-design-candidates/
+# Spec & plan live in-repo under docs/superpowers/ since 2026-08-31;
+# design-candidates/ was un-ignored by local decision the same day.
