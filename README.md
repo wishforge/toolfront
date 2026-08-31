@@ -6,7 +6,7 @@ ToolFront scans any public website for *agent-readiness* — can AI agents (Chat
 
 ## Demo
 
-[![Demo Video](assets/demo-thumbnail.jpg)](https://wishforge.github.io/toolfront/demo/)
+[![Demo Video](assets/demo-thumbnail.jpg)](https://toolfront.dev/demo)
 
 *Click to watch: scanning a real DTC brand site in 60 seconds*
 
