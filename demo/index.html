@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToolFront Demo — Is your site ready for AI agents?</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0a0a0f; color: #e0e0e0;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 20px;
+  }
+  .container { max-width: 900px; width: 100%; }
+  h1 {
+    font-size: 1.5rem; text-align: center; margin-bottom: 8px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    text-align: center; color: #888; font-size: 0.9rem; margin-bottom: 24px;
+  }
+  .player-wrap {
+    position: relative; border-radius: 12px; overflow: hidden;
+    background: #111; box-shadow: 0 20px 60px rgba(99,102,241,0.15);
+  }
+  video {
+    display: block; width: 100%; border-radius: 12px;
+  }
+  .cta {
+    text-align: center; margin-top: 24px;
+  }
+  .cta a {
+    display: inline-block; padding: 12px 32px; border-radius: 8px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff; text-decoration: none; font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .cta a:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(99,102,241,0.4); }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>ToolFront — Is your site ready for AI agents?</h1>
+  <p class="subtitle">Scan any website for agent-readiness in 60 seconds. Free, instant, no signup.</p>
+  <div class="player-wrap">
+    <video controls preload="metadata" poster="../assets/demo-thumbnail.jpg">
+      <source src="../assets/demo-video.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+  <div class="cta">
+    <a href="https://toolfront.dev" target="_blank" rel="noopener">Try it free → toolfront.dev</a>
+  </div>
+</div>
+</body>
+</html>
