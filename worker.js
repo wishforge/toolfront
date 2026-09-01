@@ -128,6 +128,15 @@ export default {
       if (!env.ASSETS) return json({ name: "toolfront", status: "ok" });
       return harden(await env.ASSETS.fetch(new Request(url.origin + "/report.html", request)));
     }
+    // Agent-skills repair docs live under the standard /.well-known/agent-skills/
+    // path (the agentskills discovery convention). Workers static assets skip
+    // dot-prefixed directories (.well-known), so the files are stored under
+    // /agent-skills/ and re-served here at their canonical well-known URL.
+    if (url.pathname.startsWith("/.well-known/agent-skills/")) {
+      const rel = url.pathname.slice("/.well-known/agent-skills/".length);
+      if (env.ASSETS) return harden(await env.ASSETS.fetch(new Request(url.origin + "/agent-skills/" + rel, request)));
+      return json({ error: "not_found" }, 404);
+    }
     if (env.ASSETS) return harden(await env.ASSETS.fetch(request));
     return json({ name: "toolfront", status: "ok" });
   },

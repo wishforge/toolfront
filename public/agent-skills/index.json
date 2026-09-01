@@ -1,0 +1,41 @@
+{
+  "$schema": "https://schemas.agentskills.io/discovery/0.2.0/schema.json",
+  "skills": [
+    {
+      "id": "robots-policy",
+      "name": "Fix the AI crawler policy",
+      "description": "State which AI crawlers are welcome in robots.txt, and stop blocking the ones that cite you.",
+      "href": "https://toolfront.dev/.well-known/agent-skills/robots-policy/SKILL.md"
+    },
+    {
+      "id": "webmcp",
+      "name": "Register WebMCP tools",
+      "description": "Expose machine-readable tools so AI agents can operate your site instead of screenshotting it.",
+      "href": "https://toolfront.dev/.well-known/agent-skills/webmcp/SKILL.md"
+    },
+    {
+      "id": "tool-security",
+      "name": "Harden the tool surface",
+      "description": "Add security annotations so your tool surface cannot be poisoned with injected instructions.",
+      "href": "https://toolfront.dev/.well-known/agent-skills/tool-security/SKILL.md"
+    },
+    {
+      "id": "machine-surfaces",
+      "name": "Publish machine-readable surfaces",
+      "description": "Expose sitemap.xml and an OpenAPI spec so agents get a map of your site and services.",
+      "href": "https://toolfront.dev/.well-known/agent-skills/machine-surfaces/SKILL.md"
+    },
+    {
+      "id": "structured-data",
+      "name": "Add structured data",
+      "description": "Add JSON-LD and OpenGraph so AI can extract prices, products and reviews reliably.",
+      "href": "https://toolfront.dev/.well-known/agent-skills/structured-data/SKILL.md"
+    },
+    {
+      "id": "llms-txt",
+      "name": "Create an llms.txt",
+      "description": "Publish a one-page markdown summary of your site for language-model clients.",
+      "href": "https://toolfront.dev/.well-known/agent-skills/llms-txt/SKILL.md"
+    }
+  ]
+}
