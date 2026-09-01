@@ -26,6 +26,7 @@
     --mid: #D97706; --mid-soft: #FFFBEB;
     --bad: #DC2626; --bad-soft: #FEF2F2;
     --card: #FFFFFF; --surface-dark: #0F172A;
+    --shadow-xs: 0 1px 2px rgba(12,18,34,0.04);
     --shadow-sm: 0 2px 8px -2px rgba(12,18,34,0.06), 0 1px 3px rgba(12,18,34,0.04);
     --shadow-report-glow: 0 0 0 1px rgba(37,99,235,0.08), 0 0 20px -2px rgba(37,99,235,0.10), 0 0 48px -8px rgba(37,99,235,0.06), 0 20px 48px -12px rgba(12,18,34,.15);
     --grad-primary: linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #3B82F6 100%);
@@ -304,19 +305,24 @@
   .scan-loading { font-family: var(--mono); font-size: 13px; color: var(--ink-2); padding: 8px 2px; }
   .scan-loading .dot { animation: pulse-dot 1s infinite; }
 
-  /* ═══ CTA ═══ */
-  .cta { margin-top: 28px; background: var(--surface-dark); border-radius: var(--r-5); color: #EEE; padding: 32px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: center; }
+  /* ═══ CTA (light card — industry standard for white-background result pages) ═══ */
+  .cta { margin-top: 28px; background: #F8FAFC; border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: var(--r-5); color: var(--ink); padding: 32px 36px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 28px; align-items: center; box-shadow: var(--shadow-sm); position: relative; }
   @media (max-width: 760px){ .cta { grid-template-columns: 1fr; } .hero-row { align-items: flex-start; } }
-  .cta h3 { font-family: var(--serif); font-optical-sizing: auto; font-weight: 430; font-size: 22px; letter-spacing: -0.015em; line-height: 1.25; color: #FFF; }
-  .cta h3 em { font-style: italic; color: #93C5FD; }
-  .cta .fine { font-family: var(--serif); font-optical-sizing: auto; font-size: 13px; color: #94A3B8; margin-top: 8px; font-weight: 340; }
-  .cta .scan { display: flex; }
-  .cta input { flex: 1; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); border-radius: var(--r-3) 0 0 var(--r-3); border-right: 0; padding: 12px 16px; font-size: 13.5px; color: #FFF; outline: none; font-family: var(--mono); }
-  .cta input::placeholder { color: #64748B; }
-  .cta input:focus { border-color: rgba(255,255,255,.35); box-shadow: 0 0 0 3px rgba(255,255,255,.08); }
-  .cta button { border: 0; background: var(--grad-primary); color: #FFF; font-weight: 600; font-size: 13.5px; padding: 0 22px; border-radius: 0 var(--r-3) var(--r-3) 0; cursor: pointer; font-family: var(--sans); transition: all var(--dur-fast) var(--ease-out); box-shadow: 0 2px 10px rgba(37,99,235,0.25); }
-  .cta button:hover { background: var(--grad-primary-hover); box-shadow: 0 4px 18px rgba(37,99,235,0.35), 0 0 28px rgba(37,99,235,0.12); transform: translateY(-1px); }
-  .cta .queued { grid-column: 1 / -1; font-family: var(--mono); font-size: 12px; color: #6EE7B7; }
+  .cta .kicker { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; background: var(--accent-soft); border-radius: var(--r-full); margin-bottom: 12px; }
+  .cta .kicker::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse-dot 2s infinite; }
+  @keyframes pulse-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }
+  .cta h3 { font-family: var(--serif); font-optical-sizing: auto; font-weight: 400; font-size: 22px; letter-spacing: -0.015em; line-height: 1.45; color: var(--ink-2); }
+  .cta h3 b { font-weight: 500; color: var(--ink); }
+  .cta h3 em { font-style: italic; color: var(--accent-deep); }
+  .cta .fine { font-family: var(--sans); font-size: 13px; color: var(--ink-3); margin-top: 8px; font-weight: 400; line-height: 1.55; }
+  .cta .scan { display: flex; justify-content: flex-end; }
+  .cta button { border: 0; background: var(--grad-primary); color: #FFF; font-weight: 600; font-size: 13.5px; padding: 13px 24px; border-radius: var(--r-3); cursor: pointer; font-family: var(--sans); letter-spacing: -0.01em; transition: all var(--dur-fast) ease; box-shadow: 0 2px 10px rgba(37,99,235,0.18); text-decoration: none; display: inline-block; }
+  .cta button:hover { background: var(--grad-primary-hover); box-shadow: 0 4px 16px rgba(37,99,235,0.28), 0 0 24px rgba(37,99,235,0.08); transform: translateY(-1px); }
+  .cta button:active { transform: translateY(0); }
+  .cta a.btn-primary { border: 0; background: var(--grad-primary); color: #FFF; font-weight: 600; font-size: 14px; padding: 14px 30px; border-radius: var(--r-full); cursor: pointer; font-family: var(--sans); letter-spacing: -0.01em; transition: all var(--dur-fast) ease; box-shadow: 0 4px 12px rgba(37,99,235,0.30), 0 0 20px rgba(59,130,246,0.18); text-decoration: none; display: inline-block; text-align: center; white-space: nowrap; }
+  .cta a.btn-primary:hover { background: var(--grad-primary-hover); box-shadow: 0 6px 20px rgba(37,99,235,0.42), 0 0 32px rgba(59,130,246,0.28); transform: translateY(-2px); color: #FFF; text-decoration: none; }
+  .cta a.btn-primary:active { transform: translateY(0); }
+  .cta .queued { grid-column: 1 / -1; font-family: var(--mono); font-size: 12px; color: var(--good); }
 
   /* ═══ COLOPHON ═══ */
   .colo { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); margin-top: 20px; flex-wrap: wrap; gap: 8px; font-family: var(--mono); }
@@ -420,12 +426,6 @@
       'dogfood.title': 'This page registered a live tool:',
       'dogfood.tool.live': 'scan_domain — registered & live',
       'dogfood.text': 'If you\u2019re viewing this in a WebMCP-enabled browser (Chrome 146+ Origin Trial), an AI agent on this page can call <code>scan_domain</code> right now and scan any website — same as the form above. That\u2019s the whole idea: your pages become places agents can <em>work</em>, not just read.',
-      'cta.h2': 'Find out where you stand — <span style="color:var(--green)">before your competitors do.</span>',
-      'waitlist.ph': 'you@company.com', 'waitlist.btn': 'Get early access',
-      'waitlist.msg': 'No spam. One confirmation email — that\u2019s it. See our privacy policy.',
-      'waitlist.enter': 'Enter a valid email first.',
-      'waitlist.done': 'Check your inbox — we just sent you a confirmation email.',
-      'waitlist.queued': 'Fix list queued for {d}. We\u2019ll be in touch.',
       'colophon.built': 'Built on the open WebMCP proposal',
       'colophon.privacy': 'Privacy',
       'colophon.terms': 'Terms',
@@ -438,16 +438,15 @@
       'report.biz.allgood': 'Nothing urgent: AI can already read and work with your site. Keep monitoring so redesigns don\u2019t break it.',
       'report.share': 'Share', 'report.pdf': 'Save as PDF', 'report.new': 'New scan', 'report.copied': 'Link copied', 'report.copyfail': 'Copy failed — copy it from the address bar',
       'report.printhead': 'Agent-readiness report — toolfront.dev',
-      'report.raise': '<b>Want to raise this score?</b> ToolFront generates the missing tools for you:',
-      'report.raise.keep': '<b>Great score — keep it that way.</b> A redesign can silently break it. Leave your email and we\u2019ll alert you if it drops:',
+      'report.raise': '<b>One redesign can drop this score.</b> Monitor checks weekly and emails you only when it moves:',
+      'report.raise.keep': '<b>Good score \u2014 but one redesign can still drop it.</b> Monitor checks weekly and emails you only when it moves:',
+      'report.cta.kicker': 'ToolFront Monitor',
       'report.fix.title': 'Fix list', 'report.fix.passed': 'already in place', 'report.fix.alldone': 'All fixes applied! Re-scan to see your new score.', 'report.fix.nofixes': 'Nothing to fix — everything is already in place.', 'report.fix.apply': 'Apply fix', 'report.fix.dismiss': 'Dismiss',
     'rfoot.privacy': 'Privacy',
     'rfoot.security': 'Security',
     'rfoot.bot': '/bot docs',
-    'report.email.placeholder': 'Email',
-    'report.email.aria': 'Email',
       'report.vs.title': 'Since your last scan', 'report.vs.first': 'First scan for this domain — check back after you make changes.', 'report.vs.local': 'Stored only in this browser — clear it anytime in browser settings.', 'report.vs.unchanged': 'No change since your last scan.', 'report.vs.date': 'Compared to your scan on {d}',
-      'report.getfix': 'Get the fix list',
+      'report.getfix': 'Start monitoring \u2192',
       'report.loading': 'Scanning {d} — checking how agents see your site',
       'report.err.network': 'Network hiccup — try again in a moment.',
       'report.err.generic': 'Scan failed. Try again.',
@@ -477,12 +476,6 @@
       'dogfood.title': '本页注册了一个真正能用的工具：',
       'dogfood.tool.live': 'scan_domain — 已注册并生效',
       'dogfood.text': '如果你正在用支持 WebMCP 的浏览器（Chrome 146+ Origin Trial）查看本页，页面上的 AI 智能体现在就能调用 <code>scan_domain</code> 扫描任意网站——和上面的表单完全一样。这就是我们的理念：让网页成为 AI 能<em>干活</em>的地方，而不只是能看的地方。',
-      'cta.h2': '趁竞争对手还没反应过来，<span style="color:var(--green)">先看清自己的位置。</span>',
-      'waitlist.ph': 'you@company.com', 'waitlist.btn': '获取内测资格',
-      'waitlist.msg': '不发垃圾邮件。你只会收到一封确认邮件。参见隐私政策。',
-      'waitlist.enter': '请输入有效的邮箱。',
-      'waitlist.done': '确认邮件已发出，请到邮箱查收。',
-      'waitlist.queued': '已收到 {d} 的定制改进清单请求——做好后第一时间通知你。',
       'colophon.built': '基于开源 WebMCP 提案构建',
       'colophon.privacy': '隐私',
       'colophon.terms': '条款',
@@ -495,16 +488,15 @@
       'report.biz.allgood': '暂时不用改：AI 已经能读懂并用好你的网站。定期回扫，别让下次改版悄悄把它搞坏。',
       'report.share': '分享', 'report.pdf': '存为 PDF', 'report.new': '重新扫描', 'report.copied': '链接已复制', 'report.copyfail': '复制失败——请从地址栏复制',
       'report.printhead': '智能体就绪度报告 — toolfront.dev',
-      'report.raise': '<b>想提高这个分数？</b> ToolFront 为你生成缺失的工具：',
-      'report.raise.keep': '<b>保持住这个成绩。</b>一次改版就可能悄悄掉分。留个邮箱，掉了第一时间通知你：',
+      'report.raise': '<b>一次改版，分数可能就掉了。</b>Monitor 每周扫一次，掉了才发邮件：',
+      'report.raise.keep': '<b>分数不低——但一次改版还是能悄悄掉下去。</b>Monitor 每周扫一次，掉了才发邮件：',
+    'report.cta.kicker': 'ToolFront Monitor',
       'report.fix.title': '修复清单', 'report.fix.passed': '已就绪', 'report.fix.alldone': '全部修复完成！重新扫描看看新分数。', 'report.fix.nofixes': '无需修复——一切已就绪。', 'report.fix.apply': '标记修复', 'report.fix.dismiss': '忽略',
     'rfoot.privacy': '隐私政策',
     'rfoot.security': '安全说明',
     'rfoot.bot': '扫描器说明',
-    'report.email.placeholder': '你的邮箱地址',
-    'report.email.aria': '邮箱地址',
       'report.vs.title': '对比上次扫描', 'report.vs.first': '首次扫描该域名——改完再来看看变化。', 'report.vs.local': '数据仅存于本浏览器——可随时在浏览器设置中清除。', 'report.vs.unchanged': '与上次扫描相比无变化。', 'report.vs.date': '对比 {d} 的扫描结果',
-      'report.getfix': '获取改进清单',
+      'report.getfix': '开始监控 \u2192',
       'report.loading': '正在扫描 {d}——看看 AI 是怎么看你网站的',
       'report.err.network': '网络波动——稍后再试。',
       'report.err.generic': '扫描失败，请重试。',
@@ -613,18 +605,16 @@
   Object.assign(LANGS.en, {
     'report.track.you': 'You', 'report.track.opaque': 'opaque', 'report.track.ready': 'agent-ready',
     'report.proj.label': 'All fixes applied →', 'report.proj.est': '{s} / 100 · {g}',
-    'report.cta.fine': 'One tag to install. Your site stays yours — payment still needs human confirmation.',
+    'report.cta.fine': 'Weekly checks. An email only if the score drops 5+ or a tool changes. Unsubscribe in one click.',
     'report.vs.improved': '↑ improved', 'report.vs.regressed': '↓ regressed',
     'report.loading0': '',
-    'waitlist.fail': 'That didn\'t go through. Please try again in a moment.'
   });
   Object.assign(LANGS.zh, {
     'report.track.you': '你', 'report.track.opaque': '对 AI 封闭', 'report.track.ready': '智能体就绪',
     'report.proj.label': '全部修复完成后 →', 'report.proj.est': '{s} 分 · {g} 级',
-    'report.cta.fine': '装一行代码就行。网站还是你的——付款仍由人工确认。',
+    'report.cta.fine': '每周扫一次 · 分数掉 5 分或工具面被改才发邮件 · 一键退订',
     'report.vs.improved': '↑ 进步', 'report.vs.regressed': '↓ 退步',
     'report.loading0': '',
-    'waitlist.fail': '提交没有成功，请稍后再试。'
   });
 
 
@@ -1036,37 +1026,16 @@
   function buildCta(r) {
     var cta = el('div', 'cta');
     var copy = el('div');
-    var raise = el('div');
+    copy.appendChild(el('div', 'kicker', t('report.cta.kicker')));
+    var raise = el('h3');
     raise.innerHTML = t(r.score >= 70 ? 'report.raise.keep' : 'report.raise'); // trusted static dict (contains <b>)
     copy.appendChild(raise);
     copy.appendChild(el('div', 'fine', t('report.cta.fine')));
     cta.appendChild(copy);
     var wl = el('div', 'scan');
-    var em = el('input'); em.type = 'email'; em.placeholder = t('waitlist.ph'); em.setAttribute('aria-label', t('report.email.aria'));
-    var btn = el('button'); btn.type = 'button'; btn.textContent = t('report.getfix');
-    wl.appendChild(em); wl.appendChild(btn);
+    var btn = el('a'); btn.href = '#monitor-signup'; btn.className = 'btn-primary'; btn.textContent = t('report.getfix'); btn.setAttribute('data-monitor-link', 'signup');
+    wl.appendChild(btn);
     cta.appendChild(wl);
-    em.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
-    btn.addEventListener('click', go);
-    function go() {
-      var v = (em.value || '').trim();
-      if (!v || v.indexOf('@') < 1) { em.focus(); return; }
-      btn.disabled = true;
-      // Same honesty rule as the landing page: only claim success when the
-      // server actually accepted the submission.
-      fetch('/api/waitlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: v, domain: r.domain || null, lang: lang }),
-      }).then(function (res) {
-        cta.appendChild(el('div', 'queued', res.ok ? t('waitlist.done') : t('waitlist.fail')));
-        if (res.ok) em.value = '';
-        else btn.disabled = false;
-      }).catch(function () {
-        cta.appendChild(el('div', 'queued', t('waitlist.fail')));
-        btn.disabled = false;
-      });
-    }
     return cta;
   }
 
@@ -1248,6 +1217,15 @@
   try { qd = (new URLSearchParams(location.search).get('domain') || '').replace(/[^a-zA-Z0-9.-]/g, ''); } catch (_) {}
   if (qd) { runScan(qd); }
   else { location.replace('/'); }
+
+  (function () {
+    var local = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    var base = local ? 'http://localhost:8787' : 'https://monitor.toolfront.dev';
+    document.querySelectorAll('[data-monitor-link]').forEach(function (a) {
+      var page = a.getAttribute('data-monitor-link') || 'login';
+      a.href = base + '/' + page;
+    });
+  })();
 </script>
 </body>
 </html>
