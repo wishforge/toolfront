@@ -833,6 +833,13 @@ async function scanDomainCore(domain, env) {
   // Provenance: a self-scan never touched the network.
   if (selfScan) report.self = true;
   if (unavailable.length) report.unavailable = unavailable;
+  // Store the tool surface body alongside its hash. A hash can only say that
+  // the surface changed; the body lets the scheduled-scan diff say WHICH tool
+  // changed and whether it was a removal, a rewritten description, or a
+  // flipped safety annotation — that difference is what makes an alert
+  // actionable instead of a puzzle. `raw` is dropped: it is up to 2KB of page
+  // body per tool, which would bloat every D1 row for no extra diff signal.
+  if (surface.tools.length) report.tools = surface.tools.map(({ raw, ...rest }) => rest);
   report.report_json = JSON.stringify(report);
   return report;
 }
