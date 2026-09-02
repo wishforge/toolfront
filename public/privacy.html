@@ -69,7 +69,7 @@
       <li><strong>IP address and timestamps</strong> — collected for rate limiting, abuse prevention, and (for waitlist signups) as your consent record under GDPR Art. 7.</li>
       <li><strong>Language preference</strong> — stored in your browser's localStorage (key <code>tf-lang</code>) to remember your language choice. This is strictly functional storage; no cookies or third-party trackers are used.</li>
       <li><strong>Scan history &amp; fix-list progress</strong> — your latest scan result per domain (domain, score, check statuses, timestamp) and your fix-list checkboxes are stored in your browser's localStorage (keys <code>tf-last:*</code> and <code>tf-fix:*</code>) to power the "since your last scan" comparison and remember your progress. This data <strong>never leaves your browser</strong> and can be cleared at any time in your browser settings.</li>
-      <li><strong>Aggregate usage statistics</strong> — counts of product events (e.g., signups, email confirmations, logins, scans started) and their coarse outcome, used to understand the signup funnel and improve the product. These counters <strong>cannot identify you</strong>: they contain no email address, no domain, no IP address, and no language. Stored by our host in Cloudflare Analytics Engine for 90 days.</li>
+      <li><strong>Aggregate usage statistics</strong> — counts of product events (e.g., signups, email confirmations, logins, monitors added) and their coarse outcome, used to understand the signup funnel and improve the product. These counters <strong>cannot identify you</strong>: they contain no email address, no domain, no IP address, and no language. Stored by our host in Cloudflare Analytics Engine for 90 days.</li>
       <li><strong>Monitor account data</strong> — if you create a Monitor account (monitor.toolfront.dev): your email address and password (stored only as a salted PBKDF2 hash — never readable), the domains you choose to monitor, login timestamps and IP addresses (for rate limiting and account lockout), scan reports and alert messages for your monitored domains, and a suppression record if you unsubscribe (a one-way hash of your email + the unsubscribe timestamp).</li>
     </ul>
     <p>Our scanner fetches only publicly accessible pages (<code>/</code>, <code>/robots.txt</code>, <code>/llms.txt</code>, <code>/sitemap.xml</code>, <code>/openapi.json</code>) of domains you submit. We never scan private networks or authenticated content.</p>
@@ -109,10 +109,10 @@
     <p>Data in transit is TLS-encrypted. Access to storage is restricted to the production Worker. If you believe you found a security issue, see <a href="/security">our vulnerability disclosure policy</a>.</p>
 
     <h2>Data breach notification</h2>
-    <p>If a security incident affects personal data we hold, we will notify the relevant supervisory authority within <strong>72 hours</strong> of becoming aware of it (GDPR Art. 33) and, where the incident is likely to result in a high risk to your rights, inform affected users without undue delay by email (GDPR Art. 34). We deliberately keep the data we hold small — an email address, a hashed consent record, and the domains you scan — which limits the impact of any incident.</p>
+    <p>If a security incident affects personal data we hold, we will notify the relevant supervisory authority within <strong>72 hours</strong> of becoming aware of it (GDPR Art. 33) and, where the incident is likely to result in a high risk to your rights, inform affected users without undue delay by email (GDPR Art. 34). We deliberately keep the data we hold small — an email address, a hashed consent record, the domains you scan or monitor, and hashed passwords for Monitor accounts — which limits the impact of any incident.</p>
 
     <h2>Changes</h2>
-    <p>We will update this page if our practices change; material changes will be announced on the site before taking effect. This is version 1.0 of the policy.</p>
+    <p>We will update this page if our practices change; material changes will be announced on the site before taking effect. This is version 1.2 of the policy.</p>
   </div>
 
   <div class="zh">
@@ -130,7 +130,7 @@
       <li><strong>IP 地址与时间戳</strong>——用于限流、防滥用，以及（针对候补注册）作为 GDPR 第 7 条要求的同意凭证。</li>
       <li><strong>语言偏好</strong>——存储在你浏览器的 localStorage（键名 <code>tf-lang</code>）中，用于记住语言选择。这是严格功能性存储；本站不使用 Cookie 或第三方跟踪器。</li>
       <li><strong>扫描历史与修复进度</strong>——你最近一次的扫描结果（域名、分数、各项检查状态、时间戳）与修复清单勾选状态，存储在你浏览器的 localStorage（键名 <code>tf-last:*</code>、<code>tf-fix:*</code>）中，用于"对比上次扫描"功能和记住修复进度。这些数据<strong>永不离开你的浏览器</strong>，可随时在浏览器设置中清除。</li>
-      <li><strong>聚合用量统计</strong>——产品事件计数（如注册、邮箱确认、登录、扫描开始）及其粗粒度结果，用于理解注册漏斗、改进产品。这些计数器<strong>无法识别你</strong>：不包含邮箱、域名、IP 或语言。存储于我们的主机方 Cloudflare Analytics Engine，保留 90 天。</li>
+      <li><strong>聚合用量统计</strong>——产品事件计数（如注册、邮箱确认、登录、添加监控）及其粗粒度结果，用于理解注册漏斗、改进产品。这些计数器<strong>无法识别你</strong>：不包含邮箱、域名、IP 或语言。存储于我们的主机方 Cloudflare Analytics Engine，保留 90 天。</li>
       <li><strong>Monitor 账号数据</strong>——如你在 monitor.toolfront.dev 创建 Monitor 账号：邮箱地址与密码（仅以加盐 PBKDF2 哈希存储，不可还原）、你选择监控的域名、登录时间戳与 IP（用于限流与账号锁定）、你监控域名的扫描报告与告警消息，以及退订抑制记录（邮箱单向哈希 + 退订时间戳）。</li>
     </ul>
     <p>扫描器只抓取你提交域名的公开页面（<code>/</code>、<code>/robots.txt</code>、<code>/llms.txt</code>、<code>/sitemap.xml</code>、<code>/openapi.json</code>），绝不扫描私网或需要登录的内容。</p>
@@ -170,10 +170,10 @@
     <p>传输数据经 TLS 加密。存储访问仅限生产 Worker。如发现安全问题，请参阅 <a href="/security">漏洞披露政策</a>。</p>
 
     <h2>数据泄露通知</h2>
-    <p>若发生影响我们所持有个人数据的安全事件，我们将在知悉后 <strong>72 小时内</strong>通知相关监管机构（GDPR 第 33 条）；若该事件可能对你的权利造成较高风险，我们将通过邮件及时告知受影响用户（GDPR 第 34 条）。我们刻意将持有的数据保持在最小范围——一个邮箱地址、一条哈希化的同意记录，以及你扫描的域名——以降低任何事件的潜在影响。</p>
+    <p>若发生影响我们所持有个人数据的安全事件，我们将在知悉后 <strong>72 小时内</strong>通知相关监管机构（GDPR 第 33 条）；若该事件可能对你的权利造成较高风险，我们将通过邮件及时告知受影响用户（GDPR 第 34 条）。我们刻意将持有的数据保持在最小范围——一个邮箱地址、一条哈希化的同意记录、你扫描或监控的域名，以及 Monitor 账号的哈希化密码——以降低任何事件的潜在影响。</p>
 
     <h2>变更</h2>
-    <p>如实践发生变化我们会更新本页；重大变更将在生效前于站内公告。当前为隐私政策版本 1.0。</p>
+    <p>如实践发生变化我们会更新本页；重大变更将在生效前于站内公告。当前为隐私政策版本 1.2。</p>
   </div>
 
   <footer>
