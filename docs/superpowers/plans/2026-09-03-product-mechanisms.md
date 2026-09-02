@@ -30,7 +30,7 @@
 **Interfaces:**
 - Produces: fix cards ordered by tier group first, then `gain = max - points` descending within each group. No data-shape change.
 
-- [ ] **Step 1: Extend the existing comparator**
+- [x] **Step 1: Extend the existing comparator**
 
 ```js
 // Order by blast radius first (blocking → interpretation → enrichment), then by
@@ -42,7 +42,7 @@ fixable.sort(function (a, b) {
 });
 ```
 
-- [ ] **Step 2: Verify** — scan a domain with mixed fail/partial checks; confirm the top blocking card is the largest `+N pts` one and group headers still appear in tier order.
+- [x] **Step 2: Verify** — scan a domain with mixed fail/partial checks; confirm the top blocking card is the largest `+N pts` one and group headers still appear in tier order.
 
 ---
 
@@ -60,15 +60,15 @@ Dropped by user decision during implementation: toolfront-monitor already ships 
 **Interfaces:**
 - Produces: successful probe results carry `ctype` (lowercased Content-Type, `null` if absent) and `link` (Link header value or `null`). Error/redirect-chain results omit both (callers treat `undefined` as absent).
 
-- [ ] **Step 1: `fetchCapped`** — on the final GET return (line ~378) and HEAD return (line ~363) add:
+- [x] **Step 1: `fetchCapped`** — on the final GET return (line ~378) and HEAD return (line ~363) add:
 
 ```js
 ctype: (res.headers.get("content-type") || "").toLowerCase() || null,
 link: res.headers.get("link"),
 ```
 
-- [ ] **Step 2: `probePath` self-scan branch** — add the same two fields from the ASSETS response headers.
-- [ ] **Step 3: Verify** — `node --check worker.js`; existing tests still pass (`npm test`).
+- [x] **Step 2: `probePath` self-scan branch** — add the same two fields from the ASSETS response headers.
+- [x] **Step 3: Verify** — `node --check worker.js`; existing tests still pass (`npm test`).
 
 ---
 
@@ -80,9 +80,9 @@ link: res.headers.get("link"),
 **Interfaces:**
 - Produces: report `checks[]` includes `api-errors`, `freshness`, `link-headers` with the same `{ id, label, tier, evidence, max, status, points, detail }` shape. `scoring_version` = `"2.1.0"`.
 
-- [ ] **Step 1: Resplit `CHECK_POLICY`** exactly as spec §F3 (blocking 0.35/0.35/0.15/0.15, interpretation 0.40/0.35/0.25, enrichment 0.60/0.40). Add evidence grades: api-errors `B`, freshness `B`, link-headers `C`.
-- [ ] **Step 2: `SCORING_VERSION = "2.1.0"`** and add the three ids to `SUB_CHECKS`.
-- [ ] **Step 3: Implement check functions** (pure, testable):
+- [x] **Step 1: Resplit `CHECK_POLICY`** exactly as spec §F3 (blocking 0.35/0.35/0.15/0.15, interpretation 0.40/0.35/0.25, enrichment 0.60/0.40). Add evidence grades: api-errors `B`, freshness `B`, link-headers `C`.
+- [x] **Step 2: `SCORING_VERSION = "2.1.0"`** and add the three ids to `SUB_CHECKS`.
+- [x] **Step 3: Implement check functions** (pure, testable):
 
 ```js
 function checkApiErrors(probe) {          // probe = result of /api/tf-probe-<ts>
@@ -107,8 +107,8 @@ function checkLinkHeaders(home) {
 }
 ```
 
-- [ ] **Step 4: Wire into `scanDomainCore`** — one extra probe `probePath(env, domain, "/api/tf-probe-" + Date.now())` in the existing `Promise.all`; freshness/link-headers read from the existing `home` probe (plus `home.headers` Last-Modified — expose it in Task 3 as `lmod`). Self-scan: `api-errors` forced `na` (asset server cannot exercise worker routes — spec limitation).
-- [ ] **Step 5: Verify** — `npm test`; scan `toolfront.dev` via `wrangler dev` and confirm the three new cards appear with honest statuses.
+- [x] **Step 4: Wire into `scanDomainCore`** — one extra probe `probePath(env, domain, "/api/tf-probe-" + Date.now())` in the existing `Promise.all`; freshness/link-headers read from the existing `home` probe (plus `home.headers` Last-Modified — expose it in Task 3 as `lmod`). Self-scan: `api-errors` forced `na` (asset server cannot exercise worker routes — spec limitation).
+- [x] **Step 5: Verify** — `npm test`; scan `toolfront.dev` via `wrangler dev` and confirm the three new cards appear with honest statuses.
 
 ---
 
@@ -120,9 +120,9 @@ function checkLinkHeaders(home) {
 **Interfaces:**
 - Consumes: check ids from Task 4. Produces: fix cards for `api-errors.<status>`, `freshness.<status>`, `link-headers.<status>` with title, serif detail, and paste-ready sample blocks (RFC 9457 problem+json sample; JSON-LD `dateModified` sample; nginx `add_header Link` sample — same content isagentready cited, rewritten in our voice).
 
-- [ ] **Step 1: fixDict** — add entries for all three ids × (fail, partial).
-- [ ] **Step 2: i18n** — check labels come from the API (`policyOf`), fix-card copy and waitlist strings added to both dictionaries.
-- [ ] **Step 3: Verify** — toggle lang switch on the report page; no `report.fix.*` raw keys leak through.
+- [x] **Step 1: fixDict** — add entries for all three ids × (fail, partial).
+- [x] **Step 2: i18n** — check labels come from the API (`policyOf`), fix-card copy and waitlist strings added to both dictionaries.
+- [x] **Step 3: Verify** — toggle lang switch on the report page; no `report.fix.*` raw keys leak through.
 
 ---
 
@@ -136,17 +136,17 @@ function checkLinkHeaders(home) {
 **Interfaces:**
 - Repo convention: self-executing, `console.log` progress, `process.exit(fail ? 1 : 0)`.
 
-- [ ] **Step 1: Write `tests/product-checks.test.mjs`** (export the check functions from worker.js or re-declare via import — follow however `dogfood.test.mjs` accesses the engine).
-- [ ] **Step 2: Update dogfood expectations** for the resplit maxes and the `na` api-errors on self-scan.
-- [ ] **Step 3: `npm test`** — all suites green.
+- [x] **Step 1: Write `tests/product-checks.test.mjs`** (export the check functions from worker.js or re-declare via import — follow however `dogfood.test.mjs` accesses the engine).
+- [x] **Step 2: Update dogfood expectations** for the resplit maxes and the `na` api-errors on self-scan.
+- [x] **Step 3: `npm test`** — all suites green.
 
 ---
 
 ### Task 7: Gates + local commit + preview (Batch 1 checkpoint)
 
-- [ ] **Step 1: `node skills/precommit-ui-regression/scripts/secret-scan.mjs`** → green.
-- [ ] **Step 2: `node skills/precommit-ui-regression/scripts/regression.mjs`** → green.
-- [ ] **Step 3: Commit locally (English message, no push):**
+- [x] **Step 1: `node skills/precommit-ui-regression/scripts/secret-scan.mjs`** → green.
+- [x] **Step 2: `node skills/precommit-ui-regression/scripts/regression.mjs`** → green.
+- [x] **Step 3: Commit locally (English message, no push):**
 
 ```
 feat(report): gain-sorted action plan, waitlist capture, api-errors/freshness/link-headers checks
@@ -158,7 +158,7 @@ feat(report): gain-sorted action plan, waitlist capture, api-errors/freshness/li
 - tests: product-checks suite; dogfood updated for new policy
 ```
 
-- [ ] **Step 4: `wrangler dev` → present the report page to the user → STOP and wait for confirmation.** No deploy.
+- [x] **Step 4: `wrangler dev` → present the report page to the user → STOP and wait for confirmation.** No deploy.
 
 ---
 
@@ -171,10 +171,10 @@ feat(report): gain-sorted action plan, waitlist capture, api-errors/freshness/li
 - Consumes: `r.rules_version` / `r.scoring_version` (already in the report JSON); check ids for the SOURCES map.
 - Produces: each fail/partial fix card renders a row of authoritative source links (RFC / spec, `rel=noopener`, `target=_blank`); the colophon shows `rules vX · scoring vY`.
 
-- [ ] **Step 1: `CHECK_SOURCES` const map in report.html** (per check id, 1–3 links; UI concern, no API change).
-- [ ] **Step 2: Render links** inside the fix card under the skill link (only when the card is a fail/partial fix).
-- [ ] **Step 3: Version stamp** in the colophon: `rules {rules_version} · scoring {scoring_version}` (mono, muted).
-- [ ] **Step 4: Verify** in `wrangler dev` — links render on failing cards, stamp shows, `npm test` green (report-dom asserts the stamp).
+- [x] **Step 1: `CHECK_SOURCES` const map in report.html** (per check id, 1–3 links; UI concern, no API change).
+- [x] **Step 2: Render links** inside the fix card under the skill link (only when the card is a fail/partial fix).
+- [x] **Step 3: Version stamp** in the colophon: `rules {rules_version} · scoring {scoring_version}` (mono, muted).
+- [x] **Step 4: Verify** in `wrangler dev` — links render on failing cards, stamp shows, `npm test` green (report-dom asserts the stamp).
 
 ---
 
@@ -187,7 +187,7 @@ feat(report): gain-sorted action plan, waitlist capture, api-errors/freshness/li
 **Interfaces:**
 - Reuses `/api/scan` cache semantics; blocked reports render as "blocked" card, not compared.
 
-- [ ] **Step 1: Worker route + API.** - [ ] **Step 2: compare.html.** - [ ] **Step 3: Mobile layout (cards stack, VS badge stays centered).** - [ ] **Step 4: Tests + gates + local commit.**
+- [x] **Step 1: Worker route + API.** - [ ] **Step 2: compare.html.** - [ ] **Step 3: Mobile layout (cards stack, VS badge stays centered).** - [ ] **Step 4: Tests + gates + local commit.**
 
 ### Task 9 (Batch 2): /rankings route + page (F5)
 
@@ -198,7 +198,7 @@ feat(report): gain-sorted action plan, waitlist capture, api-errors/freshness/li
 **Interfaces:**
 - `GET /api/rankings?vertical=hosting` → `{ rows: [{ domain, score, grade, scannedAt }] }`. Curated list is a static module in the monitor repo.
 
-- [ ] **Step 1: D1 aggregation query + route.** - [ ] **Step 2: rankings.html.** - [ ] **Step 3: Tests + gates + local commit.**
+- [x] **Step 1: D1 aggregation query + route.** - [ ] **Step 2: rankings.html.** - [ ] **Step 3: Tests + gates + local commit.**
 
 ---
 
