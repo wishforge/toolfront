@@ -468,14 +468,14 @@
       'report.raise': '<b>One redesign can drop this score.</b> Monitor checks weekly and emails you only when it moves:',
       'report.raise.keep': '<b>Good score \u2014 but one redesign can still drop it.</b> Monitor checks weekly and emails you only when it moves:',
       'report.cta.kicker': 'No noise. One email when it matters.',
-      'report.fix.title': 'Fix list', 'report.fix.passed': 'already in place', 'report.fix.alldone': 'All fixes applied! Re-scan to see your new score.', 'report.fix.nofixes': 'Nothing to fix — everything is already in place.', 'report.fix.apply': 'Apply fix', 'report.fix.dismiss': 'Dismiss',
-      'report.fix.skill': 'Repair instructions',
+      'report.fix.title': 'Fix list', 'report.fix.passed': 'already in place', 'report.fix.alldone': 'All fixes applied! Re-scan to see your new score.', 'report.fix.nofixes': 'Nothing to fix — everything is already in place.', 'report.fix.apply': 'Mark as fixed', 'report.fix.dismiss': 'Dismiss',
+      'report.fix.skill': 'How to fix',
       'report.fix.group.blocking': 'Blocks AI access',
       'report.fix.group.interpretation': 'Hurts AI understanding',
-      'report.fix.group.enrichment': 'Nice to have',
-      'report.grade.a': 'Backed by vendor documentation or an approved standard — scored at full weight',
-      'report.grade.b': 'Backed by a draft standard with significant adoption — scored at partial weight',
-      'report.grade.c': 'Community convention, not yet backed by a documented consumer — shown for reference, not scored',
+      'report.fix.group.enrichment': 'Adds context',
+      'report.grade.a': 'Confirmed: vendors publicly document reading this signal',
+      'report.grade.b': 'Widely adopted, but not yet an official standard',
+      'report.grade.c': 'Community convention — no vendor has confirmed reading it',
     'rfoot.privacy': 'Privacy',
     'rfoot.security': 'Security',
     'rfoot.bot': '/bot docs',
@@ -514,25 +514,25 @@
       'colophon.privacy': '隐私',
       'colophon.terms': '条款',
       'colophon.security': '安全',
-      'report.yours': '你的报告', 'report.summary': '报告摘要', 'report.label': '智能体就绪度', 'report.scanned': '扫描于',
+      'report.yours': '你的报告', 'report.summary': '报告摘要', 'report.label': 'AI 就绪度', 'report.scanned': '扫描于',
       'report.biz.title': '这对你的生意意味着什么', 'report.tech.title': '技术详情',
       'report.biz.low': '总结：你的网站对 AI 来说是个黑盒。本该属于你的客户，正被 AI 引去对手那里——每拖一天都在丢单。',
       'report.biz.mid': '总结：AI 只读懂了你的一半——关键时刻还是说不清、推不动。补齐下面几项，立刻见效。',
       'report.biz.high': '总结：你的网站已经"会说 AI 的语言"——领先大多数对手。保持住，定期复查。',
       'report.biz.allgood': '暂时不用改：AI 已经能读懂并用好你的网站。定期回扫，别让下次改版悄悄把它搞坏。',
       'report.share': '分享', 'report.pdf': '存为 PDF', 'report.new': '重新扫描', 'report.copied': '链接已复制', 'report.copyfail': '复制失败——请从地址栏复制',
-      'report.printhead': '智能体就绪度报告 — toolfront.dev',
+      'report.printhead': 'AI 就绪度报告 — toolfront.dev',
       'report.raise': '<b>一次改版，分数可能就掉了。</b>Monitor 每周扫一次，掉了才发邮件：',
       'report.raise.keep': '<b>分数不低——但一次改版还是能悄悄掉下去。</b>Monitor 每周扫一次，掉了才发邮件：',
     'report.cta.kicker': '不打扰 · 只在真正出事时发一封邮件',
       'report.fix.title': '修复清单', 'report.fix.passed': '已就绪', 'report.fix.alldone': '全部修复完成！重新扫描看看新分数。', 'report.fix.nofixes': '无需修复——一切已就绪。', 'report.fix.apply': '标记修复', 'report.fix.dismiss': '忽略',
-      'report.fix.skill': '修复指令',
+      'report.fix.skill': '怎么修',
       'report.fix.group.blocking': '阻塞 AI 访问',
       'report.fix.group.interpretation': '影响 AI 理解',
-      'report.fix.group.enrichment': '锦上添花',
-      'report.grade.a': '有厂商文档背书或已批准标准支撑——全额计分',
-      'report.grade.b': '有显著采用的草案标准支撑——部分计分',
-      'report.grade.c': '社区惯例，暂无文档化消费者——仅展示，不计分',
+      'report.fix.group.enrichment': '补充信息',
+      'report.grade.a': '确定有效：厂商官方写明会读取这项信号',
+      'report.grade.b': '基本有效：行业普遍采用，但还不是官方标准',
+      'report.grade.c': '仅供参考：行业惯例，暂无厂商确认会读取',
     'rfoot.privacy': '隐私政策',
     'rfoot.security': '安全说明',
     'rfoot.bot': '扫描器说明',
@@ -698,18 +698,13 @@
   function statusRank(s) { return s === 'pass' ? 3 : s === 'partial' ? 2 : s === 'fail' ? 1 : -1; }
   function statusMark(s) { return s === 'pass' ? '✓' : s === 'partial' ? '~' : s === 'fail' ? '✕' : '–'; }
 
-  /* Blast-radius group + evidence grade per check (mirrors Agent Lighthouse's
-     severity tiers and evidence policy). Group orders the fix list; grade is a
-     static hint on the card — it is NOT wired to the score yet (that is P4). */
-  var CHECK_META = {
-    'webmcp':           { group: 'blocking',       grade: 'A' },
-    'tool-security':    { group: 'blocking',       grade: 'A' },
-    'robots-policy':    { group: 'blocking',       grade: 'A' },
-    'machine-surfaces': { group: 'interpretation', grade: 'B' },
-    'structured-data':  { group: 'interpretation', grade: 'B' },
-    'llms-txt':         { group: 'enrichment',     grade: 'C' },
-  };
+  /* Blast-radius tier + evidence grade are NOT defined here — the scanner owns
+     them (CHECK_POLICY in worker.js) and ships them per check, so grouping,
+     badge, and score can never drift apart. These are fallbacks for reports
+     cached before the scanner started sending them. */
   var GROUP_ORDER = ['blocking', 'interpretation', 'enrichment'];
+  function tierOf(c) { return GROUP_ORDER.indexOf(c.tier) > -1 ? c.tier : 'enrichment'; }
+  function evidenceOf(c) { return /^[ABC]$/.test(c.evidence || '') ? c.evidence : 'C'; }
 
   var ICONS = {
     pass: '<svg class="ic" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 6l-5 5L4 7"/></svg>',
@@ -964,15 +959,13 @@
     try { localStorage.setItem(scanKey, currScan); } catch (_) {}
     // Order by blast radius: blocking first, then interpretation, then enrichment.
     fixable.sort(function (a, b) {
-      var ga = (CHECK_META[a.id] && CHECK_META[a.id].group) || 'enrichment';
-      var gb = (CHECK_META[b.id] && CHECK_META[b.id].group) || 'enrichment';
-      return GROUP_ORDER.indexOf(ga) - GROUP_ORDER.indexOf(gb);
+      return GROUP_ORDER.indexOf(tierOf(a)) - GROUP_ORDER.indexOf(tierOf(b));
     });
     var lastGroup = null;
     fixable.forEach(function (c) {
       var fx = fixDict[c.id + '.' + c.status] || fixDict[c.id + '.fail'];
       if (!fx) return;
-      var meta = CHECK_META[c.id] || { group: 'enrichment', grade: 'C' };
+      var meta = { group: tierOf(c), grade: evidenceOf(c) };
       var gainN = Math.max(0, c.max - (c.points || 0));
       totalGain += gainN;
       var key = 'tf-fix:' + r.domain + ':' + c.id;
@@ -1010,7 +1003,7 @@
       /* Action buttons */
       var acts = el('div', 'fix-actions');
       var btnApply = el('button', 'fix-btn fix-btn-apply');
-      btnApply.textContent = t('report.fix.apply') || 'Apply fix';
+      btnApply.textContent = t('report.fix.apply') || 'Mark as fixed';
       btnApply.type = 'button';
       btnApply.addEventListener('click', function () { if (!cb.checked) { cb.checked = true; cb.dispatchEvent(new Event('change')); } });
       var btnDismiss = el('button', 'fix-btn fix-btn-dismiss');

@@ -54,7 +54,7 @@ console.log("[D] 静默绕过：字段全是变量引用");
   const f = s.tools.flatMap(t => toolPoisonFindings(t));
   ok("字段全空时零发现（= 静默绕过面）", f.length === 0); // 这是问题陈述：检测不到≠安全
   const verdict = checkToolSecurity(s);
-  ok("修复后：静默绕过被降级为 partial ≤7", verdict.status === "partial" && verdict.points <= 7, JSON.stringify(verdict));
+  ok("修复后：静默绕过被降级为 partial ≤7", verdict.status === "partial" && verdict.ratio <= 0.7, JSON.stringify(verdict));
 }
 
 console.log("[E] 模板字符串/拼接描述绕过");
@@ -62,7 +62,7 @@ console.log("[E] 模板字符串/拼接描述绕过");
   const html = `<script>document.modelContext.registerTool({ name: "search", description: "safe" + poisonStr });</script>`;
   const s = extractWebMcpSurface(html);
   const verdict = checkToolSecurity(s);
-  ok("修复后：拼接描述不再白拿满分（partial 降级）", verdict.status === "partial" && verdict.points <= 7, JSON.stringify(verdict));
+  ok("修复后：拼接描述不再白拿满分（partial 降级）", verdict.status === "partial" && verdict.ratio <= 0.7, JSON.stringify(verdict));
 }
 
 console.log("[F] checkWebMCP 死代码");

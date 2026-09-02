@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import {
   extractWebMcpSurface, checkWebMCP, checkToolSecurity, checkStructuredData,
-  checkLlmsTxt, checkRobotsAI, checkMachineSurfaces,
+  checkLlmsTxt, checkRobotsAI, checkMachineSurfaces, CHECK_POLICY, TIER_BUDGET,
 } from "../worker.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -28,27 +28,32 @@ const sitemap = read("sitemap.xml");
 const openapi = read("openapi.json");
 
 const surface = extractWebMcpSurface(home.text);
+// Max values come from the SAME scoring policy the scanner uses (worker.js)
+// — no second hardcoded copy of the weights here.
+const maxOf = (id) => Math.round(TIER_BUDGET[CHECK_POLICY[id].tier] * CHECK_POLICY[id].share);
 const checks = [
-  ["webmcp", 20, checkWebMCP(surface)],
-  ["tool-security", 10, checkToolSecurity(surface)],
-  ["structured-data", 20, checkStructuredData(home.text)],
-  ["llms-txt", 15, checkLlmsTxt(llms)],
-  ["robots-policy", 10, checkRobotsAI(robots)],
-  ["machine-surfaces", 25, checkMachineSurfaces(sitemap, openapi)],
+  ["webmcp", checkWebMCP(surface)],
+  ["tool-security", checkToolSecurity(surface)],
+  ["structured-data", checkStructuredData(home.text)],
+  ["llms-txt", checkLlmsTxt(llms)],
+  ["robots-policy", checkRobotsAI(robots)],
+  ["machine-surfaces", checkMachineSurfaces(sitemap, openapi)],
 ];
 
 console.log("\n[A] 自家站点跑分（生产检查函数 × public/ 实际文件）");
 let total = 0;
-for (const [id, max, r] of checks) {
-  total += r.points;
-  console.log(`     ${id.padEnd(18)} ${String(r.points).padStart(3)}/${String(max).padEnd(3)}  ${r.status}`);
+for (const [id, r] of checks) {
+  const max = maxOf(id);
+  const pts = Math.round((r.ratio ?? 0) * max);
+  total += pts;
+  console.log(`     ${id.padEnd(18)} ${String(pts).padStart(3)}/${String(max).padEnd(3)}  ${r.status}`);
 }
 const grade = total >= 85 ? "A" : total >= 70 ? "B" : total >= 50 ? "C" : total >= 30 ? "D" : "F";
 console.log(`\n  总分 ${total}/100 · 等级 ${grade}\n`);
 
 ok("自家站点达到 A 级", grade === "A", `实际 ${total}/100`);
 ok("总分 ≥ 95（打样标准）", total >= 95, `实际 ${total}`);
-for (const [id, , r] of checks) {
+for (const [id, r] of checks) {
   ok(`${id} 检查通过（非 partial/fail）`, r.status === "pass", r.status + " — " + r.detail);
 }
 

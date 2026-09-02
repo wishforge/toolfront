@@ -565,14 +565,14 @@ function checkWebMCP(surface) {
   if (surface.tools.length || surface.platform) {
     const src = surface.platform ? `${surface.platform} platform injection` :
       `${surface.tools.length} tool(s) · ${surface.imperative} imperative / ${surface.declarative} declarative`;
-    return { status: "pass", points: 20, detail: `WebMCP surface detected (${src}). Agents can discover native tools on this page.` };
+    return { status: "pass", ratio: 1, detail: `WebMCP surface detected (${src}). Agents can discover native tools on this page.` };
   }
-  return { status: "fail", points: 0, detail: "No WebMCP tools registered. Agents must screenshot and click blind — every UI change risks breaking their flow." };
+  return { status: "fail", ratio: 0, detail: "No WebMCP tools registered. Agents must screenshot and click blind — every UI change risks breaking their flow." };
 }
 
 function checkToolSecurity(surface) {
   if (!surface.tools.length && !surface.platform) {
-    return { status: "na", points: 0, detail: "No WebMCP tool surface on this page — the tool-surface security check does not apply." };
+    return { status: "na", ratio: 0, detail: "No WebMCP tool surface on this page — the tool-surface security check does not apply." };
   }
   const findings = surface.tools.flatMap(t => toolPoisonFindings(t));
   // Anti-silent-bypass: tools whose description could not be statically
@@ -593,14 +593,14 @@ function checkToolSecurity(surface) {
   points = Math.max(0, Math.min(10, points));
   if (findings.some(f => f.severity >= 3)) {
     const codes = [...new Set(findings.map(f => f.code))].join(", ");
-    return { status: "fail", points: 0, detail: `Tool-surface security issues detected (${codes}). Tool descriptions are agent-facing instructions — see W3C WebMCP §6.3 and OWASP ASI02.` };
+    return { status: "fail", ratio: 0, detail: `Tool-surface security issues detected (${codes}). Tool descriptions are agent-facing instructions — see W3C WebMCP §6.3 and OWASP ASI02.` };
   }
   if (points < 10 || findings.length) {
     const codes = [...new Set(findings.map(f => f.code))].join(", ");
     const why = opaqueTools && points >= 7 ? `${opaqueTools} tool(s) with statically-invisible descriptions (dynamically constructed) — cannot be audited from a static view` : codes || "missing advisory hints";
-    return { status: "partial", points, detail: `Minor tool-surface findings (${why}). Review hints and budgets per the Chrome WebMCP security guide.` };
+    return { status: "partial", ratio: points / 10, detail: `Minor tool-surface findings (${why}). Review hints and budgets per the Chrome WebMCP security guide.` };
   }
-  return { status: "pass", points: 10, detail: "Tool surface passed static security checks: no poisoning patterns, hints and budgets within guidance." };
+  return { status: "pass", ratio: 1, detail: "Tool surface passed static security checks: no poisoning patterns, hints and budgets within guidance." };
 }
 
 function checkStructuredData(html) {
@@ -611,24 +611,24 @@ function checkStructuredData(html) {
   if (ldBlocks >= 3) points = 14; else if (ldBlocks >= 1) points = 10;
   if (hasOgTitle && hasOgDesc) points += 6; else if (hasOgTitle || hasOgDesc) points += 3;
   if (points >= 18) {
-    return { status: "pass", points, detail: `${ldBlocks} JSON-LD block(s) + OpenGraph tags. Agents can extract facts about this page reliably.` };
+    return { status: "pass", ratio: Math.min(1, points / 20), detail: `${ldBlocks} JSON-LD block(s) + OpenGraph tags. Agents can extract facts about this page reliably.` };
   }
   if (points > 0) {
-    return { status: "partial", points, detail: `${ldBlocks} JSON-LD block(s), partial OpenGraph coverage. Agents get fragments, not a full picture.` };
+    return { status: "partial", ratio: points / 20, detail: `${ldBlocks} JSON-LD block(s), partial OpenGraph coverage. Agents get fragments, not a full picture.` };
   }
-  return { status: "fail", points: 0, detail: "No JSON-LD or OpenGraph data. Agents see raw text only." };
+  return { status: "fail", ratio: 0, detail: "No JSON-LD or OpenGraph data. Agents see raw text only." };
 }
 
 function checkLlmsTxt(res) {
   if (res.status === 200 && res.text.length > 10) {
-    return { status: "pass", points: 15, detail: "llms.txt present — you are already speaking to agents in their language." };
+    return { status: "pass", ratio: 1, detail: "llms.txt present — you are already speaking to agents in their language." };
   }
-  return { status: "fail", points: 0, detail: "No /llms.txt. This is the cheapest agent-readiness win available: one markdown file describing your site." };
+  return { status: "fail", ratio: 0, detail: "No /llms.txt. This is the cheapest agent-readiness win available: one markdown file describing your site." };
 }
 
 function checkRobotsAI(res) {
   if (res.status !== 200 || !res.text) {
-    return { status: "partial", points: 5, detail: "No robots.txt found. AI crawlers default to allowed — but you have no stated policy." };
+    return { status: "partial", ratio: 0.5, detail: "No robots.txt found. AI crawlers default to allowed — but you have no stated policy." };
   }
   const groups = res.text.split(/(?=user-agent\s*:)/i);
   const AI_BOTS = [
@@ -648,22 +648,23 @@ function checkRobotsAI(res) {
     }
   }
   if (blocked.length) {
-    return { status: "fail", points: 0, detail: `robots.txt blocks ${blocked.join(", ")}. Major agents are explicitly turned away at the door.` };
+    return { status: "fail", ratio: 0, detail: `robots.txt blocks ${blocked.join(", ")}. Major agents are explicitly turned away at the door.` };
   }
   if (mentioned.length) {
-    return { status: "pass", points: 10, detail: `Explicit policy for ${mentioned.join(", ")} — allowed. Agents are welcome.` };
+    return { status: "pass", ratio: 1, detail: `Explicit policy for ${mentioned.join(", ")} — allowed. Agents are welcome.` };
   }
-  return { status: "partial", points: 6, detail: "robots.txt exists but names no AI crawlers. Allowed by default — a stated policy is stronger." };
+  return { status: "partial", ratio: 0.6, detail: "robots.txt exists but names no AI crawlers. Allowed by default — a stated policy is stronger." };
 }
 
 function checkMachineSurfaces(sitemapRes, apiRes) {
   const found = [];
   if (sitemapRes.status === 200) found.push("sitemap.xml");
   if (apiRes.status === 200) found.push("openapi.json");
-  let points = (sitemapRes.status === 200 ? 10 : 0) + (apiRes.status === 200 ? 15 : 0);
-  if (points >= 20) return { status: "pass", points, detail: `${found.join(" + ")} found. Your site already exposes machine-readable maps — prime material for tool generation.` };
-  if (points > 0) return { status: "partial", points, detail: `${found.join(" + ")} found. Add an OpenAPI spec and tool generation becomes near-automatic.` };
-  return { status: "fail", points: 0, detail: "No sitemap.xml or OpenAPI spec detected. Agents have no map of your site." };
+  // Internal scale: sitemap 10 + openapi 15. A "pass" needs both surfaces.
+  const ratio = ((sitemapRes.status === 200 ? 10 : 0) + (apiRes.status === 200 ? 15 : 0)) / 25;
+  if (ratio >= 0.8) return { status: "pass", ratio, detail: `${found.join(" + ")} found. Your site already exposes machine-readable maps — prime material for tool generation.` };
+  if (ratio > 0) return { status: "partial", ratio, detail: `${found.join(" + ")} found. Add an OpenAPI spec and tool generation becomes near-automatic.` };
+  return { status: "fail", ratio: 0, detail: "No sitemap.xml or OpenAPI spec detected. Agents have no map of your site." };
 }
 
 /* ————— scanner opt-out: respect robots.txt targeting our own UA —————
@@ -693,10 +694,44 @@ function robotsOptedOut(robotsText) {
 // denominator, and surfaced in report.unavailable + the UI warning banner.
 const NA_DETAIL = "Blocked by the site's bot protection — could not verify this surface. Note: the same wall stops AI agents, not just our scanner.";
 const SUB_CHECKS = [
-  { id: "llms-txt", label: "llms.txt", max: 15, path: "/llms.txt", res: "llms" },
-  { id: "robots-policy", label: "AI crawler policy", max: 10, path: "/robots.txt", res: "robots" },
-  { id: "machine-surfaces", label: "Machine-readable surfaces", max: 25, path: "/sitemap.xml + /openapi.json", res: "machine" },
+  { id: "llms-txt", label: "llms.txt", path: "/llms.txt", res: "llms" },
+  { id: "robots-policy", label: "AI crawler policy", path: "/robots.txt", res: "robots" },
+  { id: "machine-surfaces", label: "Machine-readable surfaces", path: "/sitemap.xml + /openapi.json", res: "machine" },
 ];
+
+/* ————— Scoring policy: the single source of truth ————————————————
+   A report reader sees three signals per fix: how urgent it is (tier),
+   how many points it is worth (max), and how much we trust the evidence
+   (grade). Historically these were defined in two places — the weights
+   here in worker.js and the tier/grade in report.html — so they drifted
+   apart: the "interpretation" tier was worth MORE total points than the
+   "blocking" tier, and the single highest-value item sat in the middle
+   tier. Three signals, three different answers to "what do I fix first".
+
+   Fix: tier and evidence live here, and the weight is DERIVED from the
+   tier budget below rather than hand-set per check. Grouping, badge, and
+   score can no longer disagree. The frontend reads tier/evidence off the
+   API response, so there is nothing left to duplicate.
+
+   Bumping SCORING_VERSION tells monitoring clients that historical scores
+   are not comparable — see the re-baseline guard in monitor-cron.ts. */
+const SCORING_VERSION = "2.0.0";
+const TIER_BUDGET = { blocking: 55, interpretation: 35, enrichment: 10 };
+const CHECK_POLICY = {
+  // tier = blast radius when this fails; evidence = how sure we are that
+  // agents actually consume the signal; share = split of the tier budget.
+  "robots-policy": { label: "AI crawler policy", tier: "blocking", evidence: "A", share: 0.40 },
+  webmcp: { label: "WebMCP tools", tier: "blocking", evidence: "A", share: 0.40 },
+  "tool-security": { label: "Tool surface security", tier: "blocking", evidence: "A", share: 0.20 },
+  "machine-surfaces": { label: "Machine-readable surfaces", tier: "interpretation", evidence: "B", share: 0.54 },
+  "structured-data": { label: "Structured data", tier: "interpretation", evidence: "B", share: 0.46 },
+  "llms-txt": { label: "llms.txt", tier: "enrichment", evidence: "C", share: 1.0 },
+};
+/** Resolve one check's scoring policy into the shape the report needs. */
+function policyOf(id) {
+  const p = CHECK_POLICY[id];
+  return { id, label: p.label, tier: p.tier, evidence: p.evidence, max: Math.round(TIER_BUDGET[p.tier] * p.share) };
+}
 
 // Shared scan core: used by BOTH the free HTTP scan (handleScan) and the
 // scheduled scanning clients — exactly one engine in the codebase.
@@ -775,7 +810,7 @@ async function scanDomainCore(domain, env) {
   if (challengeProbe(home.status, home.text, home.cfMitigated)) {
     return {
       domain, blocked: true, grade: null, score: null, scoreMax: 0,
-      checks: SUB_CHECKS.map(c => ({ id: c.id, label: c.label, max: c.max, status: "na", points: null, detail: NA_DETAIL })),
+      checks: SUB_CHECKS.map(c => ({ ...policyOf(c.id), status: "na", points: null, detail: NA_DETAIL })),
       unavailable: SUB_CHECKS.map(c => c.id),
       warning: "Scan blocked: the site's bot protection challenged our scanner before the homepage loaded. The same wall typically stops AI agents.",
       verdict: "Scan blocked by bot protection. AI agents likely hit the same wall — consider allowing verified automated readers.",
@@ -798,16 +833,23 @@ async function scanDomainCore(domain, env) {
     robots: challengeProbe(robots.status, robots.text, robots.cfMitigated),
     machine: challengeProbe(sitemapRes.status, sitemapRes.text, sitemapRes.cfMitigated) || challengeProbe(openapiRes.status, openapiRes.text, openapiRes.cfMitigated),
   };
-  const na = (def) => ({ id: def.id, label: def.label, max: def.max, status: "na", points: null, detail: NA_DETAIL });
+  const na = (id) => ({ ...policyOf(id), status: "na", points: null, detail: NA_DETAIL });
+  // Merge a check result (ratio 0..1) with its policy (max from tier budget):
+  // the function answers "how well did the site do", the policy answers
+  // "how much is that worth". Neither can drift from the other.
+  const scoreCheck = (id, result) => {
+    const p = policyOf(id);
+    return { ...p, status: result.status, points: result.status === "na" ? null : Math.round(result.ratio * p.max), detail: result.detail };
+  };
 
   const surface = extractWebMcpSurface(home.text);
   const checks = [
-    { id: "webmcp", label: "WebMCP tools", max: 20, ...checkWebMCP(surface) },
-    { id: "tool-security", label: "Tool surface security", max: 10, ...checkToolSecurity(surface) },
-    { id: "structured-data", label: "Structured data", max: 20, ...checkStructuredData(home.text) },
-    ch.llms ? na(SUB_CHECKS[0]) : { id: "llms-txt", label: "llms.txt", max: 15, ...checkLlmsTxt(llms) },
-    ch.robots ? na(SUB_CHECKS[1]) : { id: "robots-policy", label: "AI crawler policy", max: 10, ...checkRobotsAI(robots) },
-    ch.machine ? na(SUB_CHECKS[2]) : { id: "machine-surfaces", label: "Machine-readable surfaces", max: 25, ...checkMachineSurfaces(sitemapRes, openapiRes) },
+    scoreCheck("webmcp", checkWebMCP(surface)),
+    scoreCheck("tool-security", checkToolSecurity(surface)),
+    scoreCheck("structured-data", checkStructuredData(home.text)),
+    ch.llms ? na("llms-txt") : scoreCheck("llms-txt", checkLlmsTxt(llms)),
+    ch.robots ? na("robots-policy") : scoreCheck("robots-policy", checkRobotsAI(robots)),
+    ch.machine ? na("machine-surfaces") : scoreCheck("machine-surfaces", checkMachineSurfaces(sitemapRes, openapiRes)),
   ];
 
   // na items (points === null) count toward neither score nor denominator —
@@ -829,7 +871,7 @@ async function scanDomainCore(domain, env) {
   // tool_surface_hash enables rug-pull detection in scheduled-scan diffs; report_json
   // is the durable snapshot stored in D1 scan_reports by the cron.
   const tool_surface_hash = await sha256Hex(JSON.stringify(surface.tools));
-  const report = { domain, score, scoreMax, grade, verdict, checks, tool_surface_hash, rules_version: RULES_VERSION, scannedAt: new Date().toISOString(), cached: false };
+  const report = { domain, score, scoreMax, grade, verdict, checks, tool_surface_hash, rules_version: RULES_VERSION, scoring_version: SCORING_VERSION, scannedAt: new Date().toISOString(), cached: false };
   // Provenance: a self-scan never touched the network.
   if (selfScan) report.self = true;
   if (unavailable.length) report.unavailable = unavailable;
@@ -1207,7 +1249,7 @@ const EMAIL_L10N = {
   },
   zh: {
     subject: "请确认订阅 ToolFront",
-    intro: "你好——感谢关注 <strong>ToolFront</strong>，这个面向开放网络的智能体就绪度工具箱。",
+    intro: "你好——感谢关注 <strong>ToolFront</strong>，这个面向开放网络的 AI 就绪度工具箱。",
     domain: "你询问了 <strong>{d}</strong> 的工具蓝图——我们会在早期访问时一并给你。",
     ask: "请确认你的邮箱地址：",
     cta: "确认我的邮箱",
@@ -1291,6 +1333,6 @@ ${domain ? `<p style="font-size:14px;color:#475569;line-height:1.6">${c.domain.r
 export {
   extractWebMcpSurface, toolPoisonFindings, checkToolSecurity, checkWebMCP,
   scanDomainCore, challengeProbe, checkStructuredData, checkLlmsTxt,
-  checkRobotsAI, checkMachineSurfaces,
+  checkRobotsAI, checkMachineSurfaces, CHECK_POLICY, TIER_BUDGET,
 };
 
