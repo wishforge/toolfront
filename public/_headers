@@ -10,3 +10,14 @@
   X-Frame-Options: DENY
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; object-src 'none'
   Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Markdown charset: browsers without a charset declaration may decode the
+# UTF-8 em-dashes/quotes in SKILL.md files as the OS locale (GBK on zh-CN
+# systems) and show mojibake. Pin the encoding at the source.
+#
+# Note: the canonical /.well-known/agent-skills/* URLs are re-served by the
+# worker (public/.well-known only holds security.txt), so _headers rules on
+# that path never fire — the rule must target the /agent-skills/* storage
+# path, which both the direct URL and the worker's ASSETS fetch pass through.
+/agent-skills/*
+  Content-Type: text/markdown; charset=utf-8
