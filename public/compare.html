@@ -291,8 +291,14 @@
       tr.appendChild(lbl);
       var pa = ca.points, pb = cb.points;
       var ma = el('td', 'num'), mb = el('td', 'num');
+      // Repair gain on the losing side (spec F4): the loser's cell carries the
+      // "+N" it could recover here, so the comparison doubles as a to-do list.
       var txtA = pa == null ? '–' : pa + '/' + ca.max;
       var txtB = pb == null ? '–' : pb + '/' + cb.max;
+      if (pa != null && pb != null) {
+        if (pb > pa) txtA += ' +' + (ca.max - pa);
+        else if (pa > pb) txtB += ' +' + (cb.max - pb);
+      }
       // Own-property lookup: MARK[status] with a garbage status ('__proto__')
       // would hit the prototype chain and render garbage into the class
       // attribute (red35 audit — same family as the rankings fix).

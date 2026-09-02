@@ -88,7 +88,7 @@ Honest limitation (disclosed): for self-scans (`toolfront.dev` via ASSETS), `api
 Two display-only sections appended to every report. They deliberately carry **zero score weight** (no `SCORING_VERSION` bump, no `CHECK_POLICY` change): the ecosystem signals they read are either policy declarations (site-owner's choice, not readiness) or still-draft standards — scoring them now would punish honest sites.
 
 - **Training exposure** (`report.supplemental.training`):
-  - `crawler_blocking` — which of GPTBot / CCBot / Google-Extended / ClaudeBot / Bytespider have a blanket `Disallow: /` in their robots.txt group (parser reuses the same group-split approach as `robotsOptedOut`).
+  - `crawler_blocking` — which of GPTBot / CCBot / Google-Extended / ClaudeBot / Bytespider have a blanket `Disallow: /` in their robots.txt group. Implementation note (updated 2026-09-03): the parser is `robotsGroups()`, an RFC 9309 group-semantic parser that REPLACED the old split-per-UA approach — which also fixed a latent `robotsOptedOut` mis-grouping bug (consecutive user-agent lines share one group).
   - `ai_txt` — `/.well-known/ai.txt` present.
   - `tdmrep` — `/.well-known/tdmrep.json` present (W3C TDM Reservation Protocol).
   - `web_bot_auth` — `/.well-known/web-bot-auth` present (signed HTTP request key directory).

@@ -196,7 +196,7 @@ feat(report): gain-sorted action plan, waitlist capture, api-errors/freshness/li
 - Create: monitor `public/rankings.html` (filter tabs over a curated verticals list, mini score tracks, grade badges, rows link to `https://toolfront.dev/report?domain=`)
 
 **Interfaces:**
-- `GET /api/rankings?vertical=hosting` → `{ rows: [{ domain, score, grade, scannedAt }] }`. Curated list is a static module in the monitor repo.
+- `GET /api/rankings?vertical=hosting` → `{ rows: [{ domain, score, grade, scanned_at }] }`. Curated list is a static module in the monitor repo.
 
 - [x] **Step 1: D1 aggregation query + route.** - [x] **Step 2: rankingsPage() (monitor layout, not a static html file).** - [x] **Step 3: Tests + local commit.** (monitor `91e19b0`, tests/rankings.test.mjs 6/6)
 
