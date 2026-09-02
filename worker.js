@@ -245,6 +245,9 @@ function normalizeDomain(raw) {
   const tld = labels[labels.length - 1];
   if (!/^[a-z]{2,63}$/.test(tld)) return null;
   if (labels.some(l => l.length === 0 || l.length > 63)) return null;
+  // RFC 1035 §2.3.1: labels must start and end with an alphanumeric — a
+  // leading/trailing hyphen is not resolvable and only invites odd input.
+  if (labels.some(l => /^-|-$/.test(l))) return null;
   if (d === "localhost" || d.endsWith(".local") || d.endsWith(".internal") || d.endsWith(".localhost")) return null;
   return d;
 }
