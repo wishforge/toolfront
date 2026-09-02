@@ -337,6 +337,22 @@
   }
   .fix .fix-skill-link:hover { text-decoration: underline; text-underline-offset: 2px; }
 
+  /* Auto-fix strip: let the visitor's own coding agent apply the fixes */
+  .autofix { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap;
+    background: #F0F7FF; border: 1px solid rgba(37,99,235,0.18); border-left: 3px solid var(--accent);
+    border-radius: var(--r-4); padding: 14px 16px; margin: 2px 0 16px; }
+  .autofix-txt { min-width: 0; flex: 1 1 340px; }
+  .autofix-title { font-family: var(--sans); font-weight: 650; font-size: 13px; color: var(--ink); display: block; }
+  .autofix-sub { font-family: var(--sans); font-size: 12.5px; line-height: 1.55; color: var(--ink-3); margin-top: 3px; display: block; }
+  .autofix-cmd { font-family: var(--mono); font-size: 11.5px; background: #FFF; border: 1px solid rgba(37,99,235,0.25);
+    border-radius: 6px; padding: 1px 8px; color: var(--accent-deep); white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis; display: inline-block; max-width: 100%; vertical-align: baseline; margin-top: 6px; }
+  .autofix-go { font-family: var(--sans); font-weight: 600; font-size: 12px; color: #FFF; background: var(--accent);
+    border-radius: var(--r-full); padding: 8px 16px; text-decoration: none; white-space: nowrap;
+    transition: all var(--dur-fast) ease; }
+  .autofix-go:hover { background: var(--accent-deep); transform: translateY(-1px); }
+
+
   .potential { margin-top: 18px; display: flex; align-items: center; gap: 16px; background: var(--accent-soft); border: 1px solid rgba(37,99,235,0.15); border-radius: var(--r-4); padding: 14px 18px; flex-wrap: wrap; }
   .potential .txt { font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); }
   .potential .mini { flex: 1; min-width: 140px; height: 8px; border-radius: var(--r-full); background: #DBEAFE; position: relative; overflow: hidden; }
@@ -485,6 +501,9 @@
       'report.raise.keep': '<b>Good score \u2014 but one redesign can still drop it.</b> Monitor checks weekly and emails you only when it moves:',
       'report.cta.kicker': 'No noise. One email when it matters.',
       'report.fix.title': 'Fix list', 'report.fix.passed': 'already in place', 'report.fix.alldone': 'All fixes applied! Re-scan to see your new score.', 'report.fix.nofixes': 'Nothing to fix — everything is already in place.', 'report.fix.apply': 'Mark as fixed', 'report.fix.dismiss': 'Dismiss',
+      'report.autofix.title': 'Prefer to let your coding agent fix these?',
+      'report.autofix.sub': 'Install the ToolFront fix skills once — your agent reads each guide, applies the fix, and re-verifies it passes:',
+      'report.autofix.go': 'Skill docs & install',
       'report.fix.skill': 'How to fix',
       'report.fix.sample': 'Paste-ready /llms.txt',
       'report.fix.copy': 'Copy',
@@ -545,6 +564,9 @@
       'report.raise.keep': '<b>分数不低——但一次改版还是能悄悄掉下去。</b>Monitor 每周扫一次，掉了才发邮件：',
     'report.cta.kicker': '不打扰 · 只在真正出事时发一封邮件',
       'report.fix.title': '修复清单', 'report.fix.passed': '已就绪', 'report.fix.alldone': '全部修复完成！重新扫描看看新分数。', 'report.fix.nofixes': '无需修复——一切已就绪。', 'report.fix.apply': '标记修复', 'report.fix.dismiss': '忽略',
+      'report.autofix.title': '想让你自己的编程助手来修？',
+      'report.autofix.sub': '装一次 ToolFront 修复技能包——你的 agent 会照着每份指南动手改，并重新验证通过：',
+      'report.autofix.go': '技能包文档与安装',
       'report.fix.skill': '怎么修',
       'report.fix.sample': '可直接粘贴的 /llms.txt',
       'report.fix.copy': '复制',
@@ -960,6 +982,23 @@
     var fixable = (r.checks || []).filter(function (c) { return c.status === 'fail' || c.status === 'partial'; });
     var fixDict = (CHECKS_L10N[lang] && CHECKS_L10N[lang].fixes) || {};
     var totalGain = 0;
+
+    // Auto-fix strip (only when there is something to fix): point the visitor
+    // at the installable fix-skills repo their own agent can execute.
+    if (fixable.length) {
+      var af = el('div', 'autofix');
+      var afTxt = el('div', 'autofix-txt');
+      afTxt.appendChild(el('span', 'autofix-title', t('report.autofix.title')));
+      afTxt.appendChild(el('span', 'autofix-sub', t('report.autofix.sub')));
+      afTxt.appendChild(el('code', 'autofix-cmd', 'npx skills add https://github.com/wishforge/toolfront-fix-skills'));
+      var afGo = el('a', 'autofix-go', t('report.autofix.go'));
+      afGo.href = 'https://github.com/wishforge/toolfront-fix-skills';
+      afGo.target = '_blank';
+      afGo.rel = 'noopener';
+      af.appendChild(afTxt);
+      af.appendChild(afGo);
+      body.appendChild(af);
+    }
 
     // Fresh-scan detection: if this report's scannedAt is newer than stored,
     // clear stale fix states so every new scan starts clean
