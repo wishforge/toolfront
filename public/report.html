@@ -667,14 +667,14 @@
   /* V5 report page additions (spliced separately from the landing dict) */
   Object.assign(LANGS.en, {
     'report.track.you': 'You', 'report.track.opaque': 'opaque', 'report.track.ready': 'agent-ready',
-    'report.proj.label': 'All fixes applied →', 'report.proj.est': '{s} / 100 · {g}',
+    'report.proj.label': 'All fixes applied →', 'report.proj.est': '{s} / {m} · {g}',
     'report.cta.fine': 'Weekly checks. An email only if the score drops 5+ or a tool changes. Unsubscribe in one click.',
     'report.vs.improved': '↑ improved', 'report.vs.regressed': '↓ regressed',
     'report.loading0': '',
   });
   Object.assign(LANGS.zh, {
     'report.track.you': '你', 'report.track.opaque': '对 AI 封闭', 'report.track.ready': '智能体就绪',
-    'report.proj.label': '全部修复完成后 →', 'report.proj.est': '{s} 分 · {g} 级',
+    'report.proj.label': '全部修复完成后 →', 'report.proj.est': '{s} / {m} 分 · {g} 级',
     'report.cta.fine': '每周扫一次 · 分数掉 5 分或工具面被改才发邮件 · 一键退订',
     'report.vs.improved': '↑ 进步', 'report.vs.regressed': '↓ 退步',
     'report.loading0': '',
@@ -1127,8 +1127,12 @@
       });
       var sum = Math.min(maxScore, (typeof r.score === 'number' ? r.score : 0) + checkedGain);
       fill.style.width = Math.round((sum / maxScore) * 100) + '%';
-      // Show both current estimate and remaining potential
-      var label = t('report.proj.est').replace('{s}', String(sum)).replace('{g}', letter(sum));
+      // Show both current estimate and remaining potential. Denominator is
+      // maxScore (scoreMax after NA exclusion), and the grade letter is
+      // computed on the percentage scale — a 100-hardcoded "/ 100" broke
+      // every report where bot protection excluded a check (44/100 shown
+      // while the real ceiling was 89).
+      var label = t('report.proj.est').replace('{s}', String(sum)).replace('{m}', String(maxScore)).replace('{g}', letter(Math.round((sum / maxScore) * 100)));
       if (availableMax > 0 && sum < maxScore) {
         var remain = availableMax - checkedGain;
         var moreHint = (lang === 'zh')
