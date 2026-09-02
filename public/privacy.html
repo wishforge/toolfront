@@ -56,7 +56,8 @@
 
   <div class="en">
     <h1>Privacy Policy</h1>
-    <p class="meta">Version 1.1 · Effective date: September 2, 2026 · toolfront.dev</p>
+    <p class="meta">Version 1.2 · Effective date: September 2, 2026 · toolfront.dev</p>
+    <p class="lede">This policy covers <strong>toolfront.dev</strong> (the AI-readiness scanner) and <strong>monitor.toolfront.dev</strong> (the Monitor account system), operated by the same controller under the same commitments below.</p>
 
     <h2>Who we are (the controller)</h2>
     <p>ToolFront is operated by <strong>David</strong>, an independent developer located in Shanghai, China (&ldquo;ToolFront&rdquo;, &ldquo;we&rdquo;). Controller contact: <a href="mailto:privacy@toolfront.dev">privacy@toolfront.dev</a>.</p>
@@ -69,6 +70,7 @@
       <li><strong>Language preference</strong> — stored in your browser's localStorage (key <code>tf-lang</code>) to remember your language choice. This is strictly functional storage; no cookies or third-party trackers are used.</li>
       <li><strong>Scan history &amp; fix-list progress</strong> — your latest scan result per domain (domain, score, check statuses, timestamp) and your fix-list checkboxes are stored in your browser's localStorage (keys <code>tf-last:*</code> and <code>tf-fix:*</code>) to power the "since your last scan" comparison and remember your progress. This data <strong>never leaves your browser</strong> and can be cleared at any time in your browser settings.</li>
       <li><strong>Aggregate usage statistics</strong> — counts of product events (e.g., signups, email confirmations, logins, scans started) and their coarse outcome, used to understand the signup funnel and improve the product. These counters <strong>cannot identify you</strong>: they contain no email address, no domain, no IP address, and no language. Stored by our host in Cloudflare Analytics Engine for 90 days.</li>
+      <li><strong>Monitor account data</strong> — if you create a Monitor account (monitor.toolfront.dev): your email address and password (stored only as a salted PBKDF2 hash — never readable), the domains you choose to monitor, login timestamps and IP addresses (for rate limiting and account lockout), scan reports and alert messages for your monitored domains, and a suppression record if you unsubscribe (a one-way hash of your email + the unsubscribe timestamp).</li>
     </ul>
     <p>Our scanner fetches only publicly accessible pages (<code>/</code>, <code>/robots.txt</code>, <code>/llms.txt</code>, <code>/sitemap.xml</code>, <code>/openapi.json</code>) of domains you submit. We never scan private networks or authenticated content.</p>
 
@@ -87,6 +89,7 @@
       <li><strong>Scan results</strong> are cached for 24 hours, then deleted.</li>
       <li><strong>Rate-limit counters</strong> expire after 1 hour.</li>
       <li><strong>Aggregate usage statistics</strong> are kept for 90 days in Cloudflare Analytics Engine, then automatically deleted.</li>
+      <li><strong>Monitor account data</strong> is kept until you delete your account (available at any time from your panel — it removes your account, monitored domains, scan history, and alerts) or you unsubscribe (which stops all monitoring and leaves only the suppression hash).</li>
     </ul>
 
     <h2>Unsubscribing</h2>
@@ -114,7 +117,8 @@
 
   <div class="zh">
     <h1>隐私政策</h1>
-    <p class="meta">版本 1.1 · 生效日期：2026 年 9 月 2 日 · toolfront.dev</p>
+    <p class="meta">版本 1.2 · 生效日期：2026 年 9 月 2 日 · toolfront.dev</p>
+    <p class="lede">本政策适用于 <strong>toolfront.dev</strong>（AI 就绪度扫描器）与 <strong>monitor.toolfront.dev</strong>（Monitor 账号系统），两者由同一处理者按下列相同承诺运营。</p>
 
     <h2>我们是谁（个人信息处理者）</h2>
     <p>ToolFront 由独立开发者 <strong>David</strong>（所在地：中国上海）运营（下称"我们"）。处理者联系方式：<a href="mailto:privacy@toolfront.dev">privacy@toolfront.dev</a>。</p>
@@ -127,6 +131,7 @@
       <li><strong>语言偏好</strong>——存储在你浏览器的 localStorage（键名 <code>tf-lang</code>）中，用于记住语言选择。这是严格功能性存储；本站不使用 Cookie 或第三方跟踪器。</li>
       <li><strong>扫描历史与修复进度</strong>——你最近一次的扫描结果（域名、分数、各项检查状态、时间戳）与修复清单勾选状态，存储在你浏览器的 localStorage（键名 <code>tf-last:*</code>、<code>tf-fix:*</code>）中，用于"对比上次扫描"功能和记住修复进度。这些数据<strong>永不离开你的浏览器</strong>，可随时在浏览器设置中清除。</li>
       <li><strong>聚合用量统计</strong>——产品事件计数（如注册、邮箱确认、登录、扫描开始）及其粗粒度结果，用于理解注册漏斗、改进产品。这些计数器<strong>无法识别你</strong>：不包含邮箱、域名、IP 或语言。存储于我们的主机方 Cloudflare Analytics Engine，保留 90 天。</li>
+      <li><strong>Monitor 账号数据</strong>——如你在 monitor.toolfront.dev 创建 Monitor 账号：邮箱地址与密码（仅以加盐 PBKDF2 哈希存储，不可还原）、你选择监控的域名、登录时间戳与 IP（用于限流与账号锁定）、你监控域名的扫描报告与告警消息，以及退订抑制记录（邮箱单向哈希 + 退订时间戳）。</li>
     </ul>
     <p>扫描器只抓取你提交域名的公开页面（<code>/</code>、<code>/robots.txt</code>、<code>/llms.txt</code>、<code>/sitemap.xml</code>、<code>/openapi.json</code>），绝不扫描私网或需要登录的内容。</p>
 
@@ -145,6 +150,7 @@
       <li><strong>扫描结果缓存</strong>：24 小时后删除。</li>
       <li><strong>限流计数器</strong>：1 小时后过期。</li>
       <li><strong>聚合用量统计</strong>：保留于 Cloudflare Analytics Engine 90 天，到期自动删除。</li>
+      <li><strong>Monitor 账号数据</strong>：保留至你删除账号（随时可在面板操作——将删除账号、监控域名、扫描历史与告警），或直至你退订（退订即停止全部监控，仅保留抑制哈希）。</li>
     </ul>
 
     <h2>退订</h2>
