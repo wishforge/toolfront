@@ -843,46 +843,7 @@
     border-top: 1px solid var(--line-light); padding-top: 68px;
     text-align: center;
   }
-  .email-section h2 {
-    font-family: var(--serif); font-optical-sizing: auto;
-    font-weight: 430; font-size: clamp(27px, 3.3vw, 37px);
-    line-height: 1.14; letter-spacing: -0.008em; margin-bottom: 22px;
-  }
-  .email-form-wrap {
-    display: flex; justify-content: center; gap: 8px;
-    max-width: 520px; margin: 0 auto 14px;
-  }
-  .email-input {
-    flex: 1; padding: 14px 22px;
-    border: 1.5px solid var(--line); border-radius: var(--r-full);
-    font-family: var(--mono); font-size: 13.5px; color: var(--ink);
-    outline: none; transition: all var(--dur-fast) ease;
-    letter-spacing: -0.01em;
-  }
-  .email-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-  .email-input::placeholder { color: var(--ink-4); }
-  .email-btn {
-    padding: 14px 30px; border-radius: var(--r-full);
-    background: var(--grad-primary); color: #FFF; border: none;
-    font-family: var(--sans); font-size: 13px; font-weight: 600;
-    cursor: pointer; white-space: nowrap;
-    transition: all var(--dur-fast) var(--ease-out);
-    letter-spacing: -0.01em;
-    box-shadow: 0 2px 12px rgba(37,99,235,0.20);
-  }
-  .email-btn:hover {
-    background: var(--grad-primary-hover);
-    box-shadow: 0 4px 20px rgba(37,99,235,0.30), 0 0 32px rgba(37,99,235,0.10);
-    transform: translateY(-1px);
-  }
-  .email-note {
-    font-family: var(--mono); font-size: 11px; color: var(--ink-4);
-    letter-spacing: 0.01em;
-  }
-  .email-note a { color: var(--ink-3); text-decoration: underline; text-underline-offset: 2px; }
-  .email-note a:hover { color: var(--accent); }
-
-  /* ═══ EMAIL SECTION V5 (lightweight, left-aligned) ═══ */
+  /* ═══ EMAIL SECTION V5 (Monitor CTA) ═══ */
   .email-section-v5 {
     max-width: 1160px; margin: 0 auto;
     padding: clamp(40px, 6vw, 72px) clamp(24px, 4vw, 48px);
@@ -907,14 +868,6 @@
   .email-v5-form {
     display: flex; gap: 8px;
   }
-  .email-v5-form .email-input {
-    flex: 1; padding: 13px 20px;
-    border: 1.5px solid var(--line); border-radius: var(--r-full);
-    font-family: var(--mono); font-size: 13px; color: var(--ink);
-    outline: none; transition: all var(--dur-fast) ease;
-    background: var(--card);
-  }
-  .email-v5-form .email-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
   .email-v5-form .email-btn {
     padding: 13px 24px; border-radius: var(--r-full);
     background: var(--grad-primary); color: #FFF; border: none;
@@ -1085,6 +1038,7 @@
     <ul class="nav-menu">
       <li><a href="#band" data-i18n="nav.why">Why</a></li>
       <li><a href="#steps" data-i18n="nav.how">How it works</a></li>
+      <li><a href="https://monitor.toolfront.dev/login" id="nav-monitor" data-i18n="nav.monitor" data-monitor-link>Monitor</a></li>
     </ul>
     <div class="nav-actions" style="display:flex;align-items:center;gap:10px;">
     <span class="lang-toggle" role="group" aria-label="Language">
@@ -1381,14 +1335,13 @@
 <section class="email-section-v5">
   <div class="email-v5-inner">
     <div class="email-v5-text">
-      <p class="email-v5-kicker" data-i18n="email.kicker">Stay updated</p>
-      <h2 data-i18n="email.h2">No spam — just launch notes &amp; WebMCP spec changes.</h2>
+      <p class="email-v5-kicker" data-i18n="mon.kicker">ToolFront Monitor</p>
+      <h2 data-i18n="mon.h2">Don't scan just once. Monitor checks weekly and emails you when the score moves.</h2>
     </div>
-    <form class="email-v5-form" onsubmit="return false;">
-      <input type="email" class="email-input" placeholder="you@company.com" aria-label="Email for updates" data-i18n-ph="email.ph" data-i18n-aria="email.aria">
-      <button type="button" class="email-btn" data-i18n="email.btn">Notify me →</button>
-    </form>
-    <p class="email-note" data-i18n-html="email.note">One confirmation email, then only when it matters. <a href="/privacy" data-i18n="email.plink">Privacy policy →</a></p>
+    <div class="email-v5-form" style="display:flex;align-items:center;">
+      <a href="https://monitor.toolfront.dev/signup" class="email-btn" data-i18n="mon.btn" data-monitor-link="signup" style="text-decoration:none;">Start monitoring →</a>
+    </div>
+    <p class="email-note" data-i18n-html="mon.note">We only email when something changes. Unsubscribe anytime. <a href="/privacy" data-i18n="mon.plink">Privacy policy →</a></p>
   </div>
 </section>
 
@@ -1406,7 +1359,7 @@
          items duplicated this row (Scanner info / Security / GitHub twice). -->
     <div class="footer-v5-meta">
       <span data-i18n="foot.copy">&copy; 2026 ToolFront — Free &amp; Open</span>
-      <span><a href="/privacy" data-i18n="foot.privacy">Privacy</a> · <a href="/security" data-i18n="foot.security">Security</a> · <a href="/terms" data-i18n="foot.terms">Terms</a> · <a href="/bot" data-i18n="foot.scanner">Scanner info</a> · <a href="https://github.com/wishforge/toolfront" target="_blank" rel="noopener">GitHub</a></span>
+      <span><a href="/privacy" data-i18n="foot.privacy">Privacy</a> · <a href="/security" data-i18n="foot.security">Security</a> · <a href="/terms" data-i18n="foot.terms">Terms</a> · <a href="/bot" data-i18n="foot.scanner">Scanner info</a> · <a href="https://monitor.toolfront.dev/login" id="footer-monitor" data-i18n="nav.monitor" data-monitor-link>Monitor</a> · <a href="https://github.com/wishforge/toolfront" target="_blank" rel="noopener">GitHub</a></span>
       <span><a href="mailto:privacy@toolfront.dev">privacy@toolfront.dev</a></span>
     </div>
   </div>
@@ -1414,9 +1367,20 @@
 
 
 <script>
+  // Monitor entry links: local dev jumps to the local monitor worker
+  // (wrangler dev on :8787); production jumps to monitor.toolfront.dev.
+  (function () {
+    var local = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    var base = local ? 'http://localhost:8787' : 'https://monitor.toolfront.dev';
+    document.querySelectorAll('[data-monitor-link]').forEach(function (a) {
+      var page = a.getAttribute('data-monitor-link') || 'login';
+      a.href = base + '/' + page;
+    });
+  })();
   var LANGS = { en: {
   "nav.why": "Why",
   "nav.how": "How it works",
+  "nav.monitor": "Monitor",
   "nav.cta": "Get started →",
   "hero.kicker": "Agent-readiness scan · free · ~5s",
   "hero.lede": "Agents browse, compare and buy on your site's behalf. If your site is a black box to them, they complete the errand with a competitor. Scan it — get the grade agents see.",
@@ -1487,25 +1451,20 @@
   "dog.fndesc": "Scans any domain for AI agent readiness. Returns structured score + fix list. No auth required for public sites.",
   "dog.standby": "● STANDBY",
   "dog.active": "● ACTIVE",
-  "email.kicker": "Stay updated",
-  "email.h2": "No spam — just launch notes & WebMCP spec changes.",
-  "email.btn": "Notify me →",
-  "email.ph": "you@company.com",
-  "email.aria": "Email for updates",
-  "email.err": "Enter a valid email address.",
+  "mon.kicker": "ToolFront Monitor",
+  "mon.h2": "Don't scan just once. Monitor checks weekly and emails you when the score moves.",
+  "mon.btn": "Start monitoring →",
   "feat.h2": "Everything an agent needs to use your site.",
   "ba.r4b": "Where the errand ends",
   "trust.2s": "● Live",
   "trust.3s": "● Live",
-  "email.plink": "Privacy policy →",
-    "email.note": "One confirmation email, then only when it matters. <a href=\"/privacy\" data-i18n=\"email.plink\">Privacy policy →</a>",
+  "mon.plink": "Privacy policy →",
+    "mon.note": "We only email when something changes. Unsubscribe anytime. <a href=\"/privacy\" data-i18n=\"mon.plink\">Privacy policy →</a>",
   "foot.privacy": "Privacy",
   "foot.terms": "Terms",
   "code.cc1": "// This page registered a live tool: scan_domain",
   "code.cc2": "// auto-confirmed by default",
   "code.cc3": "// Your existing function, reused as-is — no rewrite needed",
-  "email.ok": "Check your inbox — we sent a confirmation link.",
-    "email.fail": "That didn't go through. Please try again in a moment.",
   "foot.tagline": "Built on the open WebMCP proposal.",
   "foot.example": "See an example report →",
   "foot.scanner": "Scanner info",
@@ -1525,9 +1484,10 @@
 }, zh: {
   "nav.why": "为什么",
   "nav.how": "工作原理",
+  "nav.monitor": "持续监控",
   "nav.cta": "立即开始 →",
   "hero.kicker": "AI 友好度检测 · 免费 · 5 秒",
-  "hero.lede": "AI 正在替你的客户找产品、比价、下单。它看得懂你的网站吗？扫一扫就知道。",
+  "hero.lede": "AI 正在替你的客户找产品、比价、下单。你的网站它读不懂，这单就落到竞争对手头上。扫一次，看看你在 AI 眼里是什么样。",
   "hero.h1": "下一个访问你网站的<br>是 <span class=\"hl-u\">AI</span>，<br>不是人。",
   "hero.scanbtn": "免费扫描",
   "hero.ph": "你的域名.com",
@@ -1596,25 +1556,20 @@
   "dog.fndesc": "扫描任意域名的智能体就绪度，返回结构化分数与修复清单。公开站点无需鉴权。",
   "dog.standby": "● 待命",
   "dog.active": "● 已生效",
-  "email.kicker": "保持更新",
-  "email.h2": "绝无垃圾邮件——只在有新动态和规范更新时给你发信。",
-  "email.btn": "通知我 →",
-  "email.ph": "你的邮箱@公司.com",
-  "email.aria": "接收更新的邮箱",
-  "email.err": "请输入有效的邮箱地址。",
+  "mon.kicker": "ToolFront Monitor",
+  "mon.h2": "别只扫一次。Monitor 每周扫一次，分数一动就发邮件。",
+  "mon.btn": "开始监控 →",
   "feat.h2": "让 AI 用好你的网站，就靠这几样。",
   "ba.r4b": "这单生意在哪完成",
   "trust.2s": "● 已上线",
   "trust.3s": "● 已上线",
-  "email.plink": "隐私政策 →",
-    "email.note": "仅一封确认邮件，之后只在有重要更新时联系你。<a href=\"/privacy\" data-i18n=\"email.plink\">隐私政策 →</a>",
+  "mon.plink": "隐私政策 →",
+    "mon.note": "只有真出事才发邮件 · 不想用了随时退订。<a href=\"/privacy\" data-i18n=\"mon.plink\">隐私政策 →</a>",
   "foot.privacy": "隐私政策",
   "foot.terms": "服务条款",
   "code.cc1": "// 本页注册了一个真实工具：scan_domain",
   "code.cc2": "// 默认自动确认",
   "code.cc3": "// 你现有的函数，原样复用——无需重写",
-  "email.ok": "确认邮件已发出，请到邮箱查收。",
-    "email.fail": "提交没有成功，请稍后再试。",
   "foot.tagline": "基于开放的 WebMCP 提案。",
   "foot.example": "看一份报告样例 →",
   "foot.scanner": "扫描器说明",
@@ -1700,42 +1655,6 @@
       var el = document.getElementById('scan');
       if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); if (input) input.focus(); }
     });
-
-    var eBtn = document.querySelector('.email-btn');
-    var eIn = document.querySelector('.email-input');
-    var form = document.querySelector('.email-v5-form');
-    function note(msg, bad) {
-      if (!form) return;
-      var old = form.parentNode.querySelector('.email-note');
-      if (old) old.remove();
-      var n = document.createElement('div');
-      n.className = 'email-note';
-      n.textContent = msg;
-      n.style.cssText = 'margin-top:10px;font-family:var(--mono);font-size:12px;color:' + (bad ? 'var(--bad)' : 'var(--good)');
-      form.parentNode.appendChild(n);
-    }
-    function join() {
-      var v = (eIn.value || '').trim();
-      if (!v || v.indexOf('@') < 1) { note(t('email.err'), true); eIn.focus(); return; }
-      eBtn.disabled = true;
-      // Honest feedback: the server answers non-2xx when nothing was stored and
-      // nothing was sent (undeliverable address, provider failure, rate limit).
-      // Claiming "check your inbox" there would be a lie — and the failure
-      // wording is uniform for every reason, so it cannot be used to probe
-      // which addresses are deliverable.
-      fetch('/api/waitlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: v, domain: null, lang: lang }),
-      }).then(function (res) {
-        if (res.ok) { note(t('email.ok'), false); eIn.value = ''; }
-        else note(t('email.fail'), true);
-      }).catch(function () {
-        note(t('email.fail'), true);
-      }).finally(function () { eBtn.disabled = false; });
-    }
-    if (eBtn) eBtn.addEventListener('click', join);
-    if (eIn) eIn.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); join(); } });
 
     try {
       var mc = document.modelContext || navigator.modelContext;
