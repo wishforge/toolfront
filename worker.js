@@ -360,8 +360,8 @@ async function fetchCapped(rawUrl, method = "GET", hop = 0) {
       return fetchCapped(next.toString(), method, hop + 1);
     }
     if (res.status >= 300 && res.status < 400) return { status: 0, text: "", blocked: true, cfMitigated }; // redirect chain too long
-    if (method === "HEAD") return { status: res.status, text: "", cfMitigated };
-    if (!res.body) return { status: res.status, text: "", cfMitigated };
+    if (method === "HEAD") return { status: res.status, text: "", cfMitigated, ctype: (res.headers.get("content-type") || "").toLowerCase() || null, link: res.headers.get("link"), lmod: res.headers.get("last-modified") };
+    if (!res.body) return { status: res.status, text: "", cfMitigated, ctype: (res.headers.get("content-type") || "").toLowerCase() || null, link: res.headers.get("link"), lmod: res.headers.get("last-modified") };
     const reader = res.body.getReader();
     const chunks = [];
     let size = 0;
@@ -375,7 +375,7 @@ async function fetchCapped(rawUrl, method = "GET", hop = 0) {
     const buf = new Uint8Array(size);
     let off = 0;
     for (const c of chunks) { const take = Math.min(c.byteLength, size - off); buf.set(c.subarray(0, take), off); off += take; }
-    return { status: res.status, text: new TextDecoder().decode(buf), cfMitigated };
+    return { status: res.status, text: new TextDecoder().decode(buf), cfMitigated, ctype: (res.headers.get("content-type") || "").toLowerCase() || null, link: res.headers.get("link"), lmod: res.headers.get("last-modified") };
   } catch (err) {
     return { status: 0, text: "", error: String(err && err.name || "fetch_failed") };
   } finally {
@@ -697,6 +697,91 @@ function checkMachineSurfaces(sitemapRes, apiRes) {
   return { status: "fail", ratio: 0, detail: "No sitemap.xml or OpenAPI spec detected. Agents have no map of your site." };
 }
 
+/* ————— api-errors: unknown API paths must fail in a machine-readable way —————
+   Agents call APIs programmatically and cannot recover from an HTML error
+   page. A JSON problem-details body (RFC 9457) lets them branch on failures
+   instead of guessing. Probe: one request to a random /api path that cannot
+   exist, so we measure the site's REAL error shape, not a cached page. */
+function checkApiErrors(probe) {
+  if (!probe || probe.status === 0) return { status: "na", ratio: 0, detail: "Probe unreachable — could not verify the API error shape." };
+  if (probe.blocked || probe.cfMitigated) return { status: "na", ratio: 0, detail: NA_DETAIL };
+  if (probe.status >= 400 && probe.status < 500) {
+    if (probe.ctype && probe.ctype.includes("json")) {
+      return { status: "pass", ratio: 1, detail: "Unknown API paths return machine-readable JSON errors — agents can recover from failures." };
+    }
+    return { status: "fail", ratio: 0, detail: "API errors return " + (probe.ctype || "no content-type") + " — agents cannot parse an HTML error page. Return application/problem+json instead." };
+  }
+  return { status: "partial", ratio: 0.5, detail: "Unknown API path returned HTTP " + probe.status + " instead of a structured 4xx error." };
+}
+
+/* ————— freshness: can agents tell how recent the content is? —————
+   AI systems prefer recent content and several engines surface newer pages
+   more often. Signals, best first: JSON-LD dateModified, OG
+   article:modified_time, a Last-Modified response header; published-only
+   signals (article:published_time, <time datetime>) count as partial. */
+function checkFreshness(home) {
+  const text = (home && home.text) || "";
+  if (/dateModified|article:modified_time/i.test(text) || (home && home.lmod)) {
+    return { status: "pass", ratio: 1, detail: "Content freshness signals found (dateModified / article:modified_time / Last-Modified)." };
+  }
+  if (/article:published_time|<time[^>]+datetime/i.test(text)) {
+    return { status: "partial", ratio: 0.5, detail: "A publish date exists but no last-updated signal — agents cannot tell if the content is current." };
+  }
+  return { status: "fail", ratio: 0, detail: "No freshness signals — AI systems cannot determine when this content was last updated." };
+}
+
+/* ————— link-headers: RFC 8288 Link header as request-time discovery —————
+   Link response headers let agents discover machine-readable resources
+   without parsing HTML. Scanners (including ours) look for api-catalog,
+   service-desc, service-doc, and sitemap rels. Zero extra requests: the
+   header rides along on the homepage probe. */
+function checkLinkHeaders(home) {
+  const link = home && home.link;
+  if (!link) return { status: "fail", ratio: 0, detail: "No Link response header — agents must parse HTML to discover machine-readable resources. Advertise sitemap and OpenAPI via Link." };
+  if (/api-catalog|service-desc|service-doc|sitemap/i.test(link)) {
+    return { status: "pass", ratio: 1, detail: "Link response header advertises agent-relevant relations." };
+  }
+  return { status: "partial", ratio: 0.5, detail: "Link header present but carries no agent-relevant rel (api-catalog / service-desc / sitemap)." };
+}
+
+// Paste-ready samples for the fix cards (same pattern as llmsSampleFor).
+function apiErrorsSample() {
+  return JSON.stringify({
+    type: "https://example.com/problems/not-found",
+    title: "Not found",
+    status: 404,
+    detail: "No such resource",
+    instance: "/api/v1/missing",
+  }, null, 2);
+}
+function freshnessSample() {
+  return `<!-- Option 1: JSON-LD (preferred) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Your Article Title",
+  "datePublished": "2026-01-15T09:00:00Z",
+  "dateModified": "2026-02-28T14:30:00Z"
+}
+</script>
+
+<!-- Option 2: Open Graph meta tags -->
+<meta property="article:published_time" content="2026-01-15T09:00:00Z">
+<meta property="article:modified_time" content="2026-02-28T14:30:00Z">
+
+<!-- Server-level: ensure Last-Modified is sent -->
+# Nginx
+add_header Last-Modified $date_gmt;`;
+}
+function linkHeadersSample() {
+  return `# Nginx
+add_header Link '</.well-known/api-catalog>; rel="api-catalog", </openapi.json>; rel="service-desc", </sitemap.xml>; rel="sitemap"' always;
+
+# Test
+curl -I https://yourdomain.com/ | grep -i '^link:'`;
+}
+
 /* ————— scanner opt-out: respect robots.txt targeting our own UA —————
    Our scanner is a good citizen: if a site explicitly disallows
    "ToolFront-Scanner" in its robots.txt, we do not scan it. (Wildcard
@@ -727,6 +812,7 @@ const SUB_CHECKS = [
   { id: "llms-txt", label: "llms.txt", path: "/llms.txt", res: "llms" },
   { id: "robots-policy", label: "AI crawler policy", path: "/robots.txt", res: "robots" },
   { id: "machine-surfaces", label: "Machine-readable surfaces", path: "/sitemap.xml + /openapi.json", res: "machine" },
+  { id: "api-errors", label: "API error responses", path: "/api/tf-probe (random)", res: "api" },
 ];
 
 /* ————— Scoring policy: the single source of truth ————————————————
@@ -745,17 +831,20 @@ const SUB_CHECKS = [
 
    Bumping SCORING_VERSION tells monitoring clients that historical scores
    are not comparable — see the re-baseline guard in monitor-cron.ts. */
-const SCORING_VERSION = "2.0.0";
+const SCORING_VERSION = "2.1.0";
 const TIER_BUDGET = { blocking: 55, interpretation: 35, enrichment: 10 };
 const CHECK_POLICY = {
   // tier = blast radius when this fails; evidence = how sure we are that
   // agents actually consume the signal; share = split of the tier budget.
-  "robots-policy": { label: "AI crawler policy", tier: "blocking", evidence: "A", share: 0.40 },
-  webmcp: { label: "WebMCP tools", tier: "blocking", evidence: "A", share: 0.40 },
-  "tool-security": { label: "Tool surface security", tier: "blocking", evidence: "A", share: 0.20 },
-  "machine-surfaces": { label: "Machine-readable surfaces", tier: "interpretation", evidence: "B", share: 0.54 },
-  "structured-data": { label: "Structured data", tier: "interpretation", evidence: "B", share: 0.46 },
-  "llms-txt": { label: "llms.txt", tier: "enrichment", evidence: "C", share: 1.0 },
+  "robots-policy": { label: "AI crawler policy", tier: "blocking", evidence: "A", share: 0.35 },
+  webmcp: { label: "WebMCP tools", tier: "blocking", evidence: "A", share: 0.35 },
+  "tool-security": { label: "Tool surface security", tier: "blocking", evidence: "A", share: 0.15 },
+  "api-errors": { label: "API error responses", tier: "blocking", evidence: "B", share: 0.15 },
+  "machine-surfaces": { label: "Machine-readable surfaces", tier: "interpretation", evidence: "B", share: 0.40 },
+  "structured-data": { label: "Structured data", tier: "interpretation", evidence: "B", share: 0.35 },
+  freshness: { label: "Content freshness", tier: "interpretation", evidence: "B", share: 0.25 },
+  "llms-txt": { label: "llms.txt", tier: "enrichment", evidence: "C", share: 0.60 },
+  "link-headers": { label: "Link response headers", tier: "enrichment", evidence: "C", share: 0.40 },
 };
 /** Resolve one check's scoring policy into the shape the report needs. */
 function policyOf(id) {
@@ -789,9 +878,9 @@ async function probePath(env, domain, path, method) {
     try {
       const res = await env.ASSETS.fetch(new Request("https://" + OWN_DOMAIN + path));
       const text = (await res.text()).slice(0, MAX_BYTES);
-      return { status: res.status, text, blocked: false, cfMitigated: false };
+      return { status: res.status, text, blocked: false, cfMitigated: false, ctype: (res.headers.get("content-type") || "").toLowerCase() || null, link: res.headers.get("link"), lmod: res.headers.get("last-modified") };
     } catch (_) {
-      return { status: 0, text: "", blocked: false, cfMitigated: false };
+      return { status: 0, text: "", blocked: false, cfMitigated: false, ctype: null, link: null, lmod: null };
     }
   }
   // Third-party domains keep the original HEAD-first behaviour: cheaper, and it
@@ -815,11 +904,13 @@ async function scanDomainCore(domain, env) {
     return null;
   }
 
-  const [home, llms, sitemap, openapi] = await Promise.all([
+  const [home, llms, sitemap, openapi, apiProbe] = await Promise.all([
     probePath(env, domain, "/"),
     probePath(env, domain, "/llms.txt"),
     probePath(env, domain, "/sitemap.xml", "HEAD"),
     probePath(env, domain, "/openapi.json", "HEAD"),
+    // Random path that cannot exist: measures the site's real API error shape.
+    probePath(env, domain, "/api/tf-probe-" + Date.now()),
   ]);
 
   // Some servers reject HEAD outright (405/501) while serving GET fine —
@@ -862,6 +953,7 @@ async function scanDomainCore(domain, env) {
     llms: challengeProbe(llms.status, llms.text, llms.cfMitigated),
     robots: challengeProbe(robots.status, robots.text, robots.cfMitigated),
     machine: challengeProbe(sitemapRes.status, sitemapRes.text, sitemapRes.cfMitigated) || challengeProbe(openapiRes.status, openapiRes.text, openapiRes.cfMitigated),
+    api: challengeProbe(apiProbe.status, apiProbe.text, apiProbe.cfMitigated),
   };
   const na = (id) => ({ ...policyOf(id), status: "na", points: null, detail: NA_DETAIL });
   // Merge a check result (ratio 0..1) with its policy (max from tier budget):
@@ -873,6 +965,10 @@ async function scanDomainCore(domain, env) {
   };
 
   const surface = extractWebMcpSurface(home.text);
+  const withSample = (c, sample) => {
+    if (c.status === "fail" || c.status === "partial") c.sample = sample;
+    return c;
+  };
   const checks = [
     scoreCheck("webmcp", checkWebMCP(surface)),
     scoreCheck("tool-security", checkToolSecurity(surface)),
@@ -886,15 +982,24 @@ async function scanDomainCore(domain, env) {
     })(),
     ch.robots ? na("robots-policy") : scoreCheck("robots-policy", checkRobotsAI(robots)),
     ch.machine ? na("machine-surfaces") : scoreCheck("machine-surfaces", checkMachineSurfaces(sitemapRes, openapiRes)),
+    // Self-scan honest limitation: the asset server cannot exercise the
+    // worker's route fallback, so this layer is not observable from here.
+    selfScan
+      ? { ...policyOf("api-errors"), status: "na", points: null, detail: "Self-scan: API error behavior is served by the worker, not the asset server — not observable from published assets." }
+      : ch.api ? na("api-errors") : withSample(scoreCheck("api-errors", checkApiErrors(apiProbe)), apiErrorsSample()),
+    withSample(scoreCheck("freshness", checkFreshness(home)), freshnessSample()),
+    withSample(scoreCheck("link-headers", checkLinkHeaders(home)), linkHeadersSample()),
   ];
 
   // na items (points === null) count toward neither score nor denominator —
-  // an un-scannable surface must not drag the grade down, but it IS listed in
-  // report.unavailable and flagged with report.warning so it can't hide.
+  // an un-scannable surface must not drag the grade down. Only bot-protection
+  // blocks (NA_DETAIL) land in report.unavailable + the UI warning banner;
+  // other na reasons (e.g. the self-scan api-errors layer gap) stay visible
+  // as na pills without claiming "bot protection stopped us".
   let score = 0, scoreMax = 0;
   const unavailable = [];
   for (const c of checks) {
-    if (c.points === null) { unavailable.push(c.id); continue; }
+    if (c.points === null) { if (c.detail === NA_DETAIL) unavailable.push(c.id); continue; }
     score += c.points; scoreMax += c.max;
   }
   const pct = scoreMax > 0 ? Math.round((score / scoreMax) * 100) : 0;
@@ -1369,7 +1474,8 @@ ${domain ? `<p style="font-size:14px;color:#475569;line-height:1.6">${c.domain.r
 export {
   extractWebMcpSurface, toolPoisonFindings, checkToolSecurity, checkWebMCP,
   scanDomainCore, challengeProbe, checkStructuredData, checkLlmsTxt,
-  checkRobotsAI, checkMachineSurfaces, CHECK_POLICY, TIER_BUDGET,
+  checkRobotsAI, checkMachineSurfaces, checkApiErrors, checkFreshness,
+  checkLinkHeaders, CHECK_POLICY, TIER_BUDGET,
   homeTitleOf, llmsSampleFor,
 };
 

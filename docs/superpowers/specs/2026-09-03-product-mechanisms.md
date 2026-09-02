@@ -16,7 +16,7 @@ isagentready proves three mechanisms work on the same scan core:
 | Action plan sorted by repair impact | Failed checks labeled "+N overall pts", sorted, top 3 shown | Fix cards exist (`report.html` `buildFixes`, line 980) but sort by tier only (line 1021–1024); gain is computed (`totalGain`, line 1030–1031) yet not used for ordering |
 | Compare page (`/compare/a/b`) | Two scan results side by side, "leads by N" badge, per-check diff | No route, no page; `scanDomainCore()` is a pure function callable twice (line 802) |
 | Rankings page (`/rankings`) | Aggregate of all scans, score-desc table, rows link to reports | monitor's D1 `scan_reports` table already stores per-domain latest scores; no aggregation endpoint anywhere |
-| Email capture on report page | "Free PDF report" form at page bottom | `/api/waitlist` endpoint exists (worker.js line 1096) but is only wired into the landing page |
+| Email capture on report page | "Free PDF report" form at page bottom | N/A — monitor signup funnel already covers this (F2 dropped, see §F2) |
 | Three checks we lack | api-errors (+3), freshness (+3), link-headers (+3) — all failed on toolfront.dev itself | `CHECK_POLICY` (worker.js line 750) has 6 checks; none covers API error shape, content freshness, or `Link:` response headers |
 
 isagentready's rankings lose credibility because the top of the list is unknown domains (cavalli.tr). Our rankings will curate known SaaS brands instead — that is a strategy difference, not just UI.
@@ -38,11 +38,13 @@ isagentready's rankings lose credibility because the top of the list is unknown 
 - Card header already shows a `+N pts` gain badge; sorting makes it the visual ordering principle.
 - "Potential score" projection (checkbox recalculation) is untouched — it sums the same gains.
 
-### F2 — Email capture on the report page
+### F2 — Email capture on the report page — DROPPED (2026-09-03)
 
-- One section at the bottom of `report.html`: label, email input, submit button, honeypot fields (hidden `name`/`company`), inline success/error message.
-- POSTs to `/api/waitlist` with `{ email }`; success/error rendered inline; no redirects.
-- Bilingual copy (en/zh) via the existing `t()` i18n dictionary.
+Original intent: a waitlist form at the report bottom reusing `/api/waitlist`, per the isagentready "Free PDF report" pattern.
+
+Dropped during implementation review: toolfront-monitor already ships a full account funnel (signup → email confirm → login) and the report page CTA already links to monitor `/signup`. A second email capture on the same page would split the funnel, duplicate the audience store, and add a surface to maintain — ponytail rung 1 ("does this need to be built at all?") rejects it. isagentready needed the waitlist because it has no account product; we do.
+
+If the waitlist is ever revisited, `/api/waitlist` (worker.js, honeypot + same-origin enforced) remains the ready backend.
 
 ### F3 — Three new checks
 
@@ -83,7 +85,7 @@ Honest limitation (disclosed): for self-scans (`toolfront.dev` via ASSETS), `api
 
 ## 4. Batch sequencing
 
-- **Batch 1 (this session):** F1, F2, F3 — report page upgrade + scanner depth. All local, previewable via `wrangler dev`.
+- **Batch 1 (this session):** F1, F3 — report page upgrade + scanner depth. All local, previewable via `wrangler dev`.
 - **Batch 2 (after Batch 1 user preview):** F4, F5 — new pages, cross-repo (monitor worker for rankings data).
 
 ## 5. Explicitly out of scope
@@ -99,10 +101,10 @@ Honest limitation (disclosed): for self-scans (`toolfront.dev` via ASSETS), `api
 | Spec item | Plan task |
 |-----------|-----------|
 | F1 sort | Task 1 |
-| F2 email capture | Task 2 |
+| F2 email capture | ~~Task 2~~ (dropped, see §F2) |
 | F3 shared header plumbing | Task 3 |
 | F3 three checks + policy resplit + version bump | Task 4 |
-| F1+F2+F3 i18n + fix-card copy | Task 5 |
+| F1+F3 i18n + fix-card copy | Task 5 |
 | Tests: dogfood + new check unit tests | Task 6 |
 | Gates + local commit | Task 7 |
 | F4 compare (Batch 2) | Task 8 |

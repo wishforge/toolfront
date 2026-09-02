@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Execute task-by-task in order. Batch 1 = Tasks 1–7 (this session, ends with local preview and USER CONFIRMATION — no deploy, per the preview gate). Batch 2 = Tasks 8–9 (only after the user approves the Batch 1 preview). Steps use checkbox syntax. Merging/deploying is a human action.
 
-**Goal:** Turn the report page from "a list of findings" into "a prescription" (gain-sorted fixes + email capture), deepen the scanner with three checks isagentready empirically flagged on our own domain (api-errors, freshness, link-headers), then add the two growth surfaces (compare, rankings).
+**Goal:** Turn the report page from "a list of findings" into "a prescription" (gain-sorted fixes), deepen the scanner with three checks isagentready empirically flagged on our own domain (api-errors, freshness, link-headers), then add the two growth surfaces (compare, rankings).
 
 **Architecture:** No new scan engine. `fetchCapped`/`probePath` learn to return `ctype` + `link` headers once; three new checks read from existing probes; `CHECK_POLICY` shares resplit within unchanged tier budgets; `SCORING_VERSION` bumps to 2.1.0 (monitor re-baseline guard handles comparability). Report page gains a within-tier gain sort (comparator edit only) and a bottom waitlist form reusing `/api/waitlist`. Batch 2 adds two routes + two pages reusing `scanDomainCore()` and monitor D1.
 
@@ -46,17 +46,9 @@ fixable.sort(function (a, b) {
 
 ---
 
-### Task 2: Email capture on the report page (F2)
+### Task 2: Email capture on the report page (F2) — DROPPED (2026-09-03)
 
-**Files:**
-- Modify: `public/report.html` (bottom section + i18n keys)
-
-**Interfaces:**
-- Consumes: `POST /api/waitlist` `{ email }` → `{ ok: true }` | 4xx `{ error }`. Honeypot fields `name`/`company` included hidden.
-
-- [ ] **Step 1: Add the bottom section** (after the fix list, before footer): kicker-style label, one-line promise, email input + gradient submit button (reuse `.acts .primary` styling pattern), hidden honeypot inputs, inline status line.
-- [ ] **Step 2: JS** — submit handler: client-side email sanity check, `fetch('/api/waitlist', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, name:'', company:'' }) })`, render success ("You're on the list — we'll send the deep-dive report.") or the API's error message inline. All text via `t()` with new keys `report.waitlist.*` (en + zh dictionaries).
-- [ ] **Step 3: Verify** — submit a valid email (200) and an invalid one (400) against `wrangler dev`; confirm inline messages, no page navigation.
+Dropped by user decision during implementation: toolfront-monitor already ships the account funnel (signup → confirm → login) and the report CTA already links to monitor `/signup`. A second email capture would split the funnel and duplicate the audience store (ponytail rung 1). No code kept. See spec §F2.
 
 ---
 
@@ -120,7 +112,7 @@ function checkLinkHeaders(home) {
 
 ---
 
-### Task 5: i18n + fix-card copy for the new checks (F1/F2/F3 glue)
+### Task 5: i18n + fix-card copy for the new checks (F1/F3 glue)
 
 **Files:**
 - Modify: `public/report.html` (fixDict entries + `t()` dictionaries en/zh)
@@ -196,7 +188,7 @@ feat(report): gain-sorted action plan, waitlist capture, api-errors/freshness/li
 
 ## Self-Review
 
-**Spec coverage scan:** F1→Task 1 (+Task 5 copy), F2→Task 2 (+Task 5 i18n), F3→Tasks 3/4/5/6, F4→Task 8, F5→Task 9, scoring policy change→Task 4 Step 1–2, version bump→Task 4 Step 2, `SUB_CHECKS`→Task 4 Step 2, self-scan `api-errors` na→Task 4 Step 4 + Task 6 Step 2. All spec items mapped; nothing in the spec lacks a task.
+**Spec coverage scan:** F1→Task 1 (+Task 5 copy), F2→DROPPED (Task 2 records the decision), F3→Tasks 3/4/5/6, F4→Task 8, F5→Task 9, scoring policy change→Task 4 Step 1–2, version bump→Task 4 Step 2, `SUB_CHECKS`→Task 4 Step 2, self-scan `api-errors` na→Task 4 Step 4 + Task 6 Step 2. All live spec items mapped; the dropped item is documented, not silently omitted.
 
 **Placeholder scan:** No `TODO`/`TBD`/`...` placeholders in committed tasks — Batch 2 steps are intentionally collapsed one-liners marked as later-scope, which is sequencing, not a placeholder. Sample copy content is named concretely (RFC 9457 body, JSON-LD dateModified, nginx Link header).
 

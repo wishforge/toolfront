@@ -58,6 +58,12 @@ console.log("\n[A] happy path (37/D report)");
   ok("SVG 图标注入胶囊", doc.querySelectorAll(".pills .pill svg").length === 6);
   ok("业务影响卡渲染 ≥3 项", doc.querySelectorAll(".biz-item").length >= 3);
   ok("修复清单 5 项", doc.querySelectorAll(".fix input[type=checkbox]").length === 5);
+  ok("同层内按修复增益降序（machine 25 > structured 11）", (() => {
+    const titles = [...doc.querySelectorAll(".fix .t b")].map(b => b.textContent);
+    const m = titles.findIndex(t => /OpenAPI spec/.test(t));
+    const s = titles.findIndex(t => /structured data coverage/.test(t));
+    return m > -1 && s > -1 && m < s;
+  })(), JSON.stringify([...doc.querySelectorAll(".fix .t b")].map(b => b.textContent)));
   ok("预估条存在", doc.querySelector(".potential .est") !== null);
   ok("CTA 为 Monitor 注册链接（留资表单已移除）", doc.querySelector(".cta a.btn-primary") !== null && doc.querySelector(".cta input[type=email]") === null);
   ok("域名进标题头", textOf(".rhead .dom", dom) === "example.com");

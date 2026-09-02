@@ -595,7 +595,7 @@
   /* report check labels & details (frontend translation of API responses) */
   var CHECKS_L10N = {
     en: {
-      labels: { webmcp: 'WebMCP tools', 'tool-security': 'Tool surface security', 'structured-data': 'Structured data', 'llms-txt': 'llms.txt', 'robots-policy': 'AI crawler policy', 'machine-surfaces': 'Machine-readable surfaces' },
+      labels: { webmcp: 'WebMCP tools', 'tool-security': 'Tool surface security', 'structured-data': 'Structured data', 'llms-txt': 'llms.txt', 'robots-policy': 'AI crawler policy', 'machine-surfaces': 'Machine-readable surfaces', 'api-errors': 'API error responses', freshness: 'Content freshness', 'link-headers': 'Link response headers' },
       verdicts: [70, 'Agent-ready. Agents can work with this site deliberately.', 40, 'Partially readable. Agents guess some of the time, fail the rest.', 'Opaque to agents. Every interaction is a screenshot-and-click gamble.'],
       biz: {
         'webmcp.fail': { pain: 'Customers increasingly ask AI assistants to run errands for them. AI cannot operate your site — so it runs the errand with a competitor instead.', gain: 'Register WebMCP tools and agents call your service directly: from "mentioned by AI" to "used by AI".' },
@@ -605,10 +605,16 @@
         'structured-data.fail': { pain: 'AI cannot read your prices, products or reviews — it stumbles when describing you, or skips you entirely. Like running a shop with the sign covered.', gain: 'Complete the structured data and AI quotes your price, rating and selling points accurately.' },
         'structured-data.partial': { pain: 'AI only sees fragments — its description of you is incomplete at the exact moment customers compare options.', gain: 'Fill the gaps and AI describes you fully and accurately.' },
         'llms-txt.fail': { pain: 'You gave AI no "user manual" — it guesses what your business does, and guesses wrong.', gain: 'One llms.txt file (a few dozen lines) lets AI introduce you by your own script.' },
+        'api-errors.fail': { pain: 'When AI hits a broken API path on your site it gets an HTML error page it cannot parse — the errand ends there, and the agent moves on to a competitor that fails gracefully.', gain: 'Return JSON error bodies (RFC 9457) and agents recover from failures and complete the journey on your site.' },
+        'api-errors.partial': { pain: 'Your API responses do not follow a predictable error shape — every agent integration guesses how to handle your failures.', gain: 'Adopt a structured 4xx error shape and agent integrations become reliable.' },
+        'freshness.fail': { pain: 'AI cannot tell how recent your content is — when freshness matters (prices, releases, policies), it prefers a competitor whose content dates are readable.', gain: 'Add dateModified signals and AI cites you as current instead of outdated.' },
+        'freshness.partial': { pain: 'Your content shows a publish date but no last-updated signal — AI assumes it may be stale.', gain: 'Add a last-modified signal and your updated content gets credit for being fresh.' },
         'robots-policy.fail': { pain: 'You lock out mainstream AI crawlers — they cannot learn you, so when users ask AI, it recommends someone else.', gain: 'Adjust the policy so AI can learn and cite you.' },
         'robots-policy.partial': { pain: 'You never told AI whether it is welcome — crawlers may over-scrape you, or mainstream AI may ignore you. You lose either way.', gain: 'State the policy in one line: welcome the AI you want, block the rest — control back in your hands.' },
         'machine-surfaces.fail': { pain: 'AI has no map of your site — it flips pages like a human, and whatever it cannot reach does not exist.', gain: 'Add sitemap and OpenAPI and AI sees your whole offering at a glance.' },
-        'machine-surfaces.partial': { pain: 'The map is half-drawn — AI only discovers part of your services.', gain: 'Complete the surfaces and AI sees everything you offer.' }
+        'machine-surfaces.partial': { pain: 'The map is half-drawn — AI only discovers part of your services.', gain: 'Complete the surfaces and AI sees everything you offer.' },
+        'link-headers.fail': { pain: 'Agents must parse your HTML to find your machine-readable resources — every extra hop loses some of them.', gain: 'One Link response header advertises your sitemap and API spec at request time — zero parsing needed.' },
+        'link-headers.partial': { pain: 'You send a Link header but it does not advertise anything agents look for.', gain: 'Add sitemap / service-desc rels and agents discover your machine surfaces in one request.' }
       },
       fixes: {
         'webmcp.fail': 'Register WebMCP tools so agents can operate your site directly',
@@ -619,6 +625,12 @@
         'structured-data.partial': 'Complete your structured data coverage',
         'llms-txt.fail': 'Create /llms.txt — one markdown file describing your site',
         'llms-txt.partial': 'Complete your llms.txt',
+        'api-errors.fail': 'Return JSON error bodies (RFC 9457) for unknown API paths',
+        'api-errors.partial': 'Adopt a structured 4xx error shape for your API',
+        'freshness.fail': 'Add content freshness signals (dateModified / Last-Modified)',
+        'freshness.partial': 'Add a last-modified signal to your content',
+        'link-headers.fail': 'Add an RFC 8288 Link header advertising your machine surfaces',
+        'link-headers.partial': 'Advertise agent-relevant rels in your Link header',
         'robots-policy.fail': 'Update robots.txt to allow AI crawlers',
         'robots-policy.partial': 'State your AI crawler policy in robots.txt',
         'machine-surfaces.fail': 'Add sitemap.xml and an OpenAPI spec',
@@ -626,7 +638,7 @@
       }
     },
     zh: {
-      labels: { webmcp: 'WebMCP 工具', 'tool-security': '工具面安全', 'structured-data': '结构化数据', 'llms-txt': 'llms.txt', 'robots-policy': 'AI 爬虫政策', 'machine-surfaces': '机器可读入口' },
+      labels: { webmcp: 'WebMCP 工具', 'tool-security': '工具面安全', 'structured-data': '结构化数据', 'llms-txt': 'llms.txt', 'robots-policy': 'AI 爬虫政策', 'machine-surfaces': '机器可读入口', 'api-errors': 'API 错误响应', freshness: '内容时效信号', 'link-headers': 'Link 响应头' },
       verdicts: [70, '已就绪。AI 可以顺畅地使用你的网站。', 40, '部分可读。AI 有时能看懂，有时只能瞎猜。', '对 AI 完全不透明。每次交互都是截图加乱点的赌博。'],
       biz: {
         'webmcp.fail': { pain: '客户越来越让 AI 助手替他们办事。AI 点不动你的网站——它办不了，就去办你竞争对手的。', gain: '注册 WebMCP 工具后，AI 能直接调用你的服务：从"被 AI 提到"升级为"被 AI 使用"，吃到第一波 Agent 流量。' },
@@ -636,10 +648,16 @@
         'structured-data.fail': { pain: 'AI 读不到你的价格、产品、评价这些"硬信息"——推荐你时说不清卖点，甚至直接跳过你。等于把店招蒙了布。', gain: '补全结构化数据后，AI 能准确引用你的价格、评分和卖点——推荐你的时候"话术"又准又漂亮。' },
         'structured-data.partial': { pain: 'AI 只能看到片段信息——客户货比三家的关键时刻，它对你的介绍是残缺的。', gain: '补齐缺口后，AI 对你的介绍又全又准，推荐质量立刻上一个档次。' },
         'llms-txt.fail': { pain: '你没给 AI 留"说明书"——AI 只能靠猜来理解你的业务，猜错了就把你介绍错。', gain: '一份 llms.txt（几十行 markdown）就能让 AI 按你的说法介绍你——怎么说，你说了算。' },
+        'api-errors.fail': { pain: 'AI 调用你站上不存在的 API 路径时，拿到的是一张它读不懂的 HTML 错误页——任务就此中断，AI 转身去办竞争对手的。', gain: '返回 JSON 错误体（RFC 9457）后，AI 能从失败中恢复，把任务在你的网站走完。' },
+        'api-errors.partial': { pain: '你的 API 错误响应没有固定格式——每个接入你的智能体都要猜怎么处理你的失败。', gain: '采用结构化 4xx 错误格式后，智能体接入你的 API 变得可靠。' },
+        'freshness.fail': { pain: 'AI 判断不了你的内容有多新——价格、版本、政策这类时效敏感的信息，它会优先引用标注了更新时间的竞争对手。', gain: '补上 dateModified 信号后，AI 引用你时会说"最新"，而不是"可能过期"。' },
+        'freshness.partial': { pain: '你的内容有发布日期但没有更新日期——AI 默认它可能已经过时。', gain: '加一个"最后更新"信号，你更新过的内容能拿到时效加分。' },
         'robots-policy.fail': { pain: '你把主流 AI 爬虫挡在门外——它们学不到你，用户问 AI 时它自然推荐别家。', gain: '调整 robots 政策后，AI 才能学习并引用你的内容。' },
         'robots-policy.partial': { pain: '你没表态是否欢迎 AI——要么 AI 乱抓你的内容没法管，要么主流 AI 干脆忽略你。两头吃亏。', gain: '一句话写明政策：欢迎的 AI 放进来，不欢迎的挡出去——主动权回到你手里。' },
         'machine-surfaces.fail': { pain: 'AI 找不到你网站的"地图"——它只能像人一样一页页翻，翻不到的内容等于不存在。', gain: '补上 sitemap 和 OpenAPI 后，AI 一览你的全部服务，被推荐的机会成倍增加。' },
-        'machine-surfaces.partial': { pain: '地图只画了一半——AI 只能发现你的部分服务。', gain: '补全入口后，AI 对你的服务一览无余。' }
+        'machine-surfaces.partial': { pain: '地图只画了一半——AI 只能发现你的部分服务。', gain: '补全入口后，AI 对你的服务一览无余。' },
+        'link-headers.fail': { pain: 'AI 必须解析你的 HTML 才能找到机器可读资源——每多一跳就流失一批智能体。', gain: '一条 Link 响应头就能在请求时直接宣告你的 sitemap 和 API 规范——零解析成本。' },
+        'link-headers.partial': { pain: '你发了 Link 头，但没带智能体认识的关系类型。', gain: '加上 sitemap / service-desc 关系后，智能体一个请求就能发现你的机器入口。' }
       },
       fixes: {
         'webmcp.fail': '注册 WebMCP 工具，让 AI 直接操作你的网站',
@@ -650,6 +668,12 @@
         'structured-data.partial': '补全结构化数据覆盖',
         'llms-txt.fail': '创建 /llms.txt——一份介绍你网站的 markdown',
         'llms-txt.partial': '补全你的 llms.txt',
+        'api-errors.fail': '为未知 API 路径返回 JSON 错误体（RFC 9457）',
+        'api-errors.partial': '给 API 采用结构化的 4xx 错误格式',
+        'freshness.fail': '添加内容时效信号（dateModified / Last-Modified）',
+        'freshness.partial': '给内容补一个"最后更新"信号',
+        'link-headers.fail': '添加 RFC 8288 Link 响应头，宣告你的机器可读入口',
+        'link-headers.partial': '在 Link 头中宣告智能体认识的关系类型',
         'robots-policy.fail': '调整 robots.txt 放行 AI 爬虫',
         'robots-policy.partial': '在 robots.txt 写明 AI 爬虫政策',
         'machine-surfaces.fail': '添加 sitemap.xml 和 OpenAPI 规范',
@@ -680,7 +704,17 @@
         'machine-surfaces.pass': '已有 sitemap / OpenAPI 等机器可读入口——这些是自动生成工具的好底料。',
         'machine-surfaces.partial': '提供了部分机器可读入口。补一份 OpenAPI 规范后，工具生成几乎全自动。',
         'machine-surfaces.fail': '未检测到 sitemap.xml 或 OpenAPI 规范，智能体没有你网站的地图。',
-        'machine-surfaces.na': 'sitemap/OpenAPI 探测被 bot 防护拦截，无法检测——同一道墙通常也挡住了 AI 智能体。'
+        'machine-surfaces.na': 'sitemap/OpenAPI 探测被 bot 防护拦截，无法检测——同一道墙通常也挡住了 AI 智能体。',
+        'api-errors.pass': '未知 API 路径返回机器可读的 JSON 错误——智能体能从失败中恢复，不会半路搁浅。',
+        'api-errors.partial': '未知 API 路径没有返回结构化的 4xx 错误——智能体接入时需要额外猜测。',
+        'api-errors.fail': 'API 错误返回的是 HTML 错误页——智能体无法解析，任务会直接中断（建议改用 application/problem+json）。',
+        'api-errors.na': '探测被 bot 防护拦截，无法检测——同一道墙通常也挡住了 AI 智能体。',
+        'freshness.pass': '检测到内容时效信号（dateModified / article:modified_time / Last-Modified）——AI 能判断你的内容有多新。',
+        'freshness.partial': '有发布日期但没有更新日期——AI 无法判断内容是否仍然有效。',
+        'freshness.fail': '没有任何时效信号——AI 系统判断不了你的内容是什么时候更新的。',
+        'link-headers.pass': 'Link 响应头已宣告智能体认识的关系类型——一个请求就能发现机器可读资源。',
+        'link-headers.partial': '有 Link 响应头，但没有智能体认识的 rel（api-catalog / service-desc / sitemap）。',
+        'link-headers.fail': '没有 Link 响应头——智能体必须解析 HTML 才能发现机器可读资源。'
       }
     }
   };
@@ -1018,9 +1052,13 @@
       } catch (_) {}
     }
     try { localStorage.setItem(scanKey, currScan); } catch (_) {}
-    // Order by blast radius: blocking first, then interpretation, then enrichment.
+    // Order by blast radius first (blocking → interpretation → enrichment), then
+    // by repair gain within each tier: the top of the list is always the fix
+    // worth the most points, so the action plan reads as a prescription.
     fixable.sort(function (a, b) {
-      return GROUP_ORDER.indexOf(tierOf(a)) - GROUP_ORDER.indexOf(tierOf(b));
+      var t = GROUP_ORDER.indexOf(tierOf(a)) - GROUP_ORDER.indexOf(tierOf(b));
+      if (t !== 0) return t;
+      return (b.max - (b.points || 0)) - (a.max - (a.points || 0));
     });
     var lastGroup = null;
     fixable.forEach(function (c) {
