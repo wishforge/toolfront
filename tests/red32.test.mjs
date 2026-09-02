@@ -69,7 +69,7 @@ ok("bot.html 含 opt-out 指引", BOT.includes("User-agent: ToolFront-Scanner") 
 ok("bot.html 双语", BOT.includes('lang-switch') && BOT.includes('简体中文'));
 ok("bot.html 声明 5 个探测路径", ["/robots.txt", "/llms.txt", "/sitemap.xml", "/openapi.json"].every(p => BOT.includes(`<code>${p}</code>`)) && BOT.includes("<code>/</code>"));
 ok("bot.html 不执行 JS 声明", BOT.includes("do not execute JavaScript") || BOT.includes("不执行 JavaScript"));
-ok("robotsOptedOut 兼容 toolfront-scanner（生产源码）", /a\.includes\("toolfront-scanner"\)/.test(WORKER_SRC));
+ok("robotsOptedOut 兼容 toolfront-scanner（生产源码）", /a\.toLowerCase\(\)\.includes\("toolfront-scanner"\)/.test(WORKER_SRC));
 
 /* ————— E. UI 诚实化 ————— */
 console.log("\n[E] 报告 UI（na 徽章 / warning 横幅 / blocked 版式）");

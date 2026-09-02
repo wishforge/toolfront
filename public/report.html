@@ -343,6 +343,17 @@
   .fix-src:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
   .colo #ver-stamp { color: var(--ink-4); }
 
+  /* Supplemental signals card (spec F6) — display-only */
+  .supp-note { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-4); margin-bottom: 14px; }
+  .supp-group { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin: 14px 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--line-light); }
+  .supp-group:first-of-type { margin-top: 0; }
+  .supp-item { display: flex; align-items: baseline; gap: 10px; padding: 5px 0; font-size: 13px; color: var(--ink-2); flex-wrap: wrap; }
+  .supp-item b { font-weight: 600; color: var(--ink); }
+  .supp-mark { font-family: var(--mono); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; border-radius: var(--r-full); padding: 2px 9px; flex-shrink: 0; }
+  .supp-mark.found, .supp-mark.protected { color: var(--good-deep); background: var(--good-soft); }
+  .supp-mark.open { color: var(--mid); background: var(--mid-soft); }
+  .supp-mark.notfound, .supp-mark.unknown { color: var(--ink-3); background: var(--paper-soft); border: 1px solid var(--line); }
+
   /* Auto-fix strip: let the visitor's own coding agent apply the fixes */
   .autofix { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap;
     background: #F0F7FF; border: 1px solid rgba(37,99,235,0.18); border-left: 3px solid var(--accent);
@@ -734,6 +745,19 @@
     'report.cta.fine': 'Weekly checks. An email only if the score drops 5+ or a tool changes. Unsubscribe in one click.',
     'report.vs.improved': '↑ improved', 'report.vs.regressed': '↓ regressed',
     'report.loading0': '',
+    'report.supp.title': 'Supplemental signals',
+    'report.supp.note': 'Does not affect your score — context for decisions, not a checklist.',
+    'report.supp.training': 'AI training exposure',
+    'report.supp.auth': 'Agent auth discovery',
+    'report.supp.crawler_blocking': 'Training crawler blocking',
+    'report.supp.ai_txt': 'ai.txt policy',
+    'report.supp.tdmrep': 'TDMRep declaration',
+    'report.supp.web_bot_auth': 'Web Bot Auth',
+    'report.supp.common_crawl': 'Common Crawl presence',
+    'report.supp.oauth_discovery': 'OAuth discovery',
+    'report.supp.openid_configuration': 'OpenID configuration',
+    'report.supp.st.found': 'found', 'report.supp.st.protected': 'protected', 'report.supp.st.open': 'open',
+    'report.supp.st.notfound': 'not found', 'report.supp.st.unknown': 'unknown',
   });
   Object.assign(LANGS.zh, {
     'report.track.you': '你', 'report.track.opaque': '对 AI 封闭', 'report.track.ready': '智能体就绪',
@@ -741,6 +765,19 @@
     'report.cta.fine': '每周扫一次 · 分数掉 5 分或工具面被改才发邮件 · 一键退订',
     'report.vs.improved': '↑ 进步', 'report.vs.regressed': '↓ 退步',
     'report.loading0': '',
+    'report.supp.title': '补充信号',
+    'report.supp.note': '不计入分数——决策背景，不是待办清单。',
+    'report.supp.training': 'AI 训练暴露',
+    'report.supp.auth': 'Agent 认证发现',
+    'report.supp.crawler_blocking': '训练爬虫屏蔽',
+    'report.supp.ai_txt': 'ai.txt 政策',
+    'report.supp.tdmrep': 'TDMRep 声明',
+    'report.supp.web_bot_auth': 'Web Bot Auth',
+    'report.supp.common_crawl': 'Common Crawl 收录',
+    'report.supp.oauth_discovery': 'OAuth 发现',
+    'report.supp.openid_configuration': 'OpenID 配置',
+    'report.supp.st.found': '已找到', 'report.supp.st.protected': '已防护', 'report.supp.st.open': '开放',
+    'report.supp.st.notfound': '未找到', 'report.supp.st.unknown': '未检测',
   });
 
 
@@ -1255,6 +1292,37 @@
     return body;
   }
 
+  /* Supplemental signals card (spec F6): display-only, clearly labeled as
+     not affecting the score. Status badges: found / protected = green,
+     open = amber, notfound / unknown = muted. */
+  function buildSupplemental(supp) {
+    var body = el('div', 'cbody');
+    body.appendChild(el('div', 'supp-note', t('report.supp.note')));
+    var groups = [
+      ['report.supp.training', supp.training, ['crawler_blocking', 'ai_txt', 'tdmrep', 'web_bot_auth', 'common_crawl']],
+      ['report.supp.auth', supp.agent_auth, ['oauth_discovery', 'openid_configuration']],
+    ];
+    groups.forEach(function (g) {
+      if (!g[1]) return;
+      var h = el('div', 'supp-group', t(g[0]));
+      body.appendChild(h);
+      g[2].forEach(function (key) {
+        var item = g[1][key];
+        if (!item) return;
+        var row = el('div', 'supp-item');
+        var mark = el('span', 'supp-mark ' + item.status, t('report.supp.st.' + item.status));
+        var txt = el('span', 'supp-txt');
+        var label = el('b', null, t('report.supp.' + key));
+        txt.appendChild(label);
+        txt.appendChild(document.createTextNode(' — ' + item.detail));
+        row.appendChild(mark);
+        row.appendChild(txt);
+        body.appendChild(row);
+      });
+    });
+    return body;
+  }
+
   function buildCta(r) {
     var cta = el('div', 'cta');
     var copy = el('div');
@@ -1335,6 +1403,9 @@
 
     // Card 3 — fix list
     resultBox.appendChild(buildCard(t('report.fix.title'), buildFixes(r), false));
+
+    // Card 3.5 — supplemental signals (not scored, spec 2026-09-03 F6)
+    if (r.supplemental) resultBox.appendChild(buildCard(t('report.supp.title'), buildSupplemental(r.supplemental), false));
 
     // CTA + link state
     try { history.replaceState(null, '', '/report?domain=' + encodeURIComponent(r.domain) + '&lang=' + lang); } catch (_) {}

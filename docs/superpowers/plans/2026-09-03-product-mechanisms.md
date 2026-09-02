@@ -198,13 +198,30 @@ feat(report): gain-sorted action plan, waitlist capture, api-errors/freshness/li
 **Interfaces:**
 - `GET /api/rankings?vertical=hosting` → `{ rows: [{ domain, score, grade, scannedAt }] }`. Curated list is a static module in the monitor repo.
 
-- [x] **Step 1: D1 aggregation query + route.** - [ ] **Step 2: rankings.html.** - [ ] **Step 3: Tests + gates + local commit.**
+- [x] **Step 1: D1 aggregation query + route.** - [x] **Step 2: rankingsPage() (monitor layout, not a static html file).** - [x] **Step 3: Tests + local commit.** (monitor `91e19b0`, tests/rankings.test.mjs 6/6)
+
+### Task 10 (Batch 2c): supplemental signals — not scored (F6)
+
+**Files:**
+- Modify: `worker.js` (`TRAINING_BOTS`, `robotsGroups` shared parser, `parseTrainingCrawlerBlocks`, `wellKnownStatus`, `buildSupplemental`; wired into `scanDomainCore` before `report_json`)
+- Modify: `public/report.html` (`buildSupplemental` card between fix list and CTA, `report.supp.*` i18n en/zh)
+- Create: `tests/supplemental.test.mjs`; Modify: `package.json`
+
+**Interfaces:**
+- Produces: `report.supplemental = { training: { crawler_blocking, ai_txt, tdmrep, web_bot_auth, common_crawl }, agent_auth: { oauth_discovery, openid_configuration } }`, items `{ status, detail }`, statuses found/protected/open/notfound/unknown. Zero score weight, zero `SCORING_VERSION` change. Skipped for bot-challenged targets.
+- Root-cause fix: `robotsGroups()` implements RFC 9309 group semantics (consecutive UA lines share a group) and replaces the buggy split-per-UA approach in `robotsOptedOut` too — the old code missed an opt-out when the scanner UA preceded another bot UA in the same group.
+
+- [x] **Implement + verify** — tests/supplemental.test.mjs 18/18 (parser semantics, scoring-untouched invariants, self-scan shape); live self-scan 91/91 with supplemental present.
+
+### Task 11 (P2): monitor panel progress curve — monitor repo
+
+- [x] **Implement + verify** — `sparkSvg()` in panelPage: chronological score line from apiMonitorHistory rows, min-max normalized, numeric-only interpolation (XSS-safe, asserted in panel-dom-xss suite); i18n `panel.trend` en/zh. Monitor tests 39/39, tsc clean.
 
 ---
 
 ## Self-Review
 
-**Spec coverage scan:** F1→Task 1 (+Task 5 copy), F2→DROPPED (Task 2 records the decision), F3→Tasks 3/4/5/6, F4→Task 8, F5→Task 9, scoring policy change→Task 4 Step 1–2, version bump→Task 4 Step 2, `SUB_CHECKS`→Task 4 Step 2, self-scan `api-errors` na→Task 4 Step 4 + Task 6 Step 2. All live spec items mapped; the dropped item is documented, not silently omitted.
+**Spec coverage scan:** F1→Task 1 (+Task 5 copy), F2→DROPPED (Task 2 records the decision), F3→Tasks 3/4/5/6, F4→Task 8, F5→Task 9, F6→Task 10, progress curve→Task 11, scoring policy change→Task 4 Step 1–2, version bump→Task 4 Step 2, `SUB_CHECKS`→Task 4 Step 2, self-scan `api-errors` na→Task 4 Step 4 + Task 6 Step 2. All live spec items mapped; the dropped item is documented, not silently omitted.
 
 **Placeholder scan:** No `TODO`/`TBD`/`...` placeholders in committed tasks — Batch 2 steps are intentionally collapsed one-liners marked as later-scope, which is sequencing, not a placeholder. Sample copy content is named concretely (RFC 9457 body, JSON-LD dateModified, nginx Link header).
 

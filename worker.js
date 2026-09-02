@@ -788,6 +788,68 @@ add_header Link '</.well-known/api-catalog>; rel="api-catalog", </openapi.json>;
 curl -I https://yourdomain.com/ | grep -i '^link:'`;
 }
 
+/* ————— supplemental signals (spec 2026-09-03 F6) — NOT scored —————
+   Two display-only groups: training exposure (whose content may be used for
+   AI training?) and agent auth (can agents discover your auth endpoints?).
+   Deliberately zero score weight: these are policy declarations or draft
+   standards — scoring them would punish honest sites. ponytail ceiling: the
+   robots parser is group-scoped, no Allow/wildcard precedence; upgrade path
+   is a full robots evaluator if this signal is ever promoted to a check. */
+const TRAINING_BOTS = ["GPTBot", "CCBot", "Google-Extended", "ClaudeBot", "Bytespider"];
+
+function parseTrainingCrawlerBlocks(robotsText) {
+  if (!robotsText) return [];
+  const blocked = [];
+  for (const g of robotsGroups(robotsText)) {
+    const blocksAll = g.disallows.some(d => d === "/" || d === "/*");
+    if (!blocksAll) continue;
+    for (const ua of g.agents) {
+      for (const bot of TRAINING_BOTS) {
+        if (ua.toLowerCase().includes(bot.toLowerCase()) && !blocked.includes(bot)) blocked.push(bot);
+      }
+    }
+  }
+  return blocked;
+}
+
+function wellKnownStatus(probe) {
+  if (!probe || probe.status === 0) return { status: "unknown", detail: "Could not check (probe failed)." };
+  if (probe.cfMitigated || probe.blocked) return { status: "unknown", detail: NA_DETAIL };
+  if (probe.status >= 200 && probe.status < 300) return { status: "found", detail: "Present." };
+  return { status: "notfound", detail: "Not found." };
+}
+
+async function buildSupplemental(env, domain, robotsText, selfScan) {
+  const [aiTxt, tdmRep, webBotAuth, oauthServer, openidCfg] = await Promise.all([
+    probePath(env, domain, "/.well-known/ai.txt", "HEAD"),
+    probePath(env, domain, "/.well-known/tdmrep.json", "HEAD"),
+    probePath(env, domain, "/.well-known/web-bot-auth", "HEAD"),
+    probePath(env, domain, "/.well-known/oauth-authorization-server", "HEAD"),
+    probePath(env, domain, "/.well-known/openid-configuration", "HEAD"),
+  ]);
+  const blocked = parseTrainingCrawlerBlocks(robotsText);
+  const cbStatus = robotsText == null
+    ? { status: "unknown", detail: "robots.txt unreadable." }
+    : blocked.length
+      ? { status: "protected", detail: "Blocking: " + blocked.join(", ") + "." }
+      : { status: "open", detail: "No blanket block for known AI training bots — they can crawl everything." };
+  return {
+    training: {
+      crawler_blocking: cbStatus,
+      ai_txt: wellKnownStatus(aiTxt),
+      tdmrep: wellKnownStatus(tdmRep),
+      web_bot_auth: wellKnownStatus(webBotAuth),
+      // Verifying Common Crawl presence needs an external index query —
+      // deliberately not fetched (isagentready shows the same "unknown").
+      common_crawl: { status: "unknown", detail: "Not checked during this scan." },
+    },
+    agent_auth: {
+      oauth_discovery: wellKnownStatus(oauthServer),
+      openid_configuration: wellKnownStatus(openidCfg),
+    },
+  };
+}
+
 /* ————— scanner opt-out: respect robots.txt targeting our own UA —————
    Our scanner is a good citizen: if a site explicitly disallows
    "ToolFront-Scanner" in its robots.txt, we do not scan it. (Wildcard
@@ -797,14 +859,30 @@ curl -I https://yourdomain.com/ | grep -i '^link:'`;
 
 function robotsOptedOut(robotsText) {
   if (!robotsText) return false;
-  const groups = robotsText.split(/(?=user-agent\s*:)/i);
-  for (const g of groups) {
-    const agents = [...g.matchAll(/user-agent\s*:\s*([^\n]+)/gi)].map(m => m[1].trim().toLowerCase());
-    if (!agents.some(a => a.includes("toolfront-scanner"))) continue;
-    // This group targets our scanner — any blanket Disallow means opt-out.
-    if (/^\s*disallow\s*:\s*\/(\*|\s*)$/im.test(g)) return true;
+  return robotsGroups(robotsText).some(g =>
+    g.agents.some(a => a.toLowerCase().includes("toolfront-scanner")) &&
+    g.disallows.some(d => d === "/" || d === "/*"));
+}
+
+/* RFC 9309 group semantics: consecutive user-agent lines share ONE group;
+   a user-agent line that appears after rules starts a new group. The old
+   split-per-UA approach silently mis-grouped "UA: A\nUA: B\nDisallow: /",
+   which both missed opt-outs and mis-attributed training blocks. */
+function robotsGroups(robotsText) {
+  const groups = [];
+  let agents = [], disallows = [], sawRule = false;
+  for (const raw of robotsText.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    const m = /^(user-agent|disallow)\s*:\s*(.*)$/i.exec(line);
+    if (!m) continue;
+    if (m[1].toLowerCase() === "user-agent") {
+      if (sawRule) { groups.push({ agents, disallows }); agents = []; disallows = []; sawRule = false; }
+      agents.push(m[2].trim());
+    } else { disallows.push(m[2].trim()); sawRule = true; }
   }
-  return false;
+  if (agents.length) groups.push({ agents, disallows });
+  return groups;
 }
 
 /* ————— scan orchestration ————— */
@@ -1029,6 +1107,10 @@ async function scanDomainCore(domain, env) {
   // actionable instead of a puzzle. `raw` is dropped: it is up to 2KB of page
   // body per tool, which would bloat every D1 row for no extra diff signal.
   if (surface.tools.length) report.tools = surface.tools.map(({ raw, ...rest }) => rest);
+  // Supplemental signals ride along but carry no score weight (spec F6).
+  // Skipped entirely for bot-challenged targets — nothing supplementary
+  // should leak about a site that refused our scanner.
+  if (!report.blocked) report.supplemental = await buildSupplemental(env, domain, robots.text, selfScan);
   report.report_json = JSON.stringify(report);
   return report;
 }
@@ -1508,7 +1590,7 @@ export {
   extractWebMcpSurface, toolPoisonFindings, checkToolSecurity, checkWebMCP,
   scanDomainCore, challengeProbe, checkStructuredData, checkLlmsTxt,
   checkRobotsAI, checkMachineSurfaces, checkApiErrors, checkFreshness,
-  checkLinkHeaders, CHECK_POLICY, TIER_BUDGET,
+  checkLinkHeaders, parseTrainingCrawlerBlocks, CHECK_POLICY, TIER_BUDGET,
   homeTitleOf, llmsSampleFor,
 };
 

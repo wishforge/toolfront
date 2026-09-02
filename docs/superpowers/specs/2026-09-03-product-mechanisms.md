@@ -80,13 +80,29 @@ Honest limitation (disclosed): for self-scans (`toolfront.dev` via ASSETS), `api
 ### F5 — `/rankings` page
 
 - Data: monitor's D1 `scan_reports` — latest report per domain (`GROUP BY domain`), score-desc, limit 100. Served by the monitor worker route `GET /api/rankings` (the data lives there; the main worker has no D1 binding).
-- Page (`public/rankings.html` in monitor's public assets): filter tabs (All / Hosting / Payments / DevTools / AI — curated list), rows with rank, domain, mini score track, grade badge; each row links to the main worker's report page.
+- Page (`rankingsPage()` in the monitor): filter tabs (All / Hosting / Payments / DevTools / AI — curated list), rows with rank, domain, mini score track, grade badge; each row links to the main worker's report page.
 - Curated verticals ship as a static list in the monitor repo; uncategorized domains appear only under "All".
+
+### F6 — Supplemental signals (not scored) — added 2026-09-03, from the claude.com deep-dive
+
+Two display-only sections appended to every report. They deliberately carry **zero score weight** (no `SCORING_VERSION` bump, no `CHECK_POLICY` change): the ecosystem signals they read are either policy declarations (site-owner's choice, not readiness) or still-draft standards — scoring them now would punish honest sites.
+
+- **Training exposure** (`report.supplemental.training`):
+  - `crawler_blocking` — which of GPTBot / CCBot / Google-Extended / ClaudeBot / Bytespider have a blanket `Disallow: /` in their robots.txt group (parser reuses the same group-split approach as `robotsOptedOut`).
+  - `ai_txt` — `/.well-known/ai.txt` present.
+  - `tdmrep` — `/.well-known/tdmrep.json` present (W3C TDM Reservation Protocol).
+  - `web_bot_auth` — `/.well-known/web-bot-auth` present (signed HTTP request key directory).
+  - `common_crawl` — **always `unknown`**: verifying presence needs an external index query; isagentready shows the same "not checked" on real scans.
+- **Agent auth** (`report.supplemental.agent_auth`) — `/.well-known/oauth-authorization-server` and `/.well-known/openid-configuration` present. Relevant for API-first SaaS; informational until the ecosystem settles.
+- Page: one "Supplemental signals — does not affect your score" card between the fix list and the CTA; per-item status badges; en/zh.
+- Honest ceiling (ponytail): the robots parser is group-scoped and does not model `Allow`/wildcard precedence; upgrade path is a full robots evaluator if the signal ever becomes scored.
 
 ## 4. Batch sequencing
 
-- **Batch 1 (this session):** F1, F3 — report page upgrade + scanner depth. All local, previewable via `wrangler dev`.
-- **Batch 2 (after Batch 1 user preview):** F4, F5 — new pages, cross-repo (monitor worker for rankings data).
+- **Batch 1 (done, `cca37f1`):** F1, F3.
+- **Batch 2 (done, `f700896` + monitor `91e19b0`):** F4, F5, plus SOURCES links and the version stamp (Task 7b).
+- **Batch 2c (this session):** F6 — supplemental signals.
+- **P2:** monitor panel progress curve (Task 11); AI visitor test stays deferred.
 
 ## 5. Explicitly out of scope
 
@@ -109,3 +125,5 @@ Honest limitation (disclosed): for self-scans (`toolfront.dev` via ASSETS), `api
 | Gates + local commit | Task 7 |
 | F4 compare (Batch 2) | Task 8 |
 | F5 rankings (Batch 2) | Task 9 |
+| F6 supplemental signals (Batch 2c) | Task 10 |
+| Monitor panel progress curve (P2) | Task 11 |
