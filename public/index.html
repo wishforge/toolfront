@@ -1372,9 +1372,13 @@
   (function () {
     var local = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
     var base = local ? 'http://localhost:8787' : 'https://monitor.toolfront.dev';
+    // Language handoff: monitor.toolfront.dev is a separate origin, so its
+    // localStorage is invisible here — pass the choice via ?lang= instead.
+    var curLang = 'en';
+    try { curLang = localStorage.getItem('tf-lang') || 'en'; } catch (_) {}
     document.querySelectorAll('[data-monitor-link]').forEach(function (a) {
       var page = a.getAttribute('data-monitor-link') || 'login';
-      a.href = base + '/' + page;
+      a.href = base + '/' + page + '?lang=' + curLang;
     });
   })();
   var LANGS = { en: {
