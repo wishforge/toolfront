@@ -293,8 +293,13 @@
       var ma = el('td', 'num'), mb = el('td', 'num');
       var txtA = pa == null ? '–' : pa + '/' + ca.max;
       var txtB = pb == null ? '–' : pb + '/' + cb.max;
-      ma.appendChild(el('span', 'mark ' + (MARK[ca.status] || MARK.x)[0], txtA + ' ' + (MARK[ca.status] || MARK.x)[1]));
-      mb.appendChild(el('span', 'mark ' + (MARK[cb.status] || MARK.x)[0], txtB + ' ' + (MARK[cb.status] || MARK.x)[1]));
+      // Own-property lookup: MARK[status] with a garbage status ('__proto__')
+      // would hit the prototype chain and render garbage into the class
+      // attribute (red35 audit — same family as the rankings fix).
+      var markA = Object.prototype.hasOwnProperty.call(MARK, ca.status) ? MARK[ca.status] : MARK.x;
+      var markB = Object.prototype.hasOwnProperty.call(MARK, cb.status) ? MARK[cb.status] : MARK.x;
+      ma.appendChild(el('span', 'mark ' + markA[0], txtA + ' ' + markA[1]));
+      mb.appendChild(el('span', 'mark ' + markB[0], txtB + ' ' + markB[1]));
       // Winner highlight per row (only when both sides have real numbers)
       if (pa != null && pb != null) {
         if (pa > pb) ma.classList.add('winner');

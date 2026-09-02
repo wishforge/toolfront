@@ -1306,11 +1306,16 @@
       if (!g[1]) return;
       var h = el('div', 'supp-group', t(g[0]));
       body.appendChild(h);
+      // Status reaches a class attribute — whitelist the enum (defense in
+      // depth: the API hardcodes these today, but class-string interpolation
+      // from upstream data is a fragile premise, red35 audit).
+      var ST_OK = ['found', 'protected', 'open', 'notfound', 'unknown'];
       g[2].forEach(function (key) {
         var item = g[1][key];
         if (!item) return;
+        var st = ST_OK.indexOf(item.status) >= 0 ? item.status : 'unknown';
         var row = el('div', 'supp-item');
-        var mark = el('span', 'supp-mark ' + item.status, t('report.supp.st.' + item.status));
+        var mark = el('span', 'supp-mark ' + st, t('report.supp.st.' + st));
         var txt = el('span', 'supp-txt');
         var label = el('b', null, t('report.supp.' + key));
         txt.appendChild(label);
