@@ -629,6 +629,33 @@ function checkLlmsTxt(res) {
   return { status: "fail", ratio: 0, detail: "No /llms.txt. This is the cheapest agent-readiness win available: one markdown file describing your site." };
 }
 
+/* ————— paste-ready fix samples (F2: give the user the file, not just steps) —————
+   For checks whose fix is a machine-generated file, the report carries a
+   `sample` field that the UI renders as a copy-ready block. Nothing here is
+   executable — it is static markdown, and any homepage-derived text (title)
+   is stripped of markup before it can reach the sample. */
+function homeTitleOf(html, domain) {
+  const og = html.match(/<meta[^>]*property\s*=\s*["']og:title["'][^>]*content\s*=\s*["']([^"']*)["']/i);
+  if (og) return og[1].trim().slice(0, 120);
+  const t = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  if (t) return t[1].replace(/\s+/g, " ").trim().slice(0, 120);
+  const first = domain.split(".")[0] || domain;
+  return first.charAt(0).toUpperCase() + first.slice(1);
+}
+
+function llmsSampleFor(domain, title) {
+  const clean = String(title).replace(/<[^>]*>/g, "").trim().slice(0, 80);
+  return (
+    `# ${clean}\n\n` +
+    `> ${clean}: replace this line with one sentence describing your site to an AI agent.\n\n` +
+    `## Start here\n` +
+    `- [Homepage](https://${domain}/): the entry point — what you do and who it is for.\n\n` +
+    `## Site guide\n` +
+    `- [robots.txt](https://${domain}/robots.txt): crawler policy (AI + all).\n` +
+    `- [sitemap.xml](https://${domain}/sitemap.xml): every public page, machine-readable.\n`
+  );
+}
+
 function checkRobotsAI(res) {
   if (res.status !== 200 || !res.text) {
     return { status: "partial", ratio: 0.5, detail: "No robots.txt found. AI crawlers default to allowed — but you have no stated policy." };
@@ -850,7 +877,13 @@ async function scanDomainCore(domain, env) {
     scoreCheck("webmcp", checkWebMCP(surface)),
     scoreCheck("tool-security", checkToolSecurity(surface)),
     scoreCheck("structured-data", checkStructuredData(home.text)),
-    ch.llms ? na("llms-txt") : scoreCheck("llms-txt", checkLlmsTxt(llms)),
+    (() => {
+      // llms.txt fix is a generated file — attach a paste-ready sample so the
+      // fix card can hand the user the answer, not just a guide link.
+      const c = ch.llms ? na("llms-txt") : scoreCheck("llms-txt", checkLlmsTxt(llms));
+      if (!ch.llms && (c.status === "fail" || c.status === "partial")) c.sample = llmsSampleFor(domain, homeTitleOf(home.text, domain));
+      return c;
+    })(),
     ch.robots ? na("robots-policy") : scoreCheck("robots-policy", checkRobotsAI(robots)),
     ch.machine ? na("machine-surfaces") : scoreCheck("machine-surfaces", checkMachineSurfaces(sitemapRes, openapiRes)),
   ];
@@ -1337,5 +1370,6 @@ export {
   extractWebMcpSurface, toolPoisonFindings, checkToolSecurity, checkWebMCP,
   scanDomainCore, challengeProbe, checkStructuredData, checkLlmsTxt,
   checkRobotsAI, checkMachineSurfaces, CHECK_POLICY, TIER_BUDGET,
+  homeTitleOf, llmsSampleFor,
 };
 
