@@ -236,6 +236,22 @@
     color: var(--ink-4); background: var(--paper-soft);
     border-color: var(--line); text-decoration: line-through;
   }
+  /* Paste-ready sample block (copy-able fix content) */
+  .fix-sample { margin-top: 10px; border: 1px solid var(--line); border-radius: var(--r-md, 10px); overflow: hidden; }
+  .fix-sample summary { cursor: pointer; font-size: 12px; font-weight: 600; color: var(--ink-3); padding: 8px 12px; user-select: none; }
+  .fix-sample summary:hover { color: var(--accent); }
+  .fix-sample pre {
+    margin: 0; padding: 12px; background: var(--paper-soft);
+    font-family: var(--mono); font-size: 11.5px; line-height: 1.6;
+    white-space: pre-wrap; word-break: break-word; color: var(--ink);
+    border-top: 1px solid var(--line); max-height: 280px; overflow: auto;
+  }
+  .fix-sample-copy {
+    display: block; width: 100%; border: 0; border-top: 1px solid var(--line);
+    background: transparent; color: var(--accent); font: inherit; font-size: 12px;
+    font-weight: 600; padding: 8px 12px; cursor: pointer; text-align: left;
+  }
+  .fix-sample-copy:hover { background: var(--good-soft); }
 
   /* Action buttons area — appears right of content */
   .fix-actions {
@@ -470,6 +486,9 @@
       'report.cta.kicker': 'No noise. One email when it matters.',
       'report.fix.title': 'Fix list', 'report.fix.passed': 'already in place', 'report.fix.alldone': 'All fixes applied! Re-scan to see your new score.', 'report.fix.nofixes': 'Nothing to fix — everything is already in place.', 'report.fix.apply': 'Mark as fixed', 'report.fix.dismiss': 'Dismiss',
       'report.fix.skill': 'How to fix',
+      'report.fix.sample': 'Paste-ready /llms.txt',
+      'report.fix.copy': 'Copy',
+      'report.fix.copied': 'Copied',
       'report.fix.group.blocking': 'Blocks AI access',
       'report.fix.group.interpretation': 'Hurts AI understanding',
       'report.fix.group.enrichment': 'Adds context',
@@ -527,6 +546,9 @@
     'report.cta.kicker': '不打扰 · 只在真正出事时发一封邮件',
       'report.fix.title': '修复清单', 'report.fix.passed': '已就绪', 'report.fix.alldone': '全部修复完成！重新扫描看看新分数。', 'report.fix.nofixes': '无需修复——一切已就绪。', 'report.fix.apply': '标记修复', 'report.fix.dismiss': '忽略',
       'report.fix.skill': '怎么修',
+      'report.fix.sample': '可直接粘贴的 /llms.txt',
+      'report.fix.copy': '复制',
+      'report.fix.copied': '已复制',
       'report.fix.group.blocking': '阻塞 AI 访问',
       'report.fix.group.interpretation': '影响 AI 理解',
       'report.fix.group.enrichment': '补充信息',
@@ -991,6 +1013,31 @@
       }
       txt.appendChild(titleRow);
       txt.appendChild(el('span', null, localDetail(c)));
+      if (c.sample) {
+        var det = el('details', 'fix-sample');
+        var sum = el('summary'); sum.textContent = t('report.fix.sample');
+        var pre = el('pre'); pre.textContent = c.sample; // textContent — sample is data, never markup
+        var cbtn = el('button', 'fix-sample-copy');
+        cbtn.type = 'button';
+        cbtn.textContent = t('report.fix.copy');
+        cbtn.addEventListener('click', function () {
+          var done = function () {
+            cbtn.textContent = t('report.fix.copied');
+            setTimeout(function () { cbtn.textContent = t('report.fix.copy'); }, 1600);
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(c.sample).then(done, function () { fallback(); });
+          } else { fallback(); }
+          function fallback() {
+            var ta = document.createElement('textarea');
+            ta.value = c.sample; document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy'); } catch (_) {}
+            document.body.removeChild(ta); done();
+          }
+        });
+        det.appendChild(sum); det.appendChild(pre); det.appendChild(cbtn);
+        txt.appendChild(det);
+      }
       var skill = el('a', 'fix-skill-link');
       skill.href = '/.well-known/agent-skills/' + c.id + '/SKILL.md';
       skill.target = '_blank';
