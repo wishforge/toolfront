@@ -59,7 +59,7 @@ console.log("\n[A] happy path (37/D report)");
   ok("业务影响卡渲染 ≥3 项", doc.querySelectorAll(".biz-item").length >= 3);
   ok("修复清单 5 项", doc.querySelectorAll(".fix input[type=checkbox]").length === 5);
   ok("预估条存在", doc.querySelector(".potential .est") !== null);
-  ok("CTA 表单存在", doc.querySelector(".cta input[type=email]") !== null);
+  ok("CTA 为 Monitor 注册链接（留资表单已移除）", doc.querySelector(".cta a.btn-primary") !== null && doc.querySelector(".cta input[type=email]") === null);
   ok("域名进标题头", textOf(".rhead .dom", dom) === "example.com");
   ok("地址栏 replaceState 为分享链接", dom.window.location.search.includes("domain=example.com"));
   ok("基线已写入 localStorage", (() => { try { return !!dom.window.localStorage.getItem("tf-last:example.com"); } catch (_) { return false; } })());
@@ -117,11 +117,13 @@ console.log("\n[E] 安全不变量");
   ok("恶意域名以纯文本呈现", (dom.window.document.querySelector(".rhead .dom") || {}).textContent === "<img src=x onerror=alert(1)>");
 }
 
-/* F. 留资失败必须诚实（不可一律报成功） */
-console.log("\n[F] waitlist 失败反馈的诚实性");
+/* F. 留资面已移除：CTA 是纯链接，无邮箱输入 → 无"谎报成功"的面 */
+console.log("\n[F] CTA 不收集邮箱（留资失败面消失）");
 {
-  // The server rejects an undeliverable address with 400 and stores nothing.
-  // The page must NOT claim success in that case.
+  // The waitlist form was replaced by a Monitor signup link (conversion-funnel
+  // rework). With no email input there is nothing to submit, so the old
+  // failure-honesty invariant is replaced by its structural successor: the
+  // page must not carry any email capture, and the CTA must point at Monitor.
   const dom = loadPage("https://toolfront.dev/report?domain=example.com", async (u) => {
     if (String(u).includes("/api/waitlist")) {
       return { ok: false, status: 400, json: async () => ({ ok: false, stored: false }) };
@@ -130,17 +132,10 @@ console.log("\n[F] waitlist 失败反馈的诚实性");
   });
   await new Promise(r => setTimeout(r, 60));
   const doc = dom.window.document;
-  const em = doc.querySelector(".cta input[type=email]");
-  const btn = doc.querySelector(".cta button");
-  em.value = "nobody@example.com";
-  btn.click();
-  await new Promise(r => setTimeout(r, 80));
-  const queued = doc.querySelector(".cta .queued");
-  ok("失败时给出失败提示", !!queued && queued.textContent.includes("didn't go through"), queued && queued.textContent);
-  // Only the rendered notice counts: the LANGS dictionary lives in the page's
-  // <script>, so matching on body.textContent would hit the string there.
-  ok("失败时不谎报成功", !!queued && !queued.textContent.includes("Check your inbox"), queued && queued.textContent);
-  ok("失败后按钮可重试（未锁死）", btn.disabled === false);
+  ok("页面无任何邮箱输入", doc.querySelector("input[type=email]") === null);
+  const btn = doc.querySelector(".cta a.btn-primary");
+  ok("CTA 带 Monitor 注册标记", !!btn && btn.getAttribute("data-monitor-link") === "signup");
+  ok("CTA 指向 monitor 域（环境改写生效）", !!btn && /monitor\./.test(btn.href || ""), btn && btn.href);
 }
 
 console.log(`\nreport-dom 结果: ${pass} 通过 / ${fail} 失败`);
