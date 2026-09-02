@@ -294,6 +294,33 @@
   .fix.passed::before { display: none; }
   .fix-done-msg { display: none; margin-top: 12px; font-family: var(--mono); font-size: 12.5px; color: var(--good-deep); background: var(--good-soft); border-radius: var(--r-2); padding: 10px 14px; }
 
+  /* Blast-radius grouping headers (blocking → interpretation → enrichment) */
+  .fix-group-h {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-4);
+    margin: 20px 2px 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line-light);
+  }
+  .fix-group-h:first-child { margin-top: 4px; }
+
+  /* Evidence-grade badge on each fix card title */
+  .fix-title-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .grade-badge {
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    line-height: 1; padding: 3px 7px; border-radius: var(--r-full);
+    flex-shrink: 0; cursor: help;
+  }
+  .grade-badge.a { color: var(--good-deep); background: var(--good-soft); border: 1px solid rgba(5,150,105,0.2); }
+  .grade-badge.b { color: #4f46e5; background: #EEF2FF; border: 1px solid rgba(79,70,229,0.15); }
+  .grade-badge.c { color: var(--ink-3); background: var(--paper-soft); border: 1px solid var(--line); }
+
+  /* Inline repair-instruction link below each fix detail */
+  .fix .fix-skill-link {
+    font-family: var(--sans); font-size: 11.5px; font-weight: 600;
+    color: var(--accent); text-decoration: none; align-self: flex-start;
+    margin-top: 2px;
+  }
+  .fix .fix-skill-link:hover { text-decoration: underline; text-underline-offset: 2px; }
+
   .potential { margin-top: 18px; display: flex; align-items: center; gap: 16px; background: var(--accent-soft); border: 1px solid rgba(37,99,235,0.15); border-radius: var(--r-4); padding: 14px 18px; flex-wrap: wrap; }
   .potential .txt { font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); }
   .potential .mini { flex: 1; min-width: 140px; height: 8px; border-radius: var(--r-full); background: #DBEAFE; position: relative; overflow: hidden; }
@@ -440,8 +467,15 @@
       'report.printhead': 'Agent-readiness report — toolfront.dev',
       'report.raise': '<b>One redesign can drop this score.</b> Monitor checks weekly and emails you only when it moves:',
       'report.raise.keep': '<b>Good score \u2014 but one redesign can still drop it.</b> Monitor checks weekly and emails you only when it moves:',
-      'report.cta.kicker': 'ToolFront Monitor',
+      'report.cta.kicker': 'No noise. One email when it matters.',
       'report.fix.title': 'Fix list', 'report.fix.passed': 'already in place', 'report.fix.alldone': 'All fixes applied! Re-scan to see your new score.', 'report.fix.nofixes': 'Nothing to fix — everything is already in place.', 'report.fix.apply': 'Apply fix', 'report.fix.dismiss': 'Dismiss',
+      'report.fix.skill': 'Repair instructions',
+      'report.fix.group.blocking': 'Blocks AI access',
+      'report.fix.group.interpretation': 'Hurts AI understanding',
+      'report.fix.group.enrichment': 'Nice to have',
+      'report.grade.a': 'Backed by vendor documentation or an approved standard — scored at full weight',
+      'report.grade.b': 'Backed by a draft standard with significant adoption — scored at partial weight',
+      'report.grade.c': 'Community convention, not yet backed by a documented consumer — shown for reference, not scored',
     'rfoot.privacy': 'Privacy',
     'rfoot.security': 'Security',
     'rfoot.bot': '/bot docs',
@@ -490,8 +524,15 @@
       'report.printhead': '智能体就绪度报告 — toolfront.dev',
       'report.raise': '<b>一次改版，分数可能就掉了。</b>Monitor 每周扫一次，掉了才发邮件：',
       'report.raise.keep': '<b>分数不低——但一次改版还是能悄悄掉下去。</b>Monitor 每周扫一次，掉了才发邮件：',
-    'report.cta.kicker': 'ToolFront Monitor',
+    'report.cta.kicker': '不打扰 · 只在真正出事时发一封邮件',
       'report.fix.title': '修复清单', 'report.fix.passed': '已就绪', 'report.fix.alldone': '全部修复完成！重新扫描看看新分数。', 'report.fix.nofixes': '无需修复——一切已就绪。', 'report.fix.apply': '标记修复', 'report.fix.dismiss': '忽略',
+      'report.fix.skill': '修复指令',
+      'report.fix.group.blocking': '阻塞 AI 访问',
+      'report.fix.group.interpretation': '影响 AI 理解',
+      'report.fix.group.enrichment': '锦上添花',
+      'report.grade.a': '有厂商文档背书或已批准标准支撑——全额计分',
+      'report.grade.b': '有显著采用的草案标准支撑——部分计分',
+      'report.grade.c': '社区惯例，暂无文档化消费者——仅展示，不计分',
     'rfoot.privacy': '隐私政策',
     'rfoot.security': '安全说明',
     'rfoot.bot': '扫描器说明',
@@ -656,6 +697,19 @@
   function localLabel(c) { return (CHECKS_L10N[lang].labels && CHECKS_L10N[lang].labels[c.id]) || c.label; }
   function statusRank(s) { return s === 'pass' ? 3 : s === 'partial' ? 2 : s === 'fail' ? 1 : -1; }
   function statusMark(s) { return s === 'pass' ? '✓' : s === 'partial' ? '~' : s === 'fail' ? '✕' : '–'; }
+
+  /* Blast-radius group + evidence grade per check (mirrors Agent Lighthouse's
+     severity tiers and evidence policy). Group orders the fix list; grade is a
+     static hint on the card — it is NOT wired to the score yet (that is P4). */
+  var CHECK_META = {
+    'webmcp':           { group: 'blocking',       grade: 'A' },
+    'tool-security':    { group: 'blocking',       grade: 'A' },
+    'robots-policy':    { group: 'blocking',       grade: 'A' },
+    'machine-surfaces': { group: 'interpretation', grade: 'B' },
+    'structured-data':  { group: 'interpretation', grade: 'B' },
+    'llms-txt':         { group: 'enrichment',     grade: 'C' },
+  };
+  var GROUP_ORDER = ['blocking', 'interpretation', 'enrichment'];
 
   var ICONS = {
     pass: '<svg class="ic" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 6l-5 5L4 7"/></svg>',
@@ -908,22 +962,48 @@
       } catch (_) {}
     }
     try { localStorage.setItem(scanKey, currScan); } catch (_) {}
+    // Order by blast radius: blocking first, then interpretation, then enrichment.
+    fixable.sort(function (a, b) {
+      var ga = (CHECK_META[a.id] && CHECK_META[a.id].group) || 'enrichment';
+      var gb = (CHECK_META[b.id] && CHECK_META[b.id].group) || 'enrichment';
+      return GROUP_ORDER.indexOf(ga) - GROUP_ORDER.indexOf(gb);
+    });
+    var lastGroup = null;
     fixable.forEach(function (c) {
       var fx = fixDict[c.id + '.' + c.status] || fixDict[c.id + '.fail'];
       if (!fx) return;
+      var meta = CHECK_META[c.id] || { group: 'enrichment', grade: 'C' };
       var gainN = Math.max(0, c.max - (c.points || 0));
       totalGain += gainN;
       var key = 'tf-fix:' + r.domain + ':' + c.id;
       var done = false;
       try { done = localStorage.getItem(key) === '1'; } catch (_) {}
       var sev = c.status === 'partial' ? 'warn' : 'fail';
+      if (meta.group !== lastGroup) {
+        lastGroup = meta.group;
+        body.appendChild(el('div', 'fix-group-h', t('report.fix.group.' + meta.group)));
+      }
       var item = el('label', 'fix');
       item.setAttribute('data-sev', sev);
       var cb = el('input'); cb.type = 'checkbox'; cb.checked = done;
-      /* Content area: title + detail */
+      /* Content area: title row (title + evidence grade) + detail + repair link */
       var txt = el('span', 't');
-      txt.appendChild(el('b', null, fx));
+      var titleRow = el('div', 'fix-title-row');
+      titleRow.appendChild(el('b', null, fx));
+      if (meta.grade) {
+        var badge = el('span', 'grade-badge ' + meta.grade.toLowerCase());
+        badge.textContent = meta.grade;
+        badge.title = t('report.grade.' + meta.grade.toLowerCase());
+        titleRow.appendChild(badge);
+      }
+      txt.appendChild(titleRow);
       txt.appendChild(el('span', null, localDetail(c)));
+      var skill = el('a', 'fix-skill-link');
+      skill.href = '/.well-known/agent-skills/' + c.id + '/SKILL.md';
+      skill.target = '_blank';
+      skill.rel = 'noopener';
+      skill.textContent = t('report.fix.skill') + ' →';
+      txt.appendChild(skill);
       item.appendChild(cb); item.appendChild(txt);
       /* Gain badge */
       if (gainN > 0) item.appendChild(el('span', 'gain', '+' + gainN));
