@@ -644,7 +644,14 @@ function homeTitleOf(html, domain) {
 }
 
 function llmsSampleFor(domain, title) {
-  const clean = String(title).replace(/<[^>]*>/g, "").trim().slice(0, 80);
+  let clean = String(title).replace(/<[^>]*>/g, "").trim().slice(0, 80);
+  // Defense in depth: if anything survived stripping (e.g. an unclosed <
+  // flood that the tag regex cannot match), drop the title entirely rather
+  // than ever emitting a < into the sample.
+  if (/[<>]/.test(clean)) {
+    const first = domain.split(".")[0] || domain;
+    clean = first.charAt(0).toUpperCase() + first.slice(1);
+  }
   return (
     `# ${clean}\n\n` +
     `> ${clean}: replace this line with one sentence describing your site to an AI agent.\n\n` +
