@@ -113,6 +113,7 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: { "X-Content-Type-Options": "nosniff", "Allow": "GET, POST, OPTIONS" } });
     try {
       if (url.pathname === "/api/scan") return await handleScan(url, request, env);
+      if (url.pathname === "/api/compare") return await handleCompareApi(url, request, env);
       if (url.pathname === "/api/waitlist") return await handleWaitlist(request, env);
       if (url.pathname === "/api/resend") return await handleResend(request, env);
       if (url.pathname === "/confirm") return await handleConfirm(url, env);
@@ -127,6 +128,11 @@ export default {
     if (url.pathname === "/report" || url.pathname === "/report/") {
       if (!env.ASSETS) return json({ name: "toolfront", status: "ok" });
       return harden(await env.ASSETS.fetch(new Request(url.origin + "/report.html", request)));
+    }
+    // Compare page (/compare?a=...&b=...): the URL is the shareable artifact.
+    if (url.pathname === "/compare" || url.pathname === "/compare/") {
+      if (!env.ASSETS) return json({ name: "toolfront", status: "ok" });
+      return harden(await env.ASSETS.fetch(new Request(url.origin + "/compare.html", request)));
     }
     // Agent-skills repair docs live under the standard /.well-known/agent-skills/
     // path (the agentskills discovery convention). Workers static assets skip
@@ -1027,38 +1033,28 @@ async function scanDomainCore(domain, env) {
   return report;
 }
 
-async function handleScan(url, request, env) {
-  const domain = normalizeDomain(url.searchParams.get("domain"));
-  if (!domain) return json({ error: "invalid_domain", detail: "Provide a public domain like example.com" }, 400);
-
-  // Rate limit FIRST — prevent abuse.
-  const ip = request.headers.get("CF-Connecting-IP") || "anon";
-  if (!(await rateLimitAllow(ip, env))) {
-    return json({ error: "rate_limited", detail: "Too many scans. Try again later." }, 429);
-  }
-
-  // KV cache with short TTL (300s = 5 min):
-  // - Prevents accidental double-click spam (second hit returns cached instantly)
-  // - Reduces cost on popular domains (nike.com etc.)
-  // - Short enough that users who fixed their site see new data within minutes
-  // - Force-bypass: ?fresh=1 skips cache (for demo / re-scan after fixes)
-  const forceFresh = url.searchParams.get("fresh") === "1";
+// Shared scan-to-JSON pipeline used by BOTH /api/scan (one domain) and
+// /api/compare (two domains): KV cache read, scan, blocked handling, public
+// projection (report_json / tool_surface_hash stripped), cache write.
+// Rate limiting stays with the HTTP caller (a compare request scans twice
+// but counts once against the caller's budget).
+async function scanPublicReport(domain, forceFresh, env) {
   if (env.KV && !forceFresh) {
     const cached = await env.KV.get("scan:" + domain, "json");
-    if (cached) return json({ ...cached, cached: true }, 200, { "Cache-Control": "public, max-age=60" });
+    if (cached) return { status: 200, body: { ...cached, cached: true }, cacheControl: "public, max-age=60" };
   }
 
   const report = await scanDomainCore(domain, env);
   if (!report) {
     // Re-derive WHY cheaply for the HTTP caller (cron callers just skip).
     if (!(await dnsAllows(domain))) {
-      return json({ error: "domain_not_allowed", detail: "This domain does not resolve to a public address." }, 403);
+      return { status: 403, body: { error: "domain_not_allowed", detail: "This domain does not resolve to a public address." } };
     }
     const robots = await fetchCapped("https://" + domain + "/robots.txt");
     if (robotsOptedOut(robots.text)) {
-      return json({ error: "domain_opted_out", domain, detail: "This site's robots.txt explicitly disallows ToolFront-Scanner. The scan was not performed." }, 403);
+      return { status: 403, body: { error: "domain_opted_out", domain, detail: "This site's robots.txt explicitly disallows ToolFront-Scanner. The scan was not performed." } };
     }
-    return json({ error: "unreachable", domain, detail: "Could not scan this site (unreachable, or the target refused our scanner)." }, 502);
+    return { status: 502, body: { error: "unreachable", domain, detail: "Could not scan this site (unreachable, or the target refused our scanner)." } };
   }
 
   // Blocked report (homepage served a bot challenge): still a valid, honest
@@ -1067,7 +1063,7 @@ async function handleScan(url, request, env) {
   if (report.blocked) {
     const { report_json, tool_surface_hash, ...publicBlocked } = report;
     if (env.KV) { try { await env.KV.put("scan:" + domain, JSON.stringify(publicBlocked), { expirationTtl: 1800 }); } catch (_) {} }
-    return json(publicBlocked, 200, { "Cache-Control": "public, max-age=300" });
+    return { status: 200, body: publicBlocked, cacheControl: "public, max-age=300" };
   }
 
   // Cache write is best-effort: a KV failure (quota/error) must not 500 an
@@ -1083,7 +1079,44 @@ async function handleScan(url, request, env) {
   // Cache write: short TTL (300s) so data stays fresh.
   // Blocked reports use shorter TTL (1800s) above since WAF state is sticky.
   if (env.KV) { try { await env.KV.put("scan:" + domain, JSON.stringify(publicReport), { expirationTtl: 300 }); } catch (_) {} }
-  return json(publicReport, 200, { "Cache-Control": "public, max-age=60" });
+  return { status: 200, body: publicReport, cacheControl: "public, max-age=60" };
+}
+
+async function handleScan(url, request, env) {
+  const domain = normalizeDomain(url.searchParams.get("domain"));
+  if (!domain) return json({ error: "invalid_domain", detail: "Provide a public domain like example.com" }, 400);
+
+  // Rate limit FIRST — prevent abuse.
+  const ip = request.headers.get("CF-Connecting-IP") || "anon";
+  if (!(await rateLimitAllow(ip, env))) {
+    return json({ error: "rate_limited", detail: "Too many scans. Try again later." }, 429);
+  }
+
+  const r = await scanPublicReport(domain, url.searchParams.get("fresh") === "1", env);
+  return json(r.body, r.status, r.cacheControl ? { "Cache-Control": r.cacheControl } : undefined);
+}
+
+/* ————— compare: two domains side by side (spec 2026-09-03 F4) —————
+   The URL itself is the shareable artifact ("my site vs theirs"). Both sides
+   reuse the single-scan cache, so a compare after a recent scan costs one
+   network scan at most. A side that failed to scan does not sink the other:
+   each side carries its own HTTP status and the page renders the failure
+   honestly (a blocked/unreachable card instead of a score). */
+async function handleCompareApi(url, request, env) {
+  const a = normalizeDomain(url.searchParams.get("a"));
+  const b = normalizeDomain(url.searchParams.get("b"));
+  if (!a || !b) return json({ error: "invalid_domain", detail: "Provide two domains: /api/compare?a=x.com&b=y.com" }, 400);
+  if (a === b) return json({ error: "same_domain", detail: "Pick two different domains to compare." }, 400);
+
+  // One caller budget for both scans — a compare is one user action.
+  const ip = request.headers.get("CF-Connecting-IP") || "anon";
+  if (!(await rateLimitAllow(ip, env))) {
+    return json({ error: "rate_limited", detail: "Too many scans. Try again later." }, 429);
+  }
+
+  const fresh = url.searchParams.get("fresh") === "1";
+  const [ra, rb] = await Promise.all([scanPublicReport(a, fresh, env), scanPublicReport(b, fresh, env)]);
+  return json({ a: ra.body, b: rb.body, a_status: ra.status, b_status: rb.status }, 200, { "Cache-Control": "public, max-age=60" });
 }
 
 /* ————— unsubscribe infrastructure (CAN-SPAM / CASL / GDPR Art.7) —————

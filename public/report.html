@@ -337,6 +337,12 @@
   }
   .fix .fix-skill-link:hover { text-decoration: underline; text-underline-offset: 2px; }
 
+  /* Authoritative source links on fix cards (spec 2026-09-03 Task 7b) */
+  .fix-sources { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 2px; }
+  .fix-src { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); text-decoration: none; }
+  .fix-src:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+  .colo #ver-stamp { color: var(--ink-4); }
+
   /* Auto-fix strip: let the visitor's own coding agent apply the fixes */
   .autofix { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap;
     background: #F0F7FF; border: 1px solid rgba(37,99,235,0.18); border-left: 3px solid var(--accent);
@@ -458,6 +464,7 @@
 
   <div class="colo">
     <span>© 2026 ToolFront · Free &amp; Open</span>
+    <span id="ver-stamp" hidden></span>
     <span><a href="/privacy" data-i18n="rfoot.privacy">Privacy</a> · <a href="/security" data-i18n="rfoot.security">Security</a> · <a href="/bot" data-i18n="rfoot.bot">/bot</a></span>
   </div>
 </div>
@@ -781,6 +788,19 @@
      badge, and score can never drift apart. These are fallbacks for reports
      cached before the scanner started sending them. */
   var GROUP_ORDER = ['blocking', 'interpretation', 'enrichment'];
+  /* Authoritative sources per check (spec 2026-09-03 Task 7b): rendered on
+     fail/partial fix cards so users see the standards behind each fix. */
+  var CHECK_SOURCES = {
+    'webmcp': [['W3C WebMCP proposal', 'https://webmcp.org']],
+    'tool-security': [['OWASP ASI02', 'https://genai.owasp.org']],
+    'structured-data': [['Schema.org', 'https://schema.org']],
+    'llms-txt': [['llmstxt.org', 'https://llmstxt.org']],
+    'robots-policy': [['RFC 9309 (robots)', 'https://www.rfc-editor.org/rfc/rfc9309.html']],
+    'machine-surfaces': [['Sitemap protocol', 'https://www.sitemaps.org'], ['OpenAPI spec', 'https://spec.openapis.org/oas/latest.html']],
+    'api-errors': [['RFC 9457 (problem+json)', 'https://www.rfc-editor.org/rfc/rfc9457.html']],
+    'freshness': [['Schema.org dateModified', 'https://schema.org/dateModified'], ['OG article:modified_time', 'https://ogp.me']],
+    'link-headers': [['RFC 8288 (web linking)', 'https://www.rfc-editor.org/rfc/rfc8288.html'], ['IANA link relations', 'https://www.iana.org/assignments/link-relations/']],
+  };
   function tierOf(c) { return GROUP_ORDER.indexOf(c.tier) > -1 ? c.tier : 'enrichment'; }
   function evidenceOf(c) { return /^[ABC]$/.test(c.evidence || '') ? c.evidence : 'C'; }
 
@@ -1121,6 +1141,17 @@
       skill.rel = 'noopener';
       skill.textContent = t('report.fix.skill') + ' →';
       txt.appendChild(skill);
+      var srcs = CHECK_SOURCES[c.id];
+      if (srcs && srcs.length) {
+        var srcRow = el('span', 'fix-sources');
+        srcs.forEach(function (s) {
+          var a = el('a', 'fix-src');
+          a.href = s[1]; a.target = '_blank'; a.rel = 'noopener';
+          a.textContent = s[0] + ' ↗';
+          srcRow.appendChild(a);
+        });
+        txt.appendChild(srcRow);
+      }
       item.appendChild(cb); item.appendChild(txt);
       /* Gain badge */
       if (gainN > 0) item.appendChild(el('span', 'gain', '+' + gainN));
@@ -1319,6 +1350,17 @@
     } catch (_) {}
 
     resultBox.appendChild(buildCta(r));
+
+    // Version stamp: rules and scoring versions are the methodology contract —
+    // showing them signals that scores can change when standards do (and that
+    // monitoring clients will be told when they do).
+    try {
+      var vs = document.getElementById('ver-stamp');
+      if (vs && r.rules_version && r.scoring_version) {
+        vs.textContent = 'rules ' + r.rules_version + ' · scoring ' + r.scoring_version;
+        vs.hidden = false;
+      }
+    } catch (_) {}
 
     if (first && !reducedMotion()) {
       var scoreNum = document.getElementById('scoreNum');

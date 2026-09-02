@@ -162,6 +162,22 @@ feat(report): gain-sorted action plan, waitlist capture, api-errors/freshness/li
 
 ---
 
+### Task 7b (Batch 2a, added 2026-09-03): quick wins from the claude.com deep-dive
+
+**Files:**
+- Modify: `public/report.html` (SOURCES map + fix-card link row + version stamp in colophon)
+
+**Interfaces:**
+- Consumes: `r.rules_version` / `r.scoring_version` (already in the report JSON); check ids for the SOURCES map.
+- Produces: each fail/partial fix card renders a row of authoritative source links (RFC / spec, `rel=noopener`, `target=_blank`); the colophon shows `rules vX · scoring vY`.
+
+- [ ] **Step 1: `CHECK_SOURCES` const map in report.html** (per check id, 1–3 links; UI concern, no API change).
+- [ ] **Step 2: Render links** inside the fix card under the skill link (only when the card is a fail/partial fix).
+- [ ] **Step 3: Version stamp** in the colophon: `rules {rules_version} · scoring {scoring_version}` (mono, muted).
+- [ ] **Step 4: Verify** in `wrangler dev` — links render on failing cards, stamp shows, `npm test` green (report-dom asserts the stamp).
+
+---
+
 ### Task 8 (Batch 2): /compare route + page (F4)
 
 **Files:**

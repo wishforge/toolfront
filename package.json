@@ -9,7 +9,7 @@
     "dev": "wrangler dev --test-scheduled",
     "deploy": "wrangler deploy",
     "build:rules": "node scripts/build-rules.mjs",
-    "test": "node --check worker.js && node tests/sast-scan.mjs && node tests/poison-samples.test.mjs && node tests/sec-regression.test.mjs && node tests/test-unsub.test.mjs && node tests/red14.test.mjs && node tests/red12.test.mjs && node tests/red13.test.mjs && node tests/dogfood.test.mjs && node tests/product-checks.test.mjs && node tests/email-lang.test.mjs && node tests/red32.test.mjs && node tests/report-dom.test.mjs && node tests/redos-guard.test.mjs",
+    "test": "node --check worker.js && node tests/sast-scan.mjs && node tests/poison-samples.test.mjs && node tests/sec-regression.test.mjs && node tests/test-unsub.test.mjs && node tests/red14.test.mjs && node tests/red12.test.mjs && node tests/red13.test.mjs && node tests/dogfood.test.mjs && node tests/product-checks.test.mjs && node tests/compare.test.mjs && node tests/email-lang.test.mjs && node tests/red32.test.mjs && node tests/report-dom.test.mjs && node tests/redos-guard.test.mjs",
     "test:secrets": "python3 tests/gitleaks-scan.py .",
     "test:live": "node tests/red24.live.mjs && node tests/red28.live.mjs && node tests/red29.live.mjs && node tests/red30.live.mjs && node tests/red31.live.mjs"
   },

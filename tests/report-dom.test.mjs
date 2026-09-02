@@ -13,6 +13,7 @@ const ok = (name, cond, extra = "") => { if (cond) { pass++; console.log(`  ✓ 
 const REPORT = {
   domain: "example.com", score: 37, scoreMax: 100, grade: "D",
   verdict: "Partially readable. Agents guess some of the time, fail the rest.",
+  rules_version: "1.0.0", scoring_version: "2.1.0",
   scannedAt: "2026-08-30T07:00:00.000Z", cached: false,
   checks: [
     { id: "webmcp", label: "WebMCP tools", max: 20, status: "partial", points: 12, detail: "partial tools" },
@@ -69,6 +70,8 @@ console.log("\n[A] happy path (37/D report)");
   ok("域名进标题头", textOf(".rhead .dom", dom) === "example.com");
   ok("地址栏 replaceState 为分享链接", dom.window.location.search.includes("domain=example.com"));
   ok("基线已写入 localStorage", (() => { try { return !!dom.window.localStorage.getItem("tf-last:example.com"); } catch (_) { return false; } })());
+  ok("版本戳显示 rules/scoring", (textOf("#ver-stamp", dom) || "") === "rules 1.0.0 · scoring 2.1.0", textOf("#ver-stamp", dom));
+  ok("修复卡带权威来源链接", doc.querySelectorAll(".fix-sources .fix-src").length >= 3, String(doc.querySelectorAll(".fix-sources .fix-src").length));
 }
 
 /* B. language switch re-render */
