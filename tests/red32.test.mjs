@@ -55,7 +55,7 @@ ok("非挑战 5xx/403/429 仍退避（不缓存不评分）", /home\.status === 
 /* ————— C. fetchCapped 透传 cf-mitigated + HEAD 降级 ————— */
 console.log("\n[C] fetchCapped 增强与 HEAD 假阴性降级");
 ok("fetchCapped 透传 cfMitigated", /const cfMitigated = res\.headers\.get\("cf-mitigated"\) \|\| null;/.test(WORKER_SRC));
-ok("HEAD 返回也携带 cfMitigated", /method === "HEAD"\) return \{ status: res\.status, text: "", cfMitigated \}/.test(WORKER_SRC));
+ok("HEAD 返回携带 cfMitigated + 新头部字段（ctype/link/lmod, spec 2026-09-03）", /method === "HEAD"\) return \{ status: res\.status, text: "", cfMitigated, ctype:/.test(WORKER_SRC));
 ok("HEAD 405/501 → GET 降级重试（sitemap）", /sitemapRes\.status === 405 \|\| sitemapRes\.status === 501[\s\S]{0,80}(fetchCapped\("https:\/\/" \+ domain \+ "\/sitemap\.xml"\)|probePath\(env, domain, "\/sitemap\.xml"\))/.test(WORKER_SRC));
 ok("HEAD 405/501 → GET 降级重试（openapi）", /openapiRes\.status === 405 \|\| openapiRes\.status === 501[\s\S]{0,80}(fetchCapped\("https:\/\/" \+ domain \+ "\/openapi\.json"\)|probePath\(env, domain, "\/openapi\.json"\))/.test(WORKER_SRC));
 ok("重定向 SSRF 门仍在（3 跳上限）", /MAX_REDIRECTS = 3;/.test(WORKER_SRC));
@@ -69,7 +69,7 @@ ok("bot.html 含 opt-out 指引", BOT.includes("User-agent: ToolFront-Scanner") 
 ok("bot.html 双语", BOT.includes('lang-switch') && BOT.includes('简体中文'));
 ok("bot.html 声明 5 个探测路径", ["/robots.txt", "/llms.txt", "/sitemap.xml", "/openapi.json"].every(p => BOT.includes(`<code>${p}</code>`)) && BOT.includes("<code>/</code>"));
 ok("bot.html 不执行 JS 声明", BOT.includes("do not execute JavaScript") || BOT.includes("不执行 JavaScript"));
-ok("robotsOptedOut 兼容 toolfront-scanner（生产源码）", /a\.includes\("toolfront-scanner"\)/.test(WORKER_SRC));
+ok("robotsOptedOut 兼容 toolfront-scanner（生产源码）", /a\.toLowerCase\(\)\.includes\("toolfront-scanner"\)/.test(WORKER_SRC));
 
 /* ————— E. UI 诚实化 ————— */
 console.log("\n[E] 报告 UI（na 徽章 / warning 横幅 / blocked 版式）");

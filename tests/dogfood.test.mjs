@@ -10,7 +10,8 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import {
   extractWebMcpSurface, checkWebMCP, checkToolSecurity, checkStructuredData,
-  checkLlmsTxt, checkRobotsAI, checkMachineSurfaces, CHECK_POLICY, TIER_BUDGET,
+  checkLlmsTxt, checkRobotsAI, checkMachineSurfaces, checkFreshness,
+  checkLinkHeaders, CHECK_POLICY, TIER_BUDGET,
 } from "../worker.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -27,6 +28,31 @@ const robots = read("robots.txt");
 const sitemap = read("sitemap.xml");
 const openapi = read("openapi.json");
 
+// Workers Assets applies public/_headers at the asset layer; the on-disk
+// stand-in must do the same or the link-headers check would read the wrong
+// layer (the header lives in _headers, not in index.html).
+const headersRules = (() => {
+  if (!existsSync(join(ROOT, "public", "_headers"))) return [];
+  const rules = []; let cur = null;
+  for (const line of readFileSync(join(ROOT, "public", "_headers"), "utf8").split("\n")) {
+    const t = line.trim();
+    if (!t || t.startsWith("#")) continue;
+    if (!/^\s/.test(line)) { cur = { path: t, headers: [] }; rules.push(cur); }
+    else if (cur) { const i = line.indexOf(":"); cur.headers.push([line.slice(0, i).trim().toLowerCase(), line.slice(i + 1).trim()]); }
+  }
+  return rules;
+})();
+const headersFor = (p) => {
+  const h = {};
+  for (const r of headersRules) {
+    const match = r.path.endsWith("*") ? p.startsWith(r.path.slice(0, -1)) : p === r.path;
+    if (match) for (const [k, v] of r.headers) h[k] = v;
+  }
+  return h;
+};
+home.link = headersFor("/").link || null;
+home.lmod = headersFor("/").lmod || null;
+
 const surface = extractWebMcpSurface(home.text);
 // Max values come from the SAME scoring policy the scanner uses (worker.js)
 // — no second hardcoded copy of the weights here.
@@ -38,21 +64,27 @@ const checks = [
   ["llms-txt", checkLlmsTxt(llms)],
   ["robots-policy", checkRobotsAI(robots)],
   ["machine-surfaces", checkMachineSurfaces(sitemap, openapi)],
+  // api-errors is na for self-scans by design (spec 2026-09-03): the asset
+  // server cannot exercise the worker's route fallback, so there is nothing
+  // to score here — it is excluded from this run entirely.
+  ["freshness", checkFreshness(home)],
+  ["link-headers", checkLinkHeaders(home)],
 ];
 
 console.log("\n[A] 自家站点跑分（生产检查函数 × public/ 实际文件）");
-let total = 0;
+let total = 0, maxSum = 0;
 for (const [id, r] of checks) {
   const max = maxOf(id);
   const pts = Math.round((r.ratio ?? 0) * max);
   total += pts;
+  maxSum += max;
   console.log(`     ${id.padEnd(18)} ${String(pts).padStart(3)}/${String(max).padEnd(3)}  ${r.status}`);
 }
 const grade = total >= 85 ? "A" : total >= 70 ? "B" : total >= 50 ? "C" : total >= 30 ? "D" : "F";
-console.log(`\n  总分 ${total}/100 · 等级 ${grade}\n`);
+console.log(`\n  总分 ${total}/${maxSum} · 等级 ${grade}\n`);
 
-ok("自家站点达到 A 级", grade === "A", `实际 ${total}/100`);
-ok("总分 ≥ 95（打样标准）", total >= 95, `实际 ${total}`);
+ok("自家站点达到 A 级", grade === "A", `实际 ${total}/${maxSum}`);
+ok("总分 ≥ 95%（打样标准，api-errors 自扫 na 不计分）", total >= Math.round(0.95 * maxSum), `实际 ${total}/${maxSum}`);
 for (const [id, r] of checks) {
   ok(`${id} 检查通过（非 partial/fail）`, r.status === "pass", r.status + " — " + r.detail);
 }
@@ -80,15 +112,20 @@ console.log("\n[C] 自扫路径必须走资源读取并标注 self");
     const file = p === "/" ? "index.html" : p.replace(/^\//, "");
     const full = join(ROOT, "public", file);
     if (!existsSync(full)) return new Response("not found", { status: 404 });
-    return new Response(readFileSync(full, "utf8"), { status: 200, headers: { "Content-Type": "text/plain" } });
+    // Faithful emulation: Workers Assets merges public/_headers into asset
+    // responses (that is where our Link header lives — see headersFor above).
+    return new Response(readFileSync(full, "utf8"), { status: 200, headers: { "Content-Type": "text/plain", ...headersFor(p) } });
   };
   const env = { ASSETS: { fetch: assetsFetch } };
   const res = await worker.fetch(new Request("https://toolfront.dev/api/scan?domain=toolfront.dev"), env, {});
   const body = await res.json();
   ok("自扫返回 200（不再 502 unreachable）", res.status === 200, `status=${res.status}`);
   ok("自扫带 self:true 标记来源", body.self === true, JSON.stringify({ self: body.self }));
-  ok("自扫仍是满分 A", body.score === 100 && body.grade === "A", `${body.score}/${body.grade}`);
-  ok("自扫六项全 pass", (body.checks || []).every(c => c.status === "pass"));
+  ok("自扫仍是满分 A（api-errors 自扫 na 不计分）", body.score === body.scoreMax && body.grade === "A", `${body.score}/${body.scoreMax} ${body.grade}`);
+  ok("自扫九项：八项 pass + api-errors na", (body.checks || []).every(c => c.status === "pass" || (c.id === "api-errors" && c.status === "na")),
+    JSON.stringify((body.checks || []).filter(c => c.status !== "pass" && c.id !== "api-errors").map(c => c.id + ":" + c.status)));
+  ok("自扫 api-errors 不进 unavailable 警告（非 bot 拦截原因）", !(body.unavailable || []).includes("api-errors"),
+    JSON.stringify(body.unavailable));
 
   // A third-party domain must NOT be labelled: the special case is ours only.
   const realFetch = globalThis.fetch;

@@ -219,6 +219,35 @@ try {
   check("i18n roundtrip", false, e.message.slice(0, 120));
 }
 
+// 7. compare-page regression (desktop + smallest phone): dual cards render,
+//    no overflow in the stacked mobile layout. Reuses the KV-cached domain
+//    from the report-page regression, so the extra cost is one fresh scan at
+//    most (toolfront.dev self-scan resolves from local assets).
+try {
+  for (const vp of [VIEWPORTS[0], VIEWPORTS[VIEWPORTS.length - 1]]) {
+    const page = await browser.newPage({ viewport: { width: vp.w, height: vp.h } });
+    const cmpUrl = args.url + "/compare?a=" + encodeURIComponent(args.domain) + "&b=toolfront.dev";
+    await page.goto(cmpUrl, { waitUntil: "networkidle", timeout: 45000 }).catch(() =>
+      page.goto(cmpUrl, { waitUntil: "load", timeout: 45000 })
+    );
+    await page.waitForFunction(() => document.querySelectorAll(".pcard").length > 0, { timeout: 45000 }).catch(() => {});
+    await page.waitForTimeout(500);
+    const cards = await page.locator(".pcard").count();
+    check(`${vp.name} compare dual cards`, cards === 2, `count=${cards}`);
+    const vs = await page.locator(".vs-badge").count();
+    check(`${vp.name} compare VS badge`, vs === 1);
+    const { sw, iw } = await page.evaluate(() => ({
+      sw: document.documentElement.scrollWidth,
+      iw: window.innerWidth,
+    }));
+    check(`${vp.name} compare no horizontal overflow`, sw <= iw, `${sw} vs ${iw}`);
+    await page.screenshot({ path: join(args.out, `${vp.name}-compare.png`) });
+    await page.close();
+  }
+} catch (e) {
+  check("compare page", false, e.message.slice(0, 120));
+}
+
 await browser.close();
 
 // ---------- summary ----------

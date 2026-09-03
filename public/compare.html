@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>ToolFront Compare — two sites, one agent-readiness verdict</title>
+<meta name="description" content="Compare the AI-agent readiness of any two websites side by side.">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23FFFFFF'/%3E%3Cpath d='M10 44 L10 20 L26 20 M10 32 L22 32' stroke='%230C1222' stroke-width='6' fill='none'/%3E%3Cpath d='M38 44 L54 44 M46 20 L46 44' stroke='%232563EB' stroke-width='6' fill='none'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+  /* ════════════════ V5 COMPARE — dual glow cards ════════════════
+     Same tokens as report.html. The URL is the shareable artifact. */
+  :root {
+    --paper: #FAFBFC; --paper-soft: #F1F4F8;
+    --ink: #0C1222; --ink-2: #374151; --ink-3: #6B7280; --ink-4: #9CA3AF;
+    --line: #E2E6EE; --line-light: #F0F2F5;
+    --accent: #2563EB; --accent-deep: #1D4ED8; --accent-soft: #EFF6FF;
+    --good: #059669; --good-deep: #047857; --good-soft: #ECFDF5;
+    --mid: #D97706; --mid-soft: #FFFBEB;
+    --bad: #DC2626; --bad-soft: #FEF2F2;
+    --card: #FFFFFF; --surface-dark: #0F172A;
+    --shadow-report-glow: 0 0 0 1px rgba(37,99,235,0.08), 0 0 20px -2px rgba(37,99,235,0.10), 0 0 48px -8px rgba(37,99,235,0.06), 0 20px 48px -12px rgba(12,18,34,.15);
+    --grad-primary: linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #3B82F6 100%);
+    --r-2: 8px; --r-3: 12px; --r-4: 16px; --r-full: 9999px;
+    --sans: "Space Grotesk", "Noto Sans SC", sans-serif;
+    --serif: "Source Serif 4", "Noto Serif SC", serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --dur-fast: 150ms; --dur-normal: 250ms;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--paper-soft); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.62; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 36px) 72px; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid var(--line-light); }
+  .wordmark { font-family: var(--mono); font-weight: 700; font-size: 16px; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; }
+  .top-right { display: flex; gap: 14px; align-items: center; font-size: 13px; }
+  .lang { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-full); overflow: hidden; }
+  .lang button { border: 0; background: transparent; font-family: var(--sans); font-size: 11.5px; font-weight: 600; color: var(--ink-3); padding: 5px 12px; cursor: pointer; }
+  .lang button.on { background: var(--ink); color: #fff; }
+
+  .head { padding: 28px 0 18px; }
+  .kicker { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); display: inline-flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+  .kicker::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse-dot 2s infinite; }
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.35} }
+  h1 { font-family: var(--serif); font-weight: 450; font-size: clamp(26px, 3.5vw, 36px); letter-spacing: -0.02em; }
+
+  /* Form */
+  .cmp-form { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 8px; }
+  .cmp-input { flex: 1 1 200px; border: 1.5px solid var(--line); border-radius: var(--r-3); padding: 11px 14px; font-family: var(--mono); font-size: 13px; color: var(--ink); background: var(--card); outline: none; }
+  .cmp-input:focus { border-color: var(--accent); }
+  .cmp-btn { border: 0; background: var(--grad-primary); color: #FFF; font-weight: 600; font-size: 13px; padding: 11px 22px; border-radius: var(--r-3); cursor: pointer; font-family: var(--sans); letter-spacing: -0.01em; box-shadow: 0 2px 10px rgba(37,99,235,0.18); }
+  .cmp-btn:disabled { opacity: 0.55; cursor: wait; }
+  .fine { font-size: 12px; color: var(--ink-3); font-family: var(--mono); }
+
+  /* Dual cards */
+  .duel { display: grid; grid-template-columns: 1fr 44px 1fr; align-items: stretch; gap: 0; margin-top: 22px; }
+  .pcard { background: var(--card); border: 1px solid rgba(37,99,235,0.08); border-radius: var(--r-4); box-shadow: var(--shadow-report-glow); overflow: hidden; }
+  .pcard.win { border-color: rgba(5,150,105,0.35); }
+  .cbar { display: flex; gap: 6px; padding: 11px 18px; border-bottom: 1px solid var(--line-light); align-items: center; background: var(--paper-soft); }
+  .cbar i { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .cbar i:nth-child(1){background:#EF4444}.cbar i:nth-child(2){background:#F59E0B}.cbar i:nth-child(3){background:#10B981}
+  .cbar .t { margin-left: 8px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+  .pbody { padding: 20px; text-align: center; }
+  .pdom { font-family: var(--serif); font-size: 17px; font-weight: 450; color: var(--ink); overflow-wrap: anywhere; }
+  .pgrade { width: 62px; height: 62px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; font-family: var(--sans); font-weight: 800; font-size: 32px; margin: 12px auto 6px; }
+  .pgrade.good { color: var(--good); background: linear-gradient(145deg, var(--good-soft) 0%, #E4F8EF 100%); border: 2.5px solid var(--good); }
+  .pgrade.mid { color: var(--mid); background: linear-gradient(145deg, var(--mid-soft) 0%, #FFF6E3 100%); border: 2.5px solid var(--mid); }
+  .pgrade.bad { color: var(--bad); background: linear-gradient(145deg, var(--bad-soft) 0%, #FFF0EE 100%); border: 2.5px solid var(--bad); }
+  .pgrade.na { color: var(--ink-3); background: var(--paper-soft); border: 2.5px solid var(--line); }
+  .pscore { font-family: var(--mono); font-size: 24px; font-weight: 700; color: var(--ink); }
+  .pscore .of { font-size: 13px; color: var(--ink-3); font-weight: 400; }
+  .ptrack { height: 7px; border-radius: var(--r-full); position: relative; margin-top: 12px; background: linear-gradient(90deg, var(--bad) 0 30%, var(--mid) 30% 50%, #F59E0B 50% 70%, var(--good-deep) 70% 85%, var(--good) 85% 100%); opacity: 0.92; }
+  .ptrack .cur { position: absolute; top: -5px; bottom: -5px; width: 3px; background: var(--ink); border-radius: 2px; left: 0; transition: left 0.9s cubic-bezier(.3,.7,.2,1); }
+  .pnote { margin-top: 10px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); min-height: 14px; }
+
+  .vs { display: flex; align-items: center; justify-content: center; }
+  .vs-badge { width: 36px; height: 36px; border-radius: 50%; background: var(--surface-dark); color: #fff; font-family: var(--mono); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+  .delta-row { text-align: center; margin: 18px 0 6px; }
+  .delta-pill { display: inline-block; font-family: var(--mono); font-size: 11.5px; font-weight: 700; border-radius: var(--r-full); padding: 5px 16px; }
+  .delta-pill.a { color: var(--good-deep); background: var(--good-soft); border: 1px solid rgba(5,150,105,0.12); }
+  .delta-pill.tie { color: var(--ink-3); background: var(--paper-soft); border: 1px solid var(--line); }
+
+  /* Diff table */
+  .diffcard { background: var(--card); border: 1px solid rgba(37,99,235,0.08); border-radius: var(--r-4); box-shadow: var(--shadow-report-glow); overflow: hidden; margin-top: 20px; }
+  .dtable { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .dtable th { text-align: left; padding: 10px 14px; font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); background: var(--paper-soft); border-bottom: 1px solid var(--line-light); }
+  .dtable th.num, .dtable td.num { text-align: center; }
+  .dtable td { padding: 9px 14px; border-bottom: 1px solid var(--line-light); color: var(--ink-2); }
+  .dtable tr:last-child td { border-bottom: 0; }
+  .dtable .lbl { font-weight: 600; color: var(--ink); }
+  .dtable .tier { font-family: var(--mono); font-size: 9.5px; color: var(--ink-4); margin-left: 6px; }
+  .mark { font-family: var(--mono); font-size: 11.5px; font-weight: 700; }
+  .mark.p { color: var(--good); } .mark.m { color: var(--mid); } .mark.f { color: var(--bad); } .mark.x { color: var(--ink-4); }
+  td.winner { background: var(--good-soft); }
+
+  .err { background: var(--bad-soft); border: 1px solid rgba(220,38,38,0.2); color: var(--bad); border-radius: var(--r-3); padding: 14px 18px; font-family: var(--mono); font-size: 12.5px; margin-top: 16px; }
+  .scan-loading { font-family: var(--mono); font-size: 13px; color: var(--ink-2); padding: 10px 2px; }
+
+  .colo { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); margin-top: 28px; flex-wrap: wrap; gap: 8px; font-family: var(--mono); }
+  .colo a { color: var(--ink-2); text-decoration: none; }
+
+  @media (max-width: 700px) {
+    .duel { grid-template-columns: 1fr; }
+    .vs { padding: 10px 0; }
+  }
+  @media print { .top, .cmp-form, .colo { display: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="wordmark" href="/">toolfront_</a>
+    <div class="top-right">
+      <span class="lang"><button id="lang-en" class="on">EN</button><button id="lang-zh">中文</button></span>
+    </div>
+  </div>
+
+  <div class="head">
+    <div class="kicker" id="kicker">Agent-readiness duel · free · ~5s</div>
+    <h1 id="h1">Two sites. One agent-readiness verdict.</h1>
+  </div>
+
+  <form class="cmp-form" id="cmpform">
+    <input class="cmp-input" id="in-a" placeholder="yourdomain.com" autocomplete="off">
+    <input class="cmp-input" id="in-b" placeholder="competitor.com" autocomplete="off">
+    <button class="cmp-btn" id="cmpbtn" type="submit">Compare</button>
+  </form>
+  <div class="fine" id="fine">Both sites are scanned live — the URL of a comparison is shareable.</div>
+
+  <div id="out"></div>
+
+  <div class="colo">
+    <span>© 2026 ToolFront · Free &amp; Open</span>
+    <span><a href="/privacy">Privacy</a> · <a href="/security">Security</a></span>
+  </div>
+</div>
+
+<script>
+  /* All dynamic content is DOM-built via textContent (XSS safety). */
+  var LANGS = {
+    en: {
+      'cmp.kicker': 'Agent-readiness duel · free · ~5s',
+      'cmp.h1': 'Which site is more ready for AI agents?',
+      'cmp.h1.form': 'Compare two sites',
+      'cmp.go': 'Compare',
+      'cmp.fine': 'Both sites are scanned live — and the page link is yours to share.',
+      'cmp.loading': 'Scanning both sites…',
+      // API error codes are for machines; users get the human version.
+      'cmp.err': 'That comparison did not work: ',
+      'cmp.err.rate_limited': 'Too many scans from here. Wait a minute and try again.',
+      'cmp.err.domain_not_allowed': 'That name does not point to a public website.',
+      'cmp.err.domain_opted_out': 'This site says in robots.txt that it does not want automated scans.',
+      'cmp.err.unreachable': 'Could not reach this site — it may be down or blocking us.',
+      'cmp.err.generic': 'Something went wrong on our side. Please try again.',
+      'cmp.err.invalid_domain': 'Check the domain names — one of them is not valid.',
+      'cmp.err.same_domain': 'Pick two different sites — comparing one with itself says nothing.',
+      'cmp.leads': '{w} leads by {n} pts',
+      'cmp.tie': 'Dead heat — both at {n} pts',
+      'cmp.side': 'Site',
+      'cmp.check': 'Check',
+      'cmp.blocked': 'Scan blocked by bot protection',
+      'cmp.failed': 'Could not be scanned (HTTP {s})',
+      'cmp.opted': 'Opted out (robots.txt)',
+      'cmp.unreach': 'Unreachable',
+      'cmp.invalid': 'Enter two different domains, like example.com vs competitor.com.',
+      'rfoot.privacy': 'Privacy', 'rfoot.security': 'Security',
+    },
+    zh: {
+      'cmp.kicker': 'AI 就绪度对决 · 免费 · 约 5 秒',
+      'cmp.h1': '谁的网站更懂 AI？',
+      'cmp.h1.form': '对比两个网站',
+      'cmp.go': '开始对比',
+      'cmp.fine': '两边都是实时扫描——这个页面的链接可以直接分享出去。',
+      'cmp.loading': '正在扫描两个网站…',
+      // 接口返回的错误码是给机器看的，用户看人话版本。
+      'cmp.err': '这次对比没能完成：',
+      'cmp.err.rate_limited': '这里扫得太频繁了，请稍等一分钟再试。',
+      'cmp.err.domain_not_allowed': '这个域名没有指向一个公开的网站。',
+      'cmp.err.domain_opted_out': '该站在 robots.txt 里声明不接受自动扫描。',
+      'cmp.err.unreachable': '连不上这个网站——它可能挂了，或者拦住了我们。',
+      'cmp.err.generic': '我们这边出了点问题，请再试一次。',
+      'cmp.err.invalid_domain': '检查一下域名——其中有一个不是有效域名。',
+      'cmp.err.same_domain': '两个域名不能一样，换个站点再比。',
+      'cmp.leads': '{w} 领先 {n} 分',
+      'cmp.tie': '平手——双方都是 {n} 分',
+      'cmp.side': '站点',
+      'cmp.check': '检查项',
+      'cmp.blocked': '被网站的机器人防护拦住了',
+      'cmp.failed': '扫不了这个网站（HTTP {s}）',
+      'cmp.opted': '该站在 robots.txt 里拒绝被扫描',
+      'cmp.unreach': '无法访问',
+      'cmp.invalid': '请输入两个不同的域名，例如 example.com 和 competitor.com。',
+      'rfoot.privacy': '隐私', 'rfoot.security': '安全',
+    },
+  };
+  var lang = 'en';
+  try { lang = localStorage.getItem('tf-lang') || 'en'; } catch (_) {}
+  try {
+    var qp = new URLSearchParams(location.search).get('lang');
+    if (qp === 'zh') lang = 'zh';
+    if (qp === 'en') lang = 'en';
+  } catch (_) {}
+  if (!Object.prototype.hasOwnProperty.call(LANGS, lang)) lang = 'en';
+  function t(k) { return (LANGS[lang] && LANGS[lang][k]) || LANGS.en[k] || k; }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function normalize(d) { return String(d || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, ''); }
+  var MARK = { pass: ['p', '✓'], partial: ['m', '~'], fail: ['f', '✕'], na: ['x', '–'] };
+  var API_ERRORS = ['rate_limited', 'domain_not_allowed', 'domain_opted_out', 'unreachable', 'invalid_domain', 'same_domain'];
+
+  function applyLang() {
+    document.getElementById('kicker').textContent = t('cmp.kicker');
+    document.getElementById('cmpbtn').textContent = t('cmp.go');
+    document.getElementById('fine').textContent = t('cmp.fine');
+    document.getElementById('lang-en').classList.toggle('on', lang === 'en');
+    document.getElementById('lang-zh').classList.toggle('on', lang === 'zh');
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    try { localStorage.setItem('tf-lang', lang); } catch (_) {}
+  }
+  document.getElementById('lang-en').addEventListener('click', function () { lang = 'en'; applyLang(); rerender(); });
+  document.getElementById('lang-zh').addEventListener('click', function () { lang = 'zh'; applyLang(); rerender(); });
+
+  var lastData = null;
+
+  function sideCard(side, report, status) {
+    var card = el('div', 'pcard');
+    var bar = el('div', 'cbar');
+    bar.appendChild(el('i')); bar.appendChild(el('i')); bar.appendChild(el('i'));
+    bar.appendChild(el('span', 't', t('cmp.side') + ' ' + side));
+    card.appendChild(bar);
+    var body = el('div', 'pbody');
+    if (report && report.grade != null) {
+      body.appendChild(el('div', 'pdom', report.domain));
+      var g = el('div', 'pgrade ' + (report.score >= 70 ? 'good' : report.score >= 40 ? 'mid' : 'bad'), report.grade);
+      body.appendChild(g);
+      var sc = el('div', 'pscore', String(report.score));
+      sc.appendChild(el('span', 'of', ' / ' + (report.scoreMax || 100)));
+      body.appendChild(sc);
+      var tr = el('div', 'ptrack');
+      var cur = el('div', 'cur');
+      tr.appendChild(cur);
+      body.appendChild(tr);
+      // rAF so the transition from 0 actually plays
+      requestAnimationFrame(function () { requestAnimationFrame(function () { cur.style.left = Math.min(100, Math.max(0, report.score)) + '%'; }); });
+      if (report.cached) body.appendChild(el('div', 'pnote', 'cached'));
+    } else if (report && report.blocked) {
+      body.appendChild(el('div', 'pdom', report.domain));
+      body.appendChild(el('div', 'pgrade na', '–'));
+      body.appendChild(el('div', 'pnote', t('cmp.blocked')));
+    } else {
+      body.appendChild(el('div', 'pdom', report && report.domain ? report.domain : '—'));
+      body.appendChild(el('div', 'pgrade na', '–'));
+      var why = status === 403 ? t('cmp.opted') : status === 502 ? t('cmp.unreach') : t('cmp.failed').replace('{s}', String(status || ''));
+      body.appendChild(el('div', 'pnote', why));
+    }
+    card.appendChild(body);
+    return card;
+  }
+
+  function render(data) {
+    lastData = data;
+    var out = document.getElementById('out');
+    out.textContent = '';
+    var duel = el('div', 'duel');
+    duel.appendChild(sideCard('A', data.a, data.a_status));
+    var vs = el('div', 'vs'); vs.appendChild(el('div', 'vs-badge', 'VS')); duel.appendChild(vs);
+    duel.appendChild(sideCard('B', data.b, data.b_status));
+    out.appendChild(duel);
+
+    var okA = data.a && typeof data.a.score === 'number';
+    var okB = data.b && typeof data.b.score === 'number';
+    if (okA && okB) {
+      var d = data.a.score - data.b.score;
+      var pill = el('div', 'delta-row');
+      var badge = el('span', 'delta-pill ' + (d === 0 ? 'tie' : 'a'),
+        d === 0 ? t('cmp.tie').replace('{n}', String(data.a.score))
+                : t('cmp.leads').replace('{w}', d > 0 ? data.a.domain : data.b.domain).replace('{n}', String(Math.abs(d))));
+      pill.appendChild(badge);
+      out.appendChild(pill);
+      if (d !== 0) duel.children[d > 0 ? 0 : 2].classList.add('win');
+      out.appendChild(diffTable(data.a, data.b));
+    }
+  }
+
+  function diffTable(a, b) {
+    var card = el('div', 'diffcard');
+    var tbl = el('table', 'dtable');
+    var thead = el('thead');
+    var hr = el('tr');
+    [t('cmp.check'), a.domain, b.domain].forEach(function (h, i) {
+      var th = el('th', i ? 'num' : null, h); hr.appendChild(th);
+    });
+    thead.appendChild(hr); tbl.appendChild(thead);
+    var tbody = el('tbody');
+    (a.checks || []).forEach(function (ca) {
+      var cb = null;
+      (b.checks || []).forEach(function (x) { if (x.id === ca.id) cb = x; });
+      if (!cb) return;
+      var tr = el('tr');
+      var lbl = el('td', 'lbl', ca.label);
+      lbl.appendChild(el('span', 'tier', ca.tier));
+      tr.appendChild(lbl);
+      var pa = ca.points, pb = cb.points;
+      var ma = el('td', 'num'), mb = el('td', 'num');
+      // Repair gain on the losing side (spec F4): the loser's cell carries the
+      // "+N" it could recover here, so the comparison doubles as a to-do list.
+      var txtA = pa == null ? '–' : pa + '/' + ca.max;
+      var txtB = pb == null ? '–' : pb + '/' + cb.max;
+      if (pa != null && pb != null) {
+        if (pb > pa) txtA += ' +' + (ca.max - pa);
+        else if (pa > pb) txtB += ' +' + (cb.max - pb);
+      }
+      // Own-property lookup: MARK[status] with a garbage status ('__proto__')
+      // would hit the prototype chain and render garbage into the class
+      // attribute (red35 audit — same family as the rankings fix).
+      var markA = Object.prototype.hasOwnProperty.call(MARK, ca.status) ? MARK[ca.status] : MARK.x;
+      var markB = Object.prototype.hasOwnProperty.call(MARK, cb.status) ? MARK[cb.status] : MARK.x;
+      ma.appendChild(el('span', 'mark ' + markA[0], txtA + ' ' + markA[1]));
+      mb.appendChild(el('span', 'mark ' + markB[0], txtB + ' ' + markB[1]));
+      // Winner highlight per row (only when both sides have real numbers)
+      if (pa != null && pb != null) {
+        if (pa > pb) ma.classList.add('winner');
+        else if (pb > pa) mb.classList.add('winner');
+      }
+      tr.appendChild(ma); tr.appendChild(mb);
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    card.appendChild(tbl);
+    return card;
+  }
+
+  function rerender() {
+    applyLang();
+    var params = new URLSearchParams(location.search);
+    var a = normalize(params.get('a')), b = normalize(params.get('b'));
+    document.title = t('cmp.h1') + ' — ToolFront';
+    if (a && b) {
+      document.getElementById('in-a').value = a;
+      document.getElementById('in-b').value = b;
+      document.getElementById('h1').textContent = a + ' vs ' + b;
+      load(a, b);
+    } else {
+      document.getElementById('h1').textContent = t('cmp.h1.form');
+    }
+  }
+
+  function load(a, b) {
+    var out = document.getElementById('out');
+    out.textContent = '';
+    out.appendChild(el('div', 'scan-loading', t('cmp.loading')));
+    fetch('/api/compare?a=' + encodeURIComponent(a) + '&b=' + encodeURIComponent(b))
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (r) {
+        // Prefer the machine error code over `detail` — detail is an English
+        // sentence, the code is what the human-copy map keys on.
+        if (!r.ok) { throw new Error(r.j && r.j.error || r.j && r.j.detail || 'request failed'); }
+        render(r.j);
+        try { history.replaceState(null, '', '/compare?a=' + encodeURIComponent(a) + '&b=' + encodeURIComponent(b) + '&lang=' + lang); } catch (_) {}
+      })
+      .catch(function (e) {
+        // The thrown message carries the API error code (rate_limited, …) —
+        // translate it to plain language; never surface the raw field.
+        var msg = String((e && e.message) || e || '');
+        var key = 'cmp.err.' + (API_ERRORS.indexOf(msg) >= 0 ? msg : 'generic');
+        out.textContent = '';
+        out.appendChild(el('div', 'err', t('cmp.err') + t(key)));
+      });
+  }
+
+  document.getElementById('cmpform').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var a = normalize(document.getElementById('in-a').value);
+    var b = normalize(document.getElementById('in-b').value);
+    if (!a || !b || a === b) {
+      var out = document.getElementById('out');
+      out.textContent = '';
+      out.appendChild(el('div', 'err', t('cmp.invalid')));
+      return;
+    }
+    document.getElementById('h1').textContent = a + ' vs ' + b;
+    load(a, b);
+  });
+
+  rerender();
+</script>
+</body>
+</html>
