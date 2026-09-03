@@ -475,8 +475,8 @@
 
   <div class="colo">
     <span>© 2026 ToolFront · Free &amp; Open</span>
-    <span id="ver-stamp" hidden></span>
-    <span><a href="/privacy" data-i18n="rfoot.privacy">Privacy</a> · <a href="/security" data-i18n="rfoot.security">Security</a> · <a href="/bot" data-i18n="rfoot.bot">/bot</a></span>
+    <a id="ver-link" href="/methodology" hidden><span id="ver-stamp"></span></a>
+    <span><a href="/methodology" data-i18n="rfoot.methodology">Methodology</a> · <a href="/privacy" data-i18n="rfoot.privacy">Privacy</a> · <a href="/security" data-i18n="rfoot.security">Security</a> · <a href="/bot" data-i18n="rfoot.bot">/bot</a></span>
   </div>
 </div>
 
@@ -532,6 +532,7 @@
       'report.grade.a': 'Confirmed: vendors publicly document reading this signal',
       'report.grade.b': 'Widely adopted, but not yet an official standard',
       'report.grade.c': 'Community convention — no vendor has confirmed reading it',
+    'rfoot.methodology': 'Methodology',
     'rfoot.privacy': 'Privacy',
     'rfoot.security': 'Security',
     'rfoot.bot': '/bot docs',
@@ -595,6 +596,7 @@
       'report.grade.a': '确定有效：厂商官方写明会读取这项信号',
       'report.grade.b': '基本有效：行业普遍采用，但还不是官方标准',
       'report.grade.c': '仅供参考：行业惯例，暂无厂商确认会读取',
+    'rfoot.methodology': '评分方法',
     'rfoot.privacy': '隐私政策',
     'rfoot.security': '安全说明',
     'rfoot.bot': '扫描器说明',
@@ -1454,9 +1456,10 @@
     // monitoring clients will be told when they do).
     try {
       var vs = document.getElementById('ver-stamp');
-      if (vs && r.rules_version && r.scoring_version) {
+      var vl = document.getElementById('ver-link');
+      if (vs && vl && r.rules_version && r.scoring_version) {
         vs.textContent = 'rules ' + r.rules_version + ' · scoring ' + r.scoring_version;
-        vs.hidden = false;
+        vl.hidden = false;
       }
     } catch (_) {}
 

@@ -114,6 +114,7 @@ export default {
     try {
       if (url.pathname === "/api/scan") return await handleScan(url, request, env);
       if (url.pathname === "/api/compare") return await handleCompareApi(url, request, env);
+      if (url.pathname === "/api/methodology") return json(methodologyData(), 200, { "Cache-Control": "public, max-age=3600" });
       if (url.pathname === "/api/waitlist") return await handleWaitlist(request, env);
       if (url.pathname === "/api/resend") return await handleResend(request, env);
       if (url.pathname === "/confirm") return await handleConfirm(url, env);
@@ -134,6 +135,8 @@ export default {
       if (!env.ASSETS) return json({ name: "toolfront", status: "ok" });
       return harden(await env.ASSETS.fetch(new Request(url.origin + "/compare.html", request)));
     }
+    // Methodology: the published rules behind every score.
+    if (url.pathname === "/methodology") return await handleMethodology(request, env, url.origin);
     // Agent-skills repair docs live under the standard /.well-known/agent-skills/
     // path (the agentskills discovery convention). Workers static assets skip
     // dot-prefixed directories (.well-known), so the files are stored under
@@ -1202,6 +1205,75 @@ async function handleCompareApi(url, request, env) {
   const fresh = url.searchParams.get("fresh") === "1";
   const [ra, rb] = await Promise.all([scanPublicReport(a, fresh, env), scanPublicReport(b, fresh, env)]);
   return json({ a: ra.body, b: rb.body, a_status: ra.status, b_status: rb.status }, 200, { "Cache-Control": "public, max-age=60" });
+}
+
+/* ————— public methodology (spec 2026-09-03 scoring-alignment, Task 1) —————
+   A score is a claim, so the rules behind it have to be readable — by people
+   and by agents. Both renderings are generated from the SAME constants the
+   scanner uses (CHECK_POLICY / TIER_BUDGET / SCORING_VERSION), so the page can
+   never drift from the engine: there is no second hand-maintained copy. */
+function methodologyData() {
+  const checks = Object.entries(CHECK_POLICY).map(([id, p]) => ({
+    id,
+    label: p.label,
+    tier: p.tier,
+    evidence: p.evidence,
+    share: p.share,
+    max: Math.round(TIER_BUDGET[p.tier] * p.share),
+  }));
+  return {
+    rules_version: RULES_VERSION,
+    scoring_version: SCORING_VERSION,
+    tiers: Object.entries(TIER_BUDGET).map(([tier, budget]) => ({ tier, budget })),
+    checks,
+    grade_bands: [
+      { grade: "A", min: 85 }, { grade: "B", min: 70 },
+      { grade: "C", min: 50 }, { grade: "D", min: 30 }, { grade: "F", min: 0 },
+    ],
+    statuses: ["pass", "partial", "fail", "na"],
+  };
+}
+
+function methodologyMarkdown(d) {
+  const byTier = {};
+  for (const c of d.checks) (byTier[c.tier] = byTier[c.tier] || []).push(c);
+  const lines = [
+    "# ToolFront scoring methodology",
+    "",
+    `rules_version: ${d.rules_version} · scoring_version: ${d.scoring_version}`,
+    "",
+    "Grade bands: " + d.grade_bands.map(b => `${b.grade} ≥ ${b.min}`).join(" · "),
+    "",
+    "Statuses: pass (full points) · partial (proportional) · fail (zero) · na (not applicable — excluded from both score and denominator).",
+    "",
+  ];
+  for (const t of d.tiers) {
+    lines.push(`## ${t.tier} (${t.budget} points)`, "");
+    lines.push("| check | label | evidence | max |", "| --- | --- | --- | --- |");
+    for (const c of byTier[t.tier] || []) lines.push(`| ${c.id} | ${c.label} | ${c.evidence} | ${c.max} |`);
+    lines.push("");
+  }
+  lines.push("---", "", "Machine-readable version: GET /api/methodology", "");
+  return lines.join("\n");
+}
+
+async function handleMethodology(request, env, origin) {
+  const data = methodologyData();
+  // Agents ask for markdown; the HTML page is the human rendering of the same
+  // data (fetched at runtime from /api/methodology, so it cannot drift).
+  if ((request.headers.get("accept") || "").includes("text/markdown")) {
+    return new Response(methodologyMarkdown(data), {
+      status: 200,
+      headers: {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Vary": "Accept",
+        "Cache-Control": "public, max-age=3600",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
+  }
+  if (!env.ASSETS) return json(data, 200);
+  return harden(await env.ASSETS.fetch(new Request(origin + "/methodology.html", request)));
 }
 
 /* ————— unsubscribe infrastructure (CAN-SPAM / CASL / GDPR Art.7) —————
