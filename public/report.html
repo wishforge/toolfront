@@ -350,7 +350,7 @@
   .supp-item { display: flex; align-items: baseline; gap: 10px; padding: 5px 0; font-size: 13px; color: var(--ink-2); flex-wrap: wrap; }
   .supp-item b { font-weight: 600; color: var(--ink); }
   .supp-mark { font-family: var(--mono); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; border-radius: var(--r-full); padding: 2px 9px; flex-shrink: 0; }
-  .supp-mark.found, .supp-mark.protected { color: var(--good-deep); background: var(--good-soft); }
+  .supp-mark.found, .supp-mark.blocked { color: var(--good-deep); background: var(--good-soft); }
   .supp-mark.open { color: var(--mid); background: var(--mid-soft); }
   .supp-mark.notfound, .supp-mark.unknown { color: var(--ink-3); background: var(--paper-soft); border: 1px solid var(--line); }
 
@@ -745,19 +745,30 @@
     'report.cta.fine': 'Weekly checks. An email only if the score drops 5+ or a tool changes. Unsubscribe in one click.',
     'report.vs.improved': '↑ improved', 'report.vs.regressed': '↓ regressed',
     'report.loading0': '',
-    'report.supp.title': 'Supplemental signals',
-    'report.supp.note': 'Does not affect your score — context for decisions, not a checklist.',
-    'report.supp.training': 'AI training exposure',
-    'report.supp.auth': 'Agent auth discovery',
-    'report.supp.crawler_blocking': 'Training crawler blocking',
-    'report.supp.ai_txt': 'ai.txt policy',
-    'report.supp.tdmrep': 'TDMRep declaration',
-    'report.supp.web_bot_auth': 'Web Bot Auth',
-    'report.supp.common_crawl': 'Common Crawl presence',
-    'report.supp.oauth_discovery': 'OAuth discovery',
-    'report.supp.openid_configuration': 'OpenID configuration',
-    'report.supp.st.found': 'found', 'report.supp.st.protected': 'protected', 'report.supp.st.open': 'open',
-    'report.supp.st.notfound': 'not found', 'report.supp.st.unknown': 'unknown',
+    'report.supp.title': 'Extra signals (not scored)',
+    'report.supp.note': 'Not counted in your score — background for decisions, not another to-do list.',
+    'report.supp.training': 'Is your content used to train AI?',
+    'report.supp.auth': 'Can AI agents find your sign-in?',
+    // Plain-language labels; protocol names stay as-is (they are searchable
+    // identifiers — a reader pastes them into a search box, not a dictionary).
+    'report.supp.crawler_blocking': 'Blocking AI training crawlers',
+    'report.supp.ai_txt': 'ai.txt usage rules',
+    'report.supp.tdmrep': 'TDMRep rights notice',
+    'report.supp.web_bot_auth': 'Web Bot Auth (bot identity check)',
+    'report.supp.common_crawl': 'Common Crawl (main AI training source)',
+    'report.supp.oauth_discovery': 'OAuth sign-in endpoint',
+    'report.supp.openid_configuration': 'OpenID sign-in endpoint',
+    'report.supp.st.found': 'found', 'report.supp.st.blocked': 'blocked', 'report.supp.st.open': 'not blocked',
+    'report.supp.st.notfound': 'not found', 'report.supp.st.unknown': 'not checked',
+    // Detail sentences: the API ships English detail strings, but reader-facing
+    // copy belongs in this dictionary (same rule as fixDict). Keyed by
+    // <signal>.<status>; {list} is the bot list from the API.
+    'report.supp.d.crawler_blocking.open': 'Nothing is blocking known AI training crawlers — they can read everything.',
+    'report.supp.d.crawler_blocking.blocked': 'Blocking: {list}.',
+    'report.supp.d.crawler_blocking.unknown': 'Could not read robots.txt.',
+    'report.supp.d.common_crawl.unknown': 'Not checked during this scan.',
+    'report.supp.d.found': 'Present.',
+    'report.supp.d.notfound': 'Not found.',
   });
   Object.assign(LANGS.zh, {
     'report.track.you': '你', 'report.track.opaque': '对 AI 封闭', 'report.track.ready': '智能体就绪',
@@ -765,19 +776,26 @@
     'report.cta.fine': '每周扫一次 · 分数掉 5 分或工具面被改才发邮件 · 一键退订',
     'report.vs.improved': '↑ 进步', 'report.vs.regressed': '↓ 退步',
     'report.loading0': '',
-    'report.supp.title': '补充信号',
-    'report.supp.note': '不计入分数——决策背景，不是待办清单。',
-    'report.supp.training': 'AI 训练暴露',
-    'report.supp.auth': 'Agent 认证发现',
-    'report.supp.crawler_blocking': '训练爬虫屏蔽',
-    'report.supp.ai_txt': 'ai.txt 政策',
-    'report.supp.tdmrep': 'TDMRep 声明',
-    'report.supp.web_bot_auth': 'Web Bot Auth',
-    'report.supp.common_crawl': 'Common Crawl 收录',
-    'report.supp.oauth_discovery': 'OAuth 发现',
-    'report.supp.openid_configuration': 'OpenID 配置',
-    'report.supp.st.found': '已找到', 'report.supp.st.protected': '已防护', 'report.supp.st.open': '开放',
+    'report.supp.title': '额外参考（不计分）',
+    'report.supp.note': '不计入分数——供你判断用，不是又一份待办清单。',
+    'report.supp.training': '你的内容会被拿去训练 AI 吗？',
+    'report.supp.auth': 'AI 助手能找到你的登录入口吗？',
+    // 通俗说法在前，协议名保留（它是可搜索的标识，不是要翻译的词）。
+    'report.supp.crawler_blocking': '是否屏蔽 AI 训练爬虫',
+    'report.supp.ai_txt': 'ai.txt 使用声明',
+    'report.supp.tdmrep': 'TDMRep 权利声明',
+    'report.supp.web_bot_auth': 'Web Bot Auth（机器人身份验证）',
+    'report.supp.common_crawl': 'Common Crawl 收录（AI 训练主要数据源）',
+    'report.supp.oauth_discovery': 'OAuth 登录入口',
+    'report.supp.openid_configuration': 'OpenID 登录入口',
+    'report.supp.st.found': '已找到', 'report.supp.st.blocked': '已屏蔽', 'report.supp.st.open': '未屏蔽',
     'report.supp.st.notfound': '未找到', 'report.supp.st.unknown': '未检测',
+    'report.supp.d.crawler_blocking.open': '没有屏蔽已知 AI 训练爬虫——它们可以读取全部内容。',
+    'report.supp.d.crawler_blocking.blocked': '已屏蔽：{list}。',
+    'report.supp.d.crawler_blocking.unknown': '读不到 robots.txt。',
+    'report.supp.d.common_crawl.unknown': '本次扫描未检测。',
+    'report.supp.d.found': '已设置。',
+    'report.supp.d.notfound': '未找到。',
   });
 
 
@@ -1309,7 +1327,7 @@
       // Status reaches a class attribute — whitelist the enum (defense in
       // depth: the API hardcodes these today, but class-string interpolation
       // from upstream data is a fragile premise, red35 audit).
-      var ST_OK = ['found', 'protected', 'open', 'notfound', 'unknown'];
+      var ST_OK = ['found', 'blocked', 'open', 'notfound', 'unknown'];
       g[2].forEach(function (key) {
         var item = g[1][key];
         if (!item) return;
@@ -1319,7 +1337,11 @@
         var txt = el('span', 'supp-txt');
         var label = el('b', null, t('report.supp.' + key));
         txt.appendChild(label);
-        txt.appendChild(document.createTextNode(' — ' + item.detail));
+        var dKey = 'report.supp.d.' + (st === 'found' || st === 'notfound' ? st : key + '.' + st);
+        var detail = LANGS[lang][dKey] || LANGS.en[dKey] || item.detail;
+        // The blocked list is dynamic data — it interpolates into the template.
+        if (st === 'blocked' && item.bots && item.bots.length) detail = detail.replace('{list}', item.bots.join(', '));
+        txt.appendChild(document.createTextNode(' — ' + detail));
         row.appendChild(mark);
         row.appendChild(txt);
         body.appendChild(row);

@@ -828,11 +828,14 @@ async function buildSupplemental(env, domain, robotsText, selfScan) {
     probePath(env, domain, "/.well-known/openid-configuration", "HEAD"),
   ]);
   const blocked = parseTrainingCrawlerBlocks(robotsText);
+  // `bots` ships alongside `detail` so the UI can render the list in the
+  // reader's language (copy lives in the frontend dictionary, as with
+  // fixDict) instead of echoing an English sentence.
   const cbStatus = robotsText == null
-    ? { status: "unknown", detail: "robots.txt unreadable." }
+    ? { status: "unknown", detail: "robots.txt unreadable.", bots: [] }
     : blocked.length
-      ? { status: "protected", detail: "Blocking: " + blocked.join(", ") + "." }
-      : { status: "open", detail: "No blanket block for known AI training bots — they can crawl everything." };
+      ? { status: "blocked", detail: "Blocking: " + blocked.join(", ") + ".", bots: blocked }
+      : { status: "open", detail: "No blanket block for known AI training bots — they can crawl everything.", bots: [] };
   return {
     training: {
       crawler_blocking: cbStatus,

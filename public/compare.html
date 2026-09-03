@@ -145,12 +145,20 @@
   var LANGS = {
     en: {
       'cmp.kicker': 'Agent-readiness duel · free · ~5s',
-      'cmp.h1': 'Two sites. One agent-readiness verdict.',
+      'cmp.h1': 'Which site is more ready for AI agents?',
       'cmp.h1.form': 'Compare two sites',
       'cmp.go': 'Compare',
-      'cmp.fine': 'Both sites are scanned live — the URL of a comparison is shareable.',
+      'cmp.fine': 'Both sites are scanned live — and the page link is yours to share.',
       'cmp.loading': 'Scanning both sites…',
-      'cmp.err': 'Something went wrong: ',
+      // API error codes are for machines; users get the human version.
+      'cmp.err': 'That comparison did not work: ',
+      'cmp.err.rate_limited': 'Too many scans from here. Wait a minute and try again.',
+      'cmp.err.domain_not_allowed': 'That name does not point to a public website.',
+      'cmp.err.domain_opted_out': 'This site says in robots.txt that it does not want automated scans.',
+      'cmp.err.unreachable': 'Could not reach this site — it may be down or blocking us.',
+      'cmp.err.generic': 'Something went wrong on our side. Please try again.',
+      'cmp.err.invalid_domain': 'Check the domain names — one of them is not valid.',
+      'cmp.err.same_domain': 'Pick two different sites — comparing one with itself says nothing.',
       'cmp.leads': '{w} leads by {n} pts',
       'cmp.tie': 'Dead heat — both at {n} pts',
       'cmp.side': 'Site',
@@ -160,27 +168,33 @@
       'cmp.opted': 'Opted out (robots.txt)',
       'cmp.unreach': 'Unreachable',
       'cmp.invalid': 'Enter two different domains, like example.com vs competitor.com.',
-      'cmp.winner': 'wins',
       'rfoot.privacy': 'Privacy', 'rfoot.security': 'Security',
     },
     zh: {
       'cmp.kicker': 'AI 就绪度对决 · 免费 · 约 5 秒',
-      'cmp.h1': '两个网站，一份 AI 就绪度判决。',
+      'cmp.h1': '谁的网站更懂 AI？',
       'cmp.h1.form': '对比两个网站',
       'cmp.go': '开始对比',
-      'cmp.fine': '两边都是实时扫描——对比链接可直接分享。',
+      'cmp.fine': '两边都是实时扫描——这个页面的链接可以直接分享出去。',
       'cmp.loading': '正在扫描两个网站…',
-      'cmp.err': '出错了：',
+      // 接口返回的错误码是给机器看的，用户看人话版本。
+      'cmp.err': '这次对比没能完成：',
+      'cmp.err.rate_limited': '这里扫得太频繁了，请稍等一分钟再试。',
+      'cmp.err.domain_not_allowed': '这个域名没有指向一个公开的网站。',
+      'cmp.err.domain_opted_out': '该站在 robots.txt 里声明不接受自动扫描。',
+      'cmp.err.unreachable': '连不上这个网站——它可能挂了，或者拦住了我们。',
+      'cmp.err.generic': '我们这边出了点问题，请再试一次。',
+      'cmp.err.invalid_domain': '检查一下域名——其中有一个不是有效域名。',
+      'cmp.err.same_domain': '两个域名不能一样，换个站点再比。',
       'cmp.leads': '{w} 领先 {n} 分',
       'cmp.tie': '平手——双方都是 {n} 分',
       'cmp.side': '站点',
       'cmp.check': '检查项',
-      'cmp.blocked': '扫描被 bot 防护拦截',
-      'cmp.failed': '无法扫描（HTTP {s}）',
-      'cmp.opted': '已声明拒绝（robots.txt）',
+      'cmp.blocked': '被网站的机器人防护拦住了',
+      'cmp.failed': '扫不了这个网站（HTTP {s}）',
+      'cmp.opted': '该站在 robots.txt 里拒绝被扫描',
       'cmp.unreach': '无法访问',
       'cmp.invalid': '请输入两个不同的域名，例如 example.com 和 competitor.com。',
-      'cmp.winner': '胜',
       'rfoot.privacy': '隐私', 'rfoot.security': '安全',
     },
   };
@@ -196,6 +210,7 @@
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function normalize(d) { return String(d || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, ''); }
   var MARK = { pass: ['p', '✓'], partial: ['m', '~'], fail: ['f', '✕'], na: ['x', '–'] };
+  var API_ERRORS = ['rate_limited', 'domain_not_allowed', 'domain_opted_out', 'unreachable', 'invalid_domain', 'same_domain'];
 
   function applyLang() {
     document.getElementById('kicker').textContent = t('cmp.kicker');
@@ -341,13 +356,19 @@
     fetch('/api/compare?a=' + encodeURIComponent(a) + '&b=' + encodeURIComponent(b))
       .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (r) {
-        if (!r.ok) { throw new Error(r.j && r.j.detail || r.j && r.j.error || 'request failed'); }
+        // Prefer the machine error code over `detail` — detail is an English
+        // sentence, the code is what the human-copy map keys on.
+        if (!r.ok) { throw new Error(r.j && r.j.error || r.j && r.j.detail || 'request failed'); }
         render(r.j);
         try { history.replaceState(null, '', '/compare?a=' + encodeURIComponent(a) + '&b=' + encodeURIComponent(b) + '&lang=' + lang); } catch (_) {}
       })
       .catch(function (e) {
+        // The thrown message carries the API error code (rate_limited, …) —
+        // translate it to plain language; never surface the raw field.
+        var msg = String((e && e.message) || e || '');
+        var key = 'cmp.err.' + (API_ERRORS.indexOf(msg) >= 0 ? msg : 'generic');
         out.textContent = '';
-        out.appendChild(el('div', 'err', t('cmp.err') + (e && e.message || e)));
+        out.appendChild(el('div', 'err', t('cmp.err') + t(key)));
       });
   }
 
