@@ -11,7 +11,7 @@ import { dirname, join } from "node:path";
 import {
   extractWebMcpSurface, checkWebMCP, checkToolSecurity, checkStructuredData,
   checkLlmsTxt, checkRobotsAI, checkMachineSurfaces, checkFreshness,
-  checkLinkHeaders, CHECK_POLICY, TIER_BUDGET,
+  checkLinkHeaders, CHECK_POLICY, POOL_BUDGET,
 } from "../worker.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -56,7 +56,7 @@ home.lmod = headersFor("/").lmod || null;
 const surface = extractWebMcpSurface(home.text);
 // Max values come from the SAME scoring policy the scanner uses (worker.js)
 // — no second hardcoded copy of the weights here.
-const maxOf = (id) => Math.round(TIER_BUDGET[CHECK_POLICY[id].tier] * CHECK_POLICY[id].share);
+const maxOf = (id) => Math.round(POOL_BUDGET[CHECK_POLICY[id].pool] * CHECK_POLICY[id].share);
 const checks = [
   ["webmcp", checkWebMCP(surface)],
   ["tool-security", checkToolSecurity(surface)],

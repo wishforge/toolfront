@@ -4,7 +4,7 @@
 // self-executing, console.log progress, process.exit(fail ? 1 : 0).
 import {
   checkApiErrors, checkFreshness, checkLinkHeaders,
-  CHECK_POLICY, TIER_BUDGET,
+  CHECK_POLICY, POOL_BUDGET,
 } from "../worker.js";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -48,16 +48,16 @@ ok("missing home → fail (no crash)", checkLinkHeaders(undefined).status === "f
 console.log("\n[D] scoring policy invariants (spec §F3 resplit)");
 const ids = Object.keys(CHECK_POLICY);
 ok("9 checks defined", ids.length === 9, `got ${ids.length}`);
-for (const tier of Object.keys(TIER_BUDGET)) {
-  const shareSum = ids.filter(id => CHECK_POLICY[id].tier === tier).reduce((s, id) => s + CHECK_POLICY[id].share, 0);
+for (const tier of Object.keys(POOL_BUDGET)) {
+  const shareSum = ids.filter(id => CHECK_POLICY[id].pool === tier).reduce((s, id) => s + CHECK_POLICY[id].share, 0);
   ok(`${tier} shares sum to 1.0`, Math.abs(shareSum - 1) < 1e-9, `sum=${shareSum}`);
 }
 for (const id of ids) {
   const p = CHECK_POLICY[id];
-  const max = Math.round(TIER_BUDGET[p.tier] * p.share);
+  const max = Math.round(POOL_BUDGET[p.pool] * p.share);
   ok(`${id} max positive (${max})`, max > 0);
 }
-ok("SCORING_VERSION bumped to 2.1.0", /const SCORING_VERSION = "2\.1\.0";/.test(WORKER_SRC));
+ok("SCORING_VERSION is 3.0.0 (three-pool model)", /const SCORING_VERSION = "3\.0\.0";/.test(WORKER_SRC));
 
 console.log(`\nproduct-checks 结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail ? 1 : 0);

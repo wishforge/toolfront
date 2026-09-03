@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>How we score — ToolFront methodology</title>
+<meta name="description" content="How ToolFront scores AI-agent readiness: every check, its weight, what pass / partial / fail / not-applicable mean, and the current rules version.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23FFFFFF'/%3E%3Cpath d='M10 44 L10 20 L26 20 M10 32 L22 32' stroke='%230C1222' stroke-width='6' fill='none'/%3E%3Cpath d='M38 44 L54 44 M46 20 L46 44' stroke='%232563EB' stroke-width='6' fill='none'/%3E%3C/svg%3E">
+<link rel="alternate" type="text/markdown" href="/methodology" title="Markdown version of this methodology">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+  :root {
+    --paper: #FAFBFC; --paper-soft: #F1F4F8;
+    --ink: #0C1222; --ink-2: #374151; --ink-3: #6B7280; --ink-4: #9CA3AF;
+    --line: #E2E6EE; --line-light: #F0F2F5;
+    --accent: #2563EB; --accent-deep: #1D4ED8; --accent-soft: #EFF6FF;
+    --good: #059669; --good-deep: #047857; --good-soft: #ECFDF5;
+    --mid: #D97706; --mid-soft: #FFFBEB;
+    --bad: #DC2626; --bad-soft: #FEF2F2;
+    --card: #FFFFFF;
+    --shadow-sm: 0 1px 3px rgba(12,18,34,0.06), 0 1px 2px rgba(12,18,34,0.04);
+    --grad-primary: linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #3B82F6 100%);
+    --r-2: 8px; --r-3: 12px; --r-4: 16px; --r-full: 9999px;
+    --sans: "Space Grotesk", "Noto Sans SC", sans-serif;
+    --serif: "Source Serif 4", "Noto Serif SC", serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --dur-fast: 150ms;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--paper-soft); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.62; -webkit-font-smoothing: antialiased; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 36px) 72px; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid var(--line-light); }
+  .wordmark { font-family: var(--mono); font-weight: 700; font-size: 16px; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; }
+  .lang { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-full); overflow: hidden; }
+  .lang button { border: 0; background: transparent; font-family: var(--sans); font-size: 11.5px; font-weight: 600; color: var(--ink-3); padding: 5px 12px; cursor: pointer; }
+  .lang button.on { background: var(--ink); color: #fff; }
+
+  .head { padding: 30px 0 18px; }
+  .kicker { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; background: var(--accent-soft); border-radius: var(--r-full); margin-bottom: 12px; }
+  h1 { font-family: var(--serif); font-weight: 450; font-size: clamp(26px, 3.5vw, 36px); letter-spacing: -0.02em; }
+  .lede { color: var(--ink-2); margin-top: 10px; font-size: 15px; max-width: 62ch; }
+
+  .verbar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
+  .verbar span { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-full); padding: 3px 12px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-4); box-shadow: var(--shadow-sm); overflow: hidden; margin-top: 22px; }
+  .card-head { padding: 12px 18px; border-bottom: 1px solid var(--line-light); background: var(--paper-soft); font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { text-align: left; padding: 9px 18px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--line-light); background: var(--paper-soft); }
+  td { padding: 10px 18px; border-bottom: 1px solid var(--line-light); color: var(--ink-2); }
+  tr:last-child td { border-bottom: 0; }
+  td.num, th.num { text-align: right; font-family: var(--mono); }
+  td b { color: var(--ink); font-weight: 600; }
+  .chk-id { font-family: var(--mono); font-size: 11px; color: var(--ink-4); margin-top: 1px; }
+  .ev { font-family: var(--mono); font-size: 10.5px; border-radius: var(--r-full); padding: 1px 8px; background: var(--paper-soft); border: 1px solid var(--line); color: var(--ink-3); }
+
+  .note { margin-top: 18px; font-size: 13.5px; color: var(--ink-2); }
+  .note ul { margin: 8px 0 0 18px; }
+  .note li { margin-bottom: 4px; }
+  .mono-link { font-family: var(--mono); font-size: 12.5px; color: var(--accent); text-decoration: none; }
+  .mono-link:hover { text-decoration: underline; }
+
+  .bands { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .band { font-family: var(--mono); font-size: 11.5px; font-weight: 700; border-radius: var(--r-2); padding: 4px 12px; border: 1px solid var(--line); background: var(--paper-soft); color: var(--ink-2); }
+
+  .colo { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); margin-top: 28px; flex-wrap: wrap; gap: 8px; font-family: var(--mono); }
+  .colo a { color: var(--ink-2); text-decoration: none; }
+  .colo a:hover { color: var(--accent); }
+  @media print { .top, .colo { display: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="wordmark" href="/">toolfront_</a>
+    <span class="lang"><button id="lang-en" class="on">EN</button><button id="lang-zh">中文</button></span>
+  </div>
+
+  <div class="head">
+    <div class="kicker" id="kicker">Methodology</div>
+    <h1 id="h1">How we score AI-agent readiness</h1>
+    <p class="lede" id="lede">Every check we run, how much it is worth, and what each result means. A score is a promise — here is every rule behind it.</p>
+    <div class="verbar" id="verbar"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head" id="checksHead">Checks</div>
+    <table>
+      <thead><tr><th id="thCheck">Check</th><th id="thEv">Evidence</th><th class="num" id="thMax">Points</th></tr></thead>
+      <tbody id="tbody"><tr><td colspan="3" id="loading">Loading…</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-head" id="statusHead">What a result means</div>
+    <div style="padding: 14px 18px;">
+      <div class="bands" id="bands"></div>
+      <div class="note" id="statusNote"></div>
+    </div>
+  </div>
+
+  <div class="colo">
+    <span>© 2026 ToolFront · Free &amp; Open</span>
+    <span><a href="/privacy" id="fPrivacy">Privacy</a> · <a href="/security" id="fSecurity">Security</a> · <a href="/methodology" id="fMd">Markdown version</a></span>
+  </div>
+</div>
+
+<script>
+  // Content comes from /api/methodology, which is generated from the same
+  // constants the scanner uses — so this page can never drift from the engine.
+  var T = {
+    en: {
+      'm.kicker': 'Methodology',
+      'm.h1': 'How we score AI-agent readiness',
+      'm.lede': 'Every check we run, how much it is worth, and what each result means. A score is a claim — these are the rules behind it.',
+      'm.checks': 'The checks',
+      'm.check': 'Name', 'm.evidence': 'Confidence', 'm.points': 'Points',
+      'm.status': 'What a result means',
+      'm.loading': 'Loading…',
+      'm.err': 'Could not load the methodology right now.',
+      'm.pool.essential': 'What every site needs — always scored',
+      'm.pool.surface': 'Scored only if this site actually offers that surface',
+      'm.pool.emerging': 'Worth doing, not yet required — missing this costs you nothing',
+      'm.statusNote': '<ul><li><b>pass</b> — full points.</li><li><b>partial</b> — the signal exists but is incomplete; proportional points.</li><li><b>fail</b> — the signal is missing or wrong; zero points.</li><li><b>not applicable</b> — the surface this check needs does not exist here, so it is excluded from both the score and the denominator. You are never penalised for a surface you do not offer.</li></ul>',
+      'f.privacy': 'Privacy', 'f.security': 'Security', 'f.md': 'Markdown version',
+    },
+    zh: {
+      'm.kicker': '评分方法',
+      'm.h1': '我们如何评估 AI 就绪度',
+      'm.lede': '每一项检查、它的分值，以及每种结果的含义。分数不是拍脑袋给的——这里就是它背后的每一条规则。',
+      'm.checks': '检查项清单',
+      'm.check': '名称', 'm.evidence': '信号强度', 'm.points': '分值',
+      'm.status': '结果代表什么',
+      'm.loading': '加载中…',
+      'm.err': '暂时无法加载评分方法。',
+      'm.pool.essential': '每个网站都要答的题——永远计入分数',
+      'm.pool.surface': '只有网站真的提供了这个能力才计分',
+      'm.pool.emerging': '做了更好，不做不扣分的前瞻项',
+      'm.statusNote': '<ul><li><b>通过</b>——拿满分。</li><li><b>部分</b>——信号存在但不完整，按比例给分。</li><li><b>失败</b>——信号缺失或错误，0 分。</li><li><b>不适用</b>——这项检查所需的能力在这个站点上不存在，因此它同时从分数和分母中剔除。你不会因为没提供某种能力而被扣分。</li></ul>',
+      'f.privacy': '隐私', 'f.security': '安全', 'f.md': 'Markdown 版',
+    },
+  };
+  var lang = 'en';
+  try { lang = localStorage.getItem('tf-lang') || 'en'; } catch (_) {}
+  try { var qp = new URLSearchParams(location.search).get('lang'); if (qp === 'zh') lang = 'zh'; if (qp === 'en') lang = 'en'; } catch (_) {}
+  if (!Object.prototype.hasOwnProperty.call(T, lang)) lang = 'en';
+  function t(k) { return (T[lang] && T[lang][k]) || T.en[k] || k; }
+
+  var DATA = null;
+
+  function applyLang() {
+    document.getElementById('kicker').textContent = t('m.kicker');
+    document.getElementById('h1').textContent = t('m.h1');
+    document.getElementById('lede').textContent = t('m.lede');
+    document.getElementById('checksHead').textContent = t('m.checks');
+    document.getElementById('statusHead').textContent = t('m.status');
+    document.getElementById('thCheck').textContent = t('m.check');
+    document.getElementById('thEv').textContent = t('m.evidence');
+    document.getElementById('thMax').textContent = t('m.points');
+    document.getElementById('fPrivacy').textContent = t('f.privacy');
+    document.getElementById('fSecurity').textContent = t('f.security');
+    document.getElementById('fMd').textContent = t('f.md');
+    document.getElementById('lang-en').classList.toggle('on', lang === 'en');
+    document.getElementById('lang-zh').classList.toggle('on', lang === 'zh');
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    // statusNote carries deliberate markup from a static dictionary only.
+    document.getElementById('statusNote').innerHTML = t('m.statusNote');
+    try { localStorage.setItem('tf-lang', lang); } catch (_) {}
+    render();
+  }
+
+  function esc(s) {
+    return String(s).replace(/[&<>"'`]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' }[c];
+    });
+  }
+
+  function render() {
+    if (!DATA) return;
+    var vb = document.getElementById('verbar');
+    vb.textContent = '';
+    [['rules', DATA.rules_version], ['scoring', DATA.scoring_version]].forEach(function (p) {
+      var s = document.createElement('span');
+      s.textContent = p[0] + ' ' + p[1];
+      vb.appendChild(s);
+    });
+
+    var tb = document.getElementById('tbody');
+    tb.textContent = '';
+    (DATA.pools || []).forEach(function (pool) {
+      var rows = (DATA.checks || []).filter(function (c) { return c.pool === pool.pool; });
+      if (!rows.length) return;
+      var groupRow = document.createElement('tr');
+      var th = document.createElement('td');
+      th.colSpan = 3;
+      th.textContent = (t('m.pool.' + pool.pool) || pool.pool) + ' · ' + pool.budget + ' pts';
+      th.style.fontFamily = 'var(--mono)';
+      th.style.fontSize = '11px';
+      th.style.color = 'var(--ink-3)';
+      th.style.background = 'var(--paper-soft)';
+      groupRow.appendChild(th);
+      tb.appendChild(groupRow);
+      rows.forEach(function (c) {
+        var tr = document.createElement('tr');
+        var td1 = document.createElement('td');
+        var name = document.createElement('div');
+        name.style.fontWeight = '600';
+        name.style.color = 'var(--ink)';
+        name.textContent = (lang === 'zh' && c.label_zh) ? c.label_zh : c.label;
+        var id = document.createElement('div');
+        id.className = 'chk-id';
+        id.textContent = c.id;
+        td1.appendChild(name); td1.appendChild(id);
+        var td2 = document.createElement('td');
+        var ev = document.createElement('span'); ev.className = 'ev'; ev.textContent = c.evidence;
+        td2.appendChild(ev);
+        var td3 = document.createElement('td'); td3.className = 'num'; td3.textContent = String(c.max);
+        tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
+        tb.appendChild(tr);
+      });
+    });
+
+    var bands = document.getElementById('bands');
+    bands.textContent = '';
+    (DATA.grade_bands || []).forEach(function (g) {
+      var s = document.createElement('span');
+      s.className = 'band';
+      s.textContent = g.grade + ' ≥ ' + g.min;
+      bands.appendChild(s);
+    });
+  }
+
+  fetch('/api/methodology')
+    .then(function (r) { return r.json(); })
+    .then(function (j) { DATA = j; applyLang(); })
+    .catch(function () {
+      var tb = document.getElementById('tbody');
+      tb.textContent = '';
+      var tr = document.createElement('tr');
+      var td = document.createElement('td');
+      td.colSpan = 3;
+      td.textContent = t('m.err');
+      tr.appendChild(td);
+      tb.appendChild(tr);
+    });
+
+  document.getElementById('lang-en').addEventListener('click', function () { lang = 'en'; applyLang(); });
+  document.getElementById('lang-zh').addEventListener('click', function () { lang = 'zh'; applyLang(); });
+  applyLang();
+</script>
+</body>
+</html>

@@ -310,7 +310,7 @@
   .fix.passed::before { display: none; }
   .fix-done-msg { display: none; margin-top: 12px; font-family: var(--mono); font-size: 12.5px; color: var(--good-deep); background: var(--good-soft); border-radius: var(--r-2); padding: 10px 14px; }
 
-  /* Blast-radius grouping headers (blocking → interpretation → enrichment) */
+  /* Pool grouping headers (essential → surface → emerging) */
   .fix-group-h {
     font-family: var(--mono); font-size: 11px; font-weight: 600;
     letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-4);
@@ -475,8 +475,8 @@
 
   <div class="colo">
     <span>© 2026 ToolFront · Free &amp; Open</span>
-    <span id="ver-stamp" hidden></span>
-    <span><a href="/privacy" data-i18n="rfoot.privacy">Privacy</a> · <a href="/security" data-i18n="rfoot.security">Security</a> · <a href="/bot" data-i18n="rfoot.bot">/bot</a></span>
+    <a id="ver-link" href="/methodology" hidden><span id="ver-stamp"></span></a>
+    <span><a href="/methodology" data-i18n="rfoot.methodology">Methodology</a> · <a href="/privacy" data-i18n="rfoot.privacy">Privacy</a> · <a href="/security" data-i18n="rfoot.security">Security</a> · <a href="/bot" data-i18n="rfoot.bot">/bot</a></span>
   </div>
 </div>
 
@@ -526,12 +526,13 @@
       'report.fix.sample': 'Paste-ready /llms.txt',
       'report.fix.copy': 'Copy',
       'report.fix.copied': 'Copied',
-      'report.fix.group.blocking': 'Blocks AI access',
-      'report.fix.group.interpretation': 'Hurts AI understanding',
-      'report.fix.group.enrichment': 'Adds context',
+      'report.fix.group.essential': 'Every site needs these',
+      'report.fix.group.surface': 'Scored only where it applies',
+      'report.fix.group.emerging': 'Forward-looking — an opportunity, not a failure',
       'report.grade.a': 'Confirmed: vendors publicly document reading this signal',
       'report.grade.b': 'Widely adopted, but not yet an official standard',
       'report.grade.c': 'Community convention — no vendor has confirmed reading it',
+    'rfoot.methodology': 'Methodology',
     'rfoot.privacy': 'Privacy',
     'rfoot.security': 'Security',
     'rfoot.bot': '/bot docs',
@@ -589,12 +590,13 @@
       'report.fix.sample': '可直接粘贴的 /llms.txt',
       'report.fix.copy': '复制',
       'report.fix.copied': '已复制',
-      'report.fix.group.blocking': '阻塞 AI 访问',
-      'report.fix.group.interpretation': '影响 AI 理解',
-      'report.fix.group.enrichment': '补充信息',
+      'report.fix.group.essential': '每个站点都该有的',
+      'report.fix.group.surface': '按本站实际具备的能力评估',
+      'report.fix.group.emerging': '前瞻项——机会，不是失败',
       'report.grade.a': '确定有效：厂商官方写明会读取这项信号',
       'report.grade.b': '基本有效：行业普遍采用，但还不是官方标准',
       'report.grade.c': '仅供参考：行业惯例，暂无厂商确认会读取',
+    'rfoot.methodology': '评分方法',
     'rfoot.privacy': '隐私政策',
     'rfoot.security': '安全说明',
     'rfoot.bot': '扫描器说明',
@@ -842,7 +844,10 @@
      them (CHECK_POLICY in worker.js) and ships them per check, so grouping,
      badge, and score can never drift apart. These are fallbacks for reports
      cached before the scanner started sending them. */
-  var GROUP_ORDER = ['blocking', 'interpretation', 'enrichment'];
+  // Pools, in the order a reader should work through them: fix the universal
+  // essentials first, then whatever applies to the surfaces this site actually
+  // has, then look at the forward-looking ones.
+  var GROUP_ORDER = ['essential', 'surface', 'emerging'];
   /* Authoritative sources per check (spec 2026-09-03 Task 7b): rendered on
      fail/partial fix cards so users see the standards behind each fix. */
   var CHECK_SOURCES = {
@@ -856,7 +861,10 @@
     'freshness': [['Schema.org dateModified', 'https://schema.org/dateModified'], ['OG article:modified_time', 'https://ogp.me']],
     'link-headers': [['RFC 8288 (web linking)', 'https://www.rfc-editor.org/rfc/rfc8288.html'], ['IANA link relations', 'https://www.iana.org/assignments/link-relations/']],
   };
-  function tierOf(c) { return GROUP_ORDER.indexOf(c.tier) > -1 ? c.tier : 'enrichment'; }
+  function tierOf(c) {
+    var p = c.pool || c.tier; // `pool` is current; `tier` is the one-release alias
+    return GROUP_ORDER.indexOf(p) > -1 ? p : 'essential';
+  }
   function evidenceOf(c) { return /^[ABC]$/.test(c.evidence || '') ? c.evidence : 'C'; }
 
   var ICONS = {
@@ -1454,9 +1462,10 @@
     // monitoring clients will be told when they do).
     try {
       var vs = document.getElementById('ver-stamp');
-      if (vs && r.rules_version && r.scoring_version) {
+      var vl = document.getElementById('ver-link');
+      if (vs && vl && r.rules_version && r.scoring_version) {
         vs.textContent = 'rules ' + r.rules_version + ' · scoring ' + r.scoring_version;
-        vs.hidden = false;
+        vl.hidden = false;
       }
     } catch (_) {}
 
