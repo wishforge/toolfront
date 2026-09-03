@@ -57,13 +57,18 @@ console.log('═══ C. API vs UI 数据暴露差异（exploiting-excessive-da
   const j = await r.json();
   const topKeys = Object.keys(j).sort();
   // UI (renderReport) consumes: domain score grade verdict checks(scannedAt) cached
-  const uiUsed = new Set(['domain', 'score', 'grade', 'verdict', 'checks', 'scannedAt', 'cached']);
+  // Shipped intentionally: scoring 3.0 adds pools metadata (rules_version /
+  // scoring_version / scoreMax), benchmark percentile (percentile /
+  // benchmark_version), and supplemental signals (all rendered by the report
+  // page or the methodology page that the report links to).
+  const uiUsed = new Set(['domain', 'score', 'grade', 'verdict', 'checks', 'scannedAt', 'cached', 'rules_version', 'scoring_version', 'scoreMax', 'percentile', 'benchmark_version', 'supplemental']);
   const notRendered = topKeys.filter(k => !uiUsed.has(k));
   ok('C1 API 顶层键全部被 UI 消费（无多余暴露）', notRendered.length === 0, notRendered.join(',') || 'none'); // tool_surface_hash stripped in round 31
   // checks 内部键: id label status points max detail — UI 用 localLabel/localDetail，但 label/detail 仍传输
   if (j.checks && j.checks[0]) {
     const ck = Object.keys(j.checks[0]).sort();
-    ok('C2 checks 键白名单（无意外字段）', ['detail', 'id', 'label', 'max', 'points', 'status'].every(k => ck.includes(k)) && ck.length === 6, ck.join(','));
+    // pool is the scoring-3.0 field; tier is its documented one-release alias.
+    ok('C2 checks key whitelist (no undocumented fields)', ['detail', 'evidence', 'id', 'label', 'max', 'points', 'pool', 'status', 'tier'].every(k => ck.includes(k)) && ck.length === 9, ck.join(','));
   }
   // 响应无 PII / 无服务端内部信息
   const body = JSON.stringify(j);
