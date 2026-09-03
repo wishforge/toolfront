@@ -921,25 +921,36 @@ const SUB_CHECKS = [
 
    Bumping SCORING_VERSION tells monitoring clients that historical scores
    are not comparable — see the re-baseline guard in monitor-cron.ts. */
-const SCORING_VERSION = "2.1.0";
-const TIER_BUDGET = { blocking: 55, interpretation: 35, enrichment: 10 };
+/* SCORING 3.0 — three pools (spec 2026-09-03 scoring-alignment).
+   essential  : applies to every site, always scored.
+   surface    : only meaningful when that surface exists here; otherwise the
+                check is `na` and its points leave the denominator, so a site is
+                never penalised for an interface it never offered.
+   emerging   : forward-looking standards, also surface-gated. Shown as an
+                opportunity, never as a failure.
+
+   Gating costs no extra requests: api-errors is gated on evidence the scan
+   already collects (an OpenAPI document or a machine-readable API response),
+   and both tool checks are gated on WebMCP tools the scan already extracted. */
+const SCORING_VERSION = "3.0.0";
+const POOL_BUDGET = { essential: 86, surface: 14, emerging: 8 };
 const CHECK_POLICY = {
-  // tier = blast radius when this fails; evidence = how sure we are that
-  // agents actually consume the signal; share = split of the tier budget.
-  "robots-policy": { label: "AI crawler policy", tier: "blocking", evidence: "A", share: 0.35 },
-  webmcp: { label: "WebMCP tools", tier: "blocking", evidence: "A", share: 0.35 },
-  "tool-security": { label: "Tool surface security", tier: "blocking", evidence: "A", share: 0.15 },
-  "api-errors": { label: "API error responses", tier: "blocking", evidence: "B", share: 0.15 },
-  "machine-surfaces": { label: "Machine-readable surfaces", tier: "interpretation", evidence: "B", share: 0.40 },
-  "structured-data": { label: "Structured data", tier: "interpretation", evidence: "B", share: 0.35 },
-  freshness: { label: "Content freshness", tier: "interpretation", evidence: "B", share: 0.25 },
-  "llms-txt": { label: "llms.txt", tier: "enrichment", evidence: "C", share: 0.60 },
-  "link-headers": { label: "Link response headers", tier: "enrichment", evidence: "C", share: 0.40 },
+  // pool = which scoring pool; evidence = how sure we are that agents actually
+  // consume the signal; share = split of the pool budget.
+  "robots-policy": { label: "AI crawler policy", pool: "essential", evidence: "A", share: 20 / 86 },
+  "machine-surfaces": { label: "Machine-readable surfaces", pool: "essential", evidence: "A", share: 18 / 86 },
+  "structured-data": { label: "Structured data", pool: "essential", evidence: "B", share: 18 / 86 },
+  freshness: { label: "Content freshness", pool: "essential", evidence: "B", share: 12 / 86 },
+  "llms-txt": { label: "llms.txt", pool: "essential", evidence: "C", share: 10 / 86 },
+  "link-headers": { label: "Link response headers", pool: "essential", evidence: "C", share: 8 / 86 },
+  "api-errors": { label: "API error responses", pool: "surface", evidence: "B", share: 6 / 14 },
+  "tool-security": { label: "Tool surface security", pool: "surface", evidence: "A", share: 8 / 14 },
+  webmcp: { label: "WebMCP tools", pool: "emerging", evidence: "A", share: 1.0 },
 };
 /** Resolve one check's scoring policy into the shape the report needs. */
 function policyOf(id) {
   const p = CHECK_POLICY[id];
-  return { id, label: p.label, tier: p.tier, evidence: p.evidence, max: Math.round(TIER_BUDGET[p.tier] * p.share) };
+  return { id, label: p.label, pool: p.pool, tier: p.pool, evidence: p.evidence, max: Math.round(POOL_BUDGET[p.pool] * p.share) };
 }
 
 // Shared scan core: used by BOTH the free HTTP scan (handleScan) and the
@@ -1046,7 +1057,7 @@ async function scanDomainCore(domain, env) {
     api: challengeProbe(apiProbe.status, apiProbe.text, apiProbe.cfMitigated),
   };
   const na = (id) => ({ ...policyOf(id), status: "na", points: null, detail: NA_DETAIL });
-  // Merge a check result (ratio 0..1) with its policy (max from tier budget):
+  // Merge a check result (ratio 0..1) with its policy (max from pool budget):
   // the function answers "how well did the site do", the policy answers
   // "how much is that worth". Neither can drift from the other.
   const scoreCheck = (id, result) => {
@@ -1059,9 +1070,24 @@ async function scanDomainCore(domain, env) {
     if (c.status === "fail" || c.status === "partial") c.sample = sample;
     return c;
   };
+  /* ——— surface gating (scoring 3.0) ———
+     A check only enters the score if the surface it judges actually exists
+     here. Both gates cost zero extra requests:
+       hasTools  — WebMCP tools the scan already extracted from the page.
+       apiSurface — an OpenAPI document the scan already fetched, or an
+                    unknown /api/ path that answered machine-readably (a site
+                    that returns JSON from its API layer has an API layer).
+     Without this, a brochure site was docked points for not having an API. */
+  const hasTools = surface.tools.length > 0;
+  const apiSurface =
+    (openapiRes.status >= 200 && openapiRes.status < 300) ||
+    (/json/i.test(apiProbe.ctype || "") && apiProbe.status !== 0);
+  const notApplicable = (id, why) => ({ ...policyOf(id), status: "na", points: null, detail: why });
+  const NA_NO_TOOLS = "No WebMCP tool surface detected here — nothing to evaluate. Not counted in your score.";
+  const NA_NO_API = "No API surface detected here — nothing to evaluate. Not counted in your score.";
   const checks = [
-    scoreCheck("webmcp", checkWebMCP(surface)),
-    scoreCheck("tool-security", checkToolSecurity(surface)),
+    hasTools ? scoreCheck("webmcp", checkWebMCP(surface)) : notApplicable("webmcp", NA_NO_TOOLS),
+    hasTools ? scoreCheck("tool-security", checkToolSecurity(surface)) : notApplicable("tool-security", NA_NO_TOOLS),
     scoreCheck("structured-data", checkStructuredData(home.text)),
     (() => {
       // llms.txt fix is a generated file — attach a paste-ready sample so the
@@ -1076,7 +1102,9 @@ async function scanDomainCore(domain, env) {
     // worker's route fallback, so this layer is not observable from here.
     selfScan
       ? { ...policyOf("api-errors"), status: "na", points: null, detail: "Self-scan: API error behavior is served by the worker, not the asset server — not observable from published assets." }
-      : ch.api ? na("api-errors") : withSample(scoreCheck("api-errors", checkApiErrors(apiProbe)), apiErrorsSample()),
+      : ch.api ? na("api-errors")
+      : !apiSurface ? notApplicable("api-errors", NA_NO_API)
+      : withSample(scoreCheck("api-errors", checkApiErrors(apiProbe)), apiErrorsSample()),
     withSample(scoreCheck("freshness", checkFreshness(home)), freshnessSample()),
     withSample(scoreCheck("link-headers", checkLinkHeaders(home)), linkHeadersSample()),
   ];
@@ -1216,15 +1244,17 @@ function methodologyData() {
   const checks = Object.entries(CHECK_POLICY).map(([id, p]) => ({
     id,
     label: p.label,
-    tier: p.tier,
+    pool: p.pool,
+    tier: p.pool, // alias kept for one release so older clients keep working
     evidence: p.evidence,
     share: p.share,
-    max: Math.round(TIER_BUDGET[p.tier] * p.share),
+    max: Math.round(POOL_BUDGET[p.pool] * p.share),
   }));
   return {
     rules_version: RULES_VERSION,
     scoring_version: SCORING_VERSION,
-    tiers: Object.entries(TIER_BUDGET).map(([tier, budget]) => ({ tier, budget })),
+    pools: Object.entries(POOL_BUDGET).map(([pool, budget]) => ({ pool, budget })),
+    tiers: Object.entries(POOL_BUDGET).map(([pool, budget]) => ({ tier: pool, budget })),
     checks,
     grade_bands: [
       { grade: "A", min: 85 }, { grade: "B", min: 70 },
@@ -1234,23 +1264,29 @@ function methodologyData() {
   };
 }
 
+const POOL_HELP = {
+  essential: "Applies to every site. Always scored.",
+  surface: "Scored only when this site exposes that surface; otherwise not applicable and excluded from the denominator.",
+  emerging: "Forward-looking standards, also surface-gated. Never a failure — an opportunity.",
+};
+
 function methodologyMarkdown(d) {
-  const byTier = {};
-  for (const c of d.checks) (byTier[c.tier] = byTier[c.tier] || []).push(c);
+  const byPool = {};
+  for (const c of d.checks) (byPool[c.pool] = byPool[c.pool] || []).push(c);
   const lines = [
     "# ToolFront scoring methodology",
     "",
     `rules_version: ${d.rules_version} · scoring_version: ${d.scoring_version}`,
     "",
-    "Grade bands: " + d.grade_bands.map(b => `${b.grade} ≥ ${b.min}`).join(" · "),
+    "Grade bands: " + d.grade_bands.map(b => `${b.grade} \u2265 ${b.min}`).join(" · "),
     "",
     "Statuses: pass (full points) · partial (proportional) · fail (zero) · na (not applicable — excluded from both score and denominator).",
     "",
   ];
-  for (const t of d.tiers) {
-    lines.push(`## ${t.tier} (${t.budget} points)`, "");
+  for (const p of d.pools) {
+    lines.push(`## ${p.pool} (${p.budget} points)`, "", POOL_HELP[p.pool] || "", "");
     lines.push("| check | label | evidence | max |", "| --- | --- | --- | --- |");
-    for (const c of byTier[t.tier] || []) lines.push(`| ${c.id} | ${c.label} | ${c.evidence} | ${c.max} |`);
+    for (const c of byPool[p.pool] || []) lines.push(`| ${c.id} | ${c.label} | ${c.evidence} | ${c.max} |`);
     lines.push("");
   }
   lines.push("---", "", "Machine-readable version: GET /api/methodology", "");
@@ -1665,7 +1701,7 @@ export {
   extractWebMcpSurface, toolPoisonFindings, checkToolSecurity, checkWebMCP,
   scanDomainCore, challengeProbe, checkStructuredData, checkLlmsTxt,
   checkRobotsAI, checkMachineSurfaces, checkApiErrors, checkFreshness,
-  checkLinkHeaders, parseTrainingCrawlerBlocks, CHECK_POLICY, TIER_BUDGET,
+  checkLinkHeaders, parseTrainingCrawlerBlocks, CHECK_POLICY, POOL_BUDGET,
   homeTitleOf, llmsSampleFor,
 };
 

@@ -14,8 +14,8 @@ const ok = (name, cond, extra = "") => { if (cond) { pass++; console.log(`  ✓ 
 const REP = (domain, score) => ({
   domain, score, scoreMax: 91, grade: score >= 85 ? "A" : score >= 70 ? "B" : score >= 50 ? "C" : "F",
   verdict: "x", checks: [
-    { id: "webmcp", label: "WebMCP tools", tier: "blocking", evidence: "A", max: 19, status: score > 50 ? "pass" : "fail", points: score > 50 ? 19 : 0, detail: "d" },
-    { id: "llms-txt", label: "llms.txt", tier: "enrichment", evidence: "C", max: 6, status: "pass", points: 6, detail: "d" },
+    { id: "webmcp", label: "WebMCP tools", pool: "emerging", evidence: "A", max: 19, status: score > 50 ? "pass" : "fail", points: score > 50 ? 19 : 0, detail: "d" },
+    { id: "llms-txt", label: "llms.txt", pool: "essential", evidence: "C", max: 6, status: "pass", points: 6, detail: "d" },
   ],
   scannedAt: new Date().toISOString(), cached: false, scoring_version: "2.1.0", rules_version: "1.0.0",
 });

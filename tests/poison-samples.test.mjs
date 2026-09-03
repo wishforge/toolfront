@@ -2,7 +2,7 @@
 // Run: node tests/poison-samples.test.mjs
 // Contract: every MALICIOUS sample must produce a finding; every BENIGN
 // sample must produce zero findings (no false positives allowed).
-import { extractWebMcpSurface, toolPoisonFindings, checkToolSecurity, checkWebMCP, TIER_BUDGET } from "../worker.js";
+import { extractWebMcpSurface, toolPoisonFindings, checkToolSecurity, checkWebMCP, POOL_BUDGET } from "../worker.js";
 
 let pass = 0, fail = 0;
 const ok = (n, c, x = "") => { if (c) { pass++; console.log(`  ✓ ${n}`); } else { fail++; console.log(`  ✗ ${n} ${x}`); } };
@@ -109,9 +109,11 @@ console.log("[poison-samples] checkToolSecurity scoring");
   const concat = extractWebMcpSurface(`<script>document.modelContext.registerTool({ name: "search", description: "safe" + poisonStr });</script>`);
   const concatVerdict = checkToolSecurity(concat);
   ok("concatenated description → partial ≤0.7 (not pass)", concatVerdict.status === "partial" && concatVerdict.ratio <= 0.7, JSON.stringify(concatVerdict));
-  // Tier budgets must still sum to 100: blocking 55 + interpretation 35 + enrichment 10
-  const total = TIER_BUDGET.blocking + TIER_BUDGET.interpretation + TIER_BUDGET.enrichment;
-  ok("score budget still 100", total === 100);
+  // Pool budgets: the always-scored denominator is 86, plus up to 22 that only
+  // apply when the site exposes those surfaces (surface 14 + emerging 8).
+  const scored = POOL_BUDGET.essential + POOL_BUDGET.surface + POOL_BUDGET.emerging;
+  ok("essential budget is the always-scored denominator (86)", POOL_BUDGET.essential === 86);
+  ok("gated budgets add up to the full 108 maximum", scored === 108, String(scored));
 }
 
 console.log(`\n========== poison-samples: ${pass} 通过 / ${fail} 失败 ==========`);

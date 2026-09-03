@@ -10,14 +10,24 @@ const ok = (n, c, e = "") => { if (c) { pass++; console.log(`  ✓ ${n}`); } els
 // The worker owns the constants; read them the same way the scanner does, so a
 // drift between the page and the engine fails here instead of in production.
 const src = readFileSync(ROOT + "worker.js", "utf8");
-const tierBudget = JSON.parse(src.match(/const TIER_BUDGET = (\{[^}]*\});/)[1].replace(/(\w+):/g, '"$1":'));
+const tierBudget = JSON.parse(src.match(/const POOL_BUDGET = (\{[^}]*\});/)[1].replace(/(\w+):/g, '"$1":'));
 const policyIds = [...src.matchAll(/^\s{2}"?([\w-]+)"?: \{ label:/gm)].map(m => m[1]);
 const scoringVersion = src.match(/const SCORING_VERSION = "([\d.]+)";/)[1];
 
 // Recreate methodologyData()'s arithmetic from the source constants.
 const shares = {};
-for (const m of src.matchAll(/^\s{2}"?([\w-]+)"?: \{ label: "[^"]+", tier: "(\w+)", evidence: "(\w+)", share: ([\d.]+) \}/gm)) {
-  shares[m[1]] = { tier: m[2], evidence: m[3], share: Number(m[4]) };
+// Shares are written as readable expressions (20 / 86), so parse them without
+// eval — the SAST gate bans eval/new Function anywhere in the repo.
+const parseShare = (raw) => {
+  const t = raw.trim();
+  if (t.includes("/")) {
+    const [a, b] = t.split("/").map(x => Number(x.trim()));
+    return a / b;
+  }
+  return Number(t);
+};
+for (const m of src.matchAll(/^\s{2}"?([\w-]+)"?: \{ label: "[^"]+", pool: "(\w+)", evidence: "(\w+)", share: ([\d.\s/]+) \}/gm)) {
+  shares[m[1]] = { pool: m[2], evidence: m[3], share: parseShare(m[4]) };
 }
 
 const API = process.env.TF_API || "http://localhost:8788";
@@ -33,7 +43,7 @@ try {
 }
 if (data) {
   ok("has rules_version + scoring_version", !!data.rules_version && !!data.scoring_version);
-  ok("has tiers, checks, grade_bands", Array.isArray(data.tiers) && Array.isArray(data.checks) && Array.isArray(data.grade_bands));
+  ok("has pools, checks, grade_bands", Array.isArray(data.pools) && Array.isArray(data.checks) && Array.isArray(data.grade_bands));
 }
 
 console.log("\n[B] no drift — the published table equals the engine constants");
@@ -42,13 +52,13 @@ if (data) {
   ok("scoring_version matches worker", data.scoring_version === scoringVersion, `${data.scoring_version} vs ${scoringVersion}`);
   let drift = [];
   for (const c of data.checks) {
-    const expected = Math.round(tierBudget[shares[c.id].tier] * shares[c.id].share);
+    const expected = Math.round(tierBudget[shares[c.id].pool] * shares[c.id].share);
     if (c.max !== expected) drift.push(`${c.id}: ${c.max}!=${expected}`);
-    if (c.tier !== shares[c.id].tier) drift.push(`${c.id}: tier ${c.tier}!=${shares[c.id].tier}`);
+    if (c.pool !== shares[c.id].pool) drift.push(`${c.id}: pool ${c.pool}!=${shares[c.id].pool}`);
   }
-  ok("every max + tier matches CHECK_POLICY arithmetic", drift.length === 0, drift.slice(0, 3).join(" | "));
-  const tierBudgetMatches = data.tiers.every(t => tierBudget[t.tier] === t.budget);
-  ok("tier budgets match TIER_BUDGET", tierBudgetMatches);
+  ok("every max + pool matches CHECK_POLICY arithmetic", drift.length === 0, drift.slice(0, 3).join(" | "));
+  const poolBudgetMatches = data.pools.every(t => tierBudget[t.pool] === t.budget);
+  ok("pool budgets match POOL_BUDGET", poolBudgetMatches);
   ok("grade bands are the documented six-step scale", data.grade_bands.map(b => b.grade).join("") === "ABCDF");
 }
 
