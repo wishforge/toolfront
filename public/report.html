@@ -104,6 +104,7 @@
   .nums { min-width: 200px; }
   .nums .score { font-family: var(--mono); font-size: 32px; font-weight: 700; letter-spacing: -0.03em; color: var(--ink); }
   .nums .score .of { font-size: 14px; color: var(--ink-3); font-weight: 400; }
+  .nums .pct-line { font-size: 12px; color: var(--ink-3); margin-top: 3px; }
   .delta { display: inline-flex; align-items: center; gap: 4px; margin-left: 10px; font-family: var(--mono); font-size: 11.5px; font-weight: 700; border-radius: var(--r-full); padding: 3px 10px; vertical-align: 4px; }
   .delta.up { color: var(--good-deep); background: var(--good-soft); border: 1px solid rgba(5,150,105,0.12); }
   .delta.down { color: var(--bad); background: var(--bad-soft); border: 1px solid rgba(220,38,38,0.12); }
@@ -508,6 +509,8 @@
       'colophon.terms': 'Terms',
       'colophon.security': 'Security',
       'report.yours': 'Your report', 'report.summary': 'Report Summary', 'report.label': 'Agent readiness', 'report.scanned': 'Scanned',
+      // {p} = percentile of this score in the cross-industry benchmark
+      'report.percentile': 'Higher than {p}% of sites in our cross-industry benchmark',
       'report.biz.title': 'What this means for your business', 'report.tech.title': 'Technical details',
       'report.biz.low': 'Bottom line: your site is a black box to AI. Customers who ask AI for recommendations are being sent to competitors — every week this stays unfixed, you lose deals.',
       'report.biz.mid': 'Bottom line: AI half-understands your site — at the moments that matter it still misdescribes or skips you. Fixing the items below starts paying back immediately.',
@@ -572,6 +575,7 @@
       'colophon.terms': '条款',
       'colophon.security': '安全',
       'report.yours': '你的报告', 'report.summary': '报告摘要', 'report.label': 'AI 就绪度', 'report.scanned': '扫描于',
+      'report.percentile': '高于我们跨行业基准中 {p}% 的网站',
       'report.biz.title': '这对你的生意意味着什么', 'report.tech.title': '技术详情',
       'report.biz.low': '总结：你的网站对 AI 来说是个黑盒。本该属于你的客户，正被 AI 引去对手那里——每拖一天都在丢单。',
       'report.biz.mid': '总结：AI 只读懂了你的一半——关键时刻还是说不清、推不动。补齐下面几项，立刻见效。',
@@ -1414,6 +1418,11 @@
     }
     nums.appendChild(score);
     nums.appendChild(el('div', 'grade-label', t('report.label')));
+    // Benchmark percentile comes from the engine (BENCHMARK anchors) — hidden
+    // when absent so reports cached before this field stay clean.
+    if (typeof r.percentile === 'number') {
+      nums.appendChild(el('div', 'pct-line', t('report.percentile').replace('{p}', String(r.percentile))));
+    }
     hero.appendChild(nums);
     var vd = el('div', 'verdict');
     // Split on first sentence-ending punctuation (. or 。) for bold/plain rendering
