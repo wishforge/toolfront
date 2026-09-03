@@ -31,16 +31,27 @@ for (const m of src.matchAll(/^\s{2}"?([\w-]+)"?: \{ label: "[^"]+",(?: label_zh
   shares[m[1]] = { pool: m[2], evidence: m[3], share: parseShare(m[4]) };
 }
 
-const API = process.env.TF_API || "http://localhost:8788";
+/* Repo convention: fully offline. Every suite here imports the worker directly
+   — no dev server required (CI has none, and one depending on a running
+   wrangler dev passed locally only because the machine happened to have one).
+   The ASSETS stub below serves the real public/ files from disk, so the
+   worker's route + harden() path is exercised end to end. */
+const worker = (await import("../worker.js")).default;
+const assetsStub = {
+  fetch: async (req) => {
+    const p = new URL(req.url).pathname;
+    return new Response(readFileSync(ROOT + "public" + p), {
+      headers: { "content-type": "text/html; charset=utf-8" },
+    });
+  },
+};
 
 console.log("\n[A] /api/methodology — shape");
 let data = null;
-try {
-  const res = await fetch(`${API}/api/methodology`);
+{
+  const res = await worker.fetch(new Request("http://x/api/methodology"), {}, {});
   data = await res.json();
   ok("200 OK", res.status === 200, `status=${res.status}`);
-} catch (e) {
-  ok("200 OK", false, e.message.slice(0, 60));
 }
 if (data) {
   ok("has rules_version + scoring_version", !!data.rules_version && !!data.scoring_version);
@@ -65,7 +76,7 @@ if (data) {
 
 console.log("\n[C] /methodology — HTML page + markdown variant");
 {
-  const htmlRes = await fetch(`${API}/methodology`);
+  const htmlRes = await worker.fetch(new Request("http://x/methodology"), { ASSETS: assetsStub }, {});
   const html = await htmlRes.text();
   ok("HTML page 200", htmlRes.status === 200, `status=${htmlRes.status}`);
   ok("served as HTML", (htmlRes.headers.get("content-type") || "").includes("text/html"));
@@ -79,7 +90,6 @@ console.log("\n[C] /methodology — HTML page + markdown variant");
      sits behind this machine's HTTP proxy, which rewrites Accept before the
      worker sees it — so over HTTP the negotiation is untestable locally. Call
      the worker directly instead: same code path, no proxy in the way. */
-  const worker = (await import("../worker.js")).default;
   const mdRes = await worker.fetch(new Request("http://x/methodology", { headers: { accept: "text/markdown" } }), {}, {});
   const md = await mdRes.text();
   ok("markdown variant returns text/markdown", (mdRes.headers.get("content-type") || "").includes("text/markdown"), mdRes.headers.get("content-type"));
