@@ -1027,6 +1027,24 @@
     .btn-nav-solid { padding: 6px 14px; font-size: 12px; white-space: nowrap; }
     .lang-toggle button { padding: 5px 9px; font-size: 11px; }
   }
+
+  /* Live rankings strip — real data as social proof; hidden when empty. */
+  .rank-strip { max-width: 1080px; margin: 0 auto 72px; padding: 0 20px; }
+  .rank-inner { background: var(--paper-soft, #F7F5F0); border: 1px solid var(--line, #E5E1D8); border-radius: 16px; padding: 28px 26px; }
+  .rank-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px; margin-bottom: 18px; }
+  .rank-head h2 { font-family: var(--serif, serif); font-size: 24px; font-weight: 600; color: var(--ink); margin: 0; }
+  .rank-head p { font-size: 13px; color: var(--ink-3, #6B7280); margin: 0; flex: 1 1 260px; }
+  .rank-viewall { font-family: var(--mono, monospace); font-size: 12px; color: var(--accent); text-decoration: none; white-space: nowrap; }
+  .rank-viewall:hover { text-decoration: underline; }
+  .rank-rows { list-style: none; margin: 0; padding: 0; }
+  .rank-rows li { display: flex; align-items: center; gap: 14px; padding: 9px 10px; border-radius: 10px; font-family: var(--mono, monospace); font-size: 13.5px; }
+  .rank-rows li:nth-child(odd) { background: var(--paper, #FCFBF8); }
+  .rank-rows li.top { box-shadow: 0 0 0 1.5px var(--accent-glow, rgba(37,99,235,.35)); }
+  .rank-rows .rk { color: var(--ink-4, #9CA3AF); width: 22px; text-align: right; }
+  .rank-rows .dom { flex: 1; color: var(--ink); font-weight: 600; }
+  .rank-rows .gr { font-size: 11px; font-weight: 700; border: 1px solid var(--line, #E5E1D8); border-radius: 6px; padding: 2px 7px; color: var(--ink-2); }
+  .rank-rows .sc { width: 44px; text-align: right; color: var(--ink); font-weight: 700; }
+  .rank-rows li.top .sc { color: var(--accent); }
 </style>
 </head>
 <body>
@@ -1038,6 +1056,8 @@
     <ul class="nav-menu">
       <li><a href="#band" data-i18n="nav.why">Why</a></li>
       <li><a href="#steps" data-i18n="nav.how">How it works</a></li>
+      <li><a href="/compare" data-i18n="nav.compare">Compare</a></li>
+      <li><a href="https://monitor.toolfront.dev/rankings" id="nav-rankings" data-i18n="nav.rankings" data-monitor-link="rankings">Rankings</a></li>
       <li><a href="https://monitor.toolfront.dev/login" id="nav-monitor" data-i18n="nav.monitor" data-monitor-link>Monitor</a></li>
     </ul>
     <div class="nav-actions" style="display:flex;align-items:center;gap:10px;">
@@ -1348,6 +1368,17 @@
 </main>
 
 <!-- ═══ FOOTER (V5 light) ═══ -->
+<section class="rank-strip" id="rankings" hidden>
+  <div class="rank-inner">
+    <div class="rank-head">
+      <h2 data-i18n="home.rank.title">Live rankings</h2>
+      <p data-i18n="home.rank.sub">Every row is a real scan of a real domain — the board never invents a score.</p>
+      <a id="rank-all" class="rank-viewall" data-i18n="home.rank.viewall" href="https://monitor.toolfront.dev/rankings">View all rankings →</a>
+    </div>
+    <ol class="rank-rows" id="rank-rows"></ol>
+  </div>
+</section>
+
 <footer class="footer-v5">
   <div class="footer-v5-inner">
     <div class="footer-v5-brand">
@@ -1359,7 +1390,7 @@
          items duplicated this row (Scanner info / Security / GitHub twice). -->
     <div class="footer-v5-meta">
       <span data-i18n="foot.copy">&copy; 2026 ToolFront — Free &amp; Open</span>
-      <span><a href="/privacy" data-i18n="foot.privacy">Privacy</a> · <a href="/security" data-i18n="foot.security">Security</a> · <a href="/terms" data-i18n="foot.terms">Terms</a> · <a href="/bot" data-i18n="foot.scanner">Scanner info</a> · <a href="https://monitor.toolfront.dev/login" id="footer-monitor" data-i18n="nav.monitor" data-monitor-link>Monitor</a> · <a href="https://github.com/wishforge/toolfront" target="_blank" rel="noopener">GitHub</a></span>
+      <span><a href="/privacy" data-i18n="foot.privacy">Privacy</a> · <a href="/security" data-i18n="foot.security">Security</a> · <a href="/terms" data-i18n="foot.terms">Terms</a> · <a href="/bot" data-i18n="foot.scanner">Scanner info</a> · <a href="/compare" data-i18n="nav.compare">Compare</a> · <a href="https://monitor.toolfront.dev/rankings" id="footer-rankings" data-i18n="nav.rankings" data-monitor-link="rankings">Rankings</a> · <a href="https://monitor.toolfront.dev/login" id="footer-monitor" data-i18n="nav.monitor" data-monitor-link>Monitor</a> · <a href="https://github.com/wishforge/toolfront" target="_blank" rel="noopener">GitHub</a></span>
       <span><a href="mailto:privacy@toolfront.dev">privacy@toolfront.dev</a></span>
     </div>
   </div>
@@ -1385,6 +1416,11 @@
   "nav.why": "Why",
   "nav.how": "How it works",
   "nav.monitor": "Monitor",
+  "nav.compare": "Compare",
+  "home.rank.title": "Live rankings",
+  "home.rank.sub": "Every row is a real scan of a real domain — the board never invents a score.",
+  "home.rank.viewall": "View all rankings →",
+  "nav.rankings": "Rankings",
   "nav.cta": "Get started →",
   "hero.kicker": "Agent-readiness scan · free · ~5s",
   "hero.lede": "Agents browse, compare and buy on your site's behalf. If your site is a black box to them, they complete the errand with a competitor. Scan it — get the grade agents see.",
@@ -1489,6 +1525,11 @@
   "nav.why": "为什么",
   "nav.how": "工作原理",
   "nav.monitor": "持续监控",
+  "nav.compare": "对比",
+  "home.rank.title": "实时排行榜",
+  "home.rank.sub": "每一行都是一次真实扫描——榜单绝不编造分数。",
+  "home.rank.viewall": "查看完整榜单 →",
+  "nav.rankings": "排行榜",
   "nav.cta": "立即开始 →",
   "hero.kicker": "AI 友好度检测 · 免费 · 5 秒",
   "hero.lede": "AI 正在替你的客户找产品、比价、下单。你的网站它读不懂，这单就落到竞争对手头上。扫一次，看看你在 AI 眼里是什么样。",
@@ -1693,7 +1734,33 @@
     if (len) len.addEventListener('click', function () { setDogfood(document.getElementById('dogfood-status').textContent.indexOf('ACTIVE') >= 0); });
     if (lzh) lzh.addEventListener('click', function () { setDogfood(document.getElementById('dogfood-status').textContent.indexOf('ACTIVE') >= 0); });
   })();
-</script>
 
-</body>
-</html>
+  /* Live rankings strip: real rows from the monitor's public API, or nothing.
+     Compliance rule mirrors the rankings board itself — never invent a score. */
+  (function () {
+    var base = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+      ? 'http://localhost:8787' : 'https://monitor.toolfront.dev';
+    var sec = document.getElementById('rankings');
+    if (!sec) return;
+    fetch(base + '/api/rankings')
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var rows = (d && d.rows) || [];
+        if (!rows.length) return;            // empty board -> strip stays hidden
+        var ol = document.getElementById('rank-rows');
+        rows.slice(0, 8).forEach(function (row, i) {
+          var li = document.createElement('li');
+          if (i === 0) li.className = 'top';
+          li.appendChild(el('span', 'rk', String(i + 1)));
+          li.appendChild(el('span', 'dom', row.domain));
+          li.appendChild(el('span', 'gr', row.grade || ''));
+          li.appendChild(el('span', 'sc', String(row.score)));
+          ol.appendChild(li);
+        });
+        var lang = (localStorage.getItem('tf-lang') || 'en');
+        document.getElementById('rank-all').href = base + '/rankings?lang=' + lang;
+        sec.hidden = false;
+      })
+      .catch(function () { /* network hiccup -> keep the strip hidden */ });
+  })();
+</script>

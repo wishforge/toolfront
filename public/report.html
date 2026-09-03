@@ -105,6 +105,17 @@
   .nums .score { font-family: var(--mono); font-size: 32px; font-weight: 700; letter-spacing: -0.03em; color: var(--ink); }
   .nums .score .of { font-size: 14px; color: var(--ink-3); font-weight: 400; }
   .nums .pct-line { font-size: 12px; color: var(--ink-3); margin-top: 3px; }
+  .hist-body { display: flex; flex-direction: column; gap: 2px; }
+  .hist-row { display: flex; align-items: center; gap: 14px; padding: 7px 10px; border-radius: 8px; text-decoration: none; font-family: var(--mono); font-size: 13px; }
+  .hist-row:hover { background: var(--paper-soft); }
+  .hist-date { flex: 1; color: var(--ink-2); }
+  .hist-grade { font-size: 11px; font-weight: 700; border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; }
+  .hist-grade.good { color: var(--good, #1a7f37); border-color: var(--good, #1a7f37); }
+  .hist-grade.mid { color: var(--warn, #9a6700); border-color: var(--warn, #9a6700); }
+  .hist-grade.bad { color: var(--bad, #cf222e); border-color: var(--bad, #cf222e); }
+  .hist-score { width: 44px; text-align: right; font-weight: 700; color: var(--ink); }
+  .hist-ver { font-size: 11px; color: var(--ink-4); }
+
   .delta { display: inline-flex; align-items: center; gap: 4px; margin-left: 10px; font-family: var(--mono); font-size: 11.5px; font-weight: 700; border-radius: var(--r-full); padding: 3px 10px; vertical-align: 4px; }
   .delta.up { color: var(--good-deep); background: var(--good-soft); border: 1px solid rgba(5,150,105,0.12); }
   .delta.down { color: var(--bad); background: var(--bad-soft); border: 1px solid rgba(220,38,38,0.12); }
@@ -516,7 +527,7 @@
       'report.biz.mid': 'Bottom line: AI half-understands your site — at the moments that matter it still misdescribes or skips you. Fixing the items below starts paying back immediately.',
       'report.biz.high': 'Bottom line: your site already speaks AI fluently — you are ahead of most competitors. Keep it that way and keep monitoring.',
       'report.biz.allgood': 'Nothing urgent: AI can already read and work with your site. Keep monitoring so redesigns don\u2019t break it.',
-      'report.share': 'Share', 'report.pdf': 'Save as PDF', 'report.new': 'New scan', 'report.copied': 'Link copied', 'report.copyfail': 'Copy failed — copy it from the address bar',
+      'report.compare': 'Compare with a competitor', 'report.hist.title': 'Previous scans', 'report.hist.cmp': 'Compare with a competitor — click to pre-fill', 'report.share': 'Share', 'report.pdf': 'Save as PDF', 'report.new': 'New scan', 'report.copied': 'Link copied', 'report.copyfail': 'Copy failed — copy it from the address bar',
       'report.printhead': 'Agent-readiness report — toolfront.dev',
       'report.raise': '<b>One redesign can drop this score.</b> Monitor checks weekly and emails you only when it moves:',
       'report.raise.keep': '<b>Good score \u2014 but one redesign can still drop it.</b> Monitor checks weekly and emails you only when it moves:',
@@ -581,7 +592,7 @@
       'report.biz.mid': '总结：AI 只读懂了你的一半——关键时刻还是说不清、推不动。补齐下面几项，立刻见效。',
       'report.biz.high': '总结：你的网站已经"会说 AI 的语言"——领先大多数对手。保持住，定期复查。',
       'report.biz.allgood': '暂时不用改：AI 已经能读懂并用好你的网站。定期回扫，别让下次改版悄悄把它搞坏。',
-      'report.share': '分享', 'report.pdf': '存为 PDF', 'report.new': '重新扫描', 'report.copied': '链接已复制', 'report.copyfail': '复制失败——请从地址栏复制',
+      'report.compare': '与竞品对比', 'report.hist.title': '历史扫描', 'report.hist.cmp': '与竞品对比——点击预填本域名', 'report.share': '分享', 'report.pdf': '存为 PDF', 'report.new': '重新扫描', 'report.copied': '链接已复制', 'report.copyfail': '复制失败——请从地址栏复制',
       'report.printhead': 'AI 就绪度报告 — toolfront.dev',
       'report.raise': '<b>一次改版，分数可能就掉了。</b>Monitor 每周扫一次，掉了才发邮件：',
       'report.raise.keep': '<b>分数不低——但一次改版还是能悄悄掉下去。</b>Monitor 每周扫一次，掉了才发邮件：',
@@ -942,6 +953,37 @@
     return tw;
   }
 
+  function renderHistory(domain) {
+    if (!domain) return;
+    fetch('/api/scan-history?domain=' + encodeURIComponent(domain))
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var rows = (d && d.rows) || [];
+        if (!rows.length) return; // no ledger rows -> no card (never fake history)
+        var old = document.getElementById('hist-card');
+        if (old && old.parentNode) old.parentNode.removeChild(old);
+        var body = el('div', 'hist-body');
+        var locale = lang === 'zh' ? 'zh-CN' : 'en-US';
+        rows.slice(0, 12).forEach(function (row) {
+          var dt = new Date(row.scanned_at);
+          var dstr = dt.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) + ' ' + dt.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+          var rowEl = el('a', 'hist-row');
+          rowEl.href = '/compare?a=' + encodeURIComponent(domain) + '&lang=' + lang;
+          rowEl.title = t('report.hist.cmp');
+          var g = el('span', 'hist-grade ' + cls(row.score), row.grade || '\u2013');
+          rowEl.appendChild(el('span', 'hist-date', dstr));
+          rowEl.appendChild(g);
+          rowEl.appendChild(el('span', 'hist-score', String(row.score)));
+          rowEl.appendChild(el('span', 'hist-ver', row.scoring_version || ''));
+          body.appendChild(rowEl);
+        });
+        var card = buildCard(t('report.hist.title'), body, false);
+        card.id = 'hist-card';
+        resultBox.appendChild(card);
+      })
+      .catch(function () { /* history is best-effort — a failed fetch hides the card */ });
+  }
+
   function buildVs(r) {
     var block = el('div', 'vs');
     block.appendChild(el('div', 'vt', t('report.vs.title')));
@@ -977,9 +1019,16 @@
 
   function buildActs(r) {
     var acts = el('div', 'acts');
+    var cmpBtn = el('button'); cmpBtn.type = 'button';
     var shareBtn = el('button', 'primary'); shareBtn.type = 'button';
     var pdfBtn = el('button'); pdfBtn.type = 'button';
     var newBtn = el('button'); newBtn.type = 'button';
+    // The competitor's report page leads with Compare — scanning is only half
+    // the decision; the other half is 'against whom?'. Pre-fill this domain.
+    cmpBtn.textContent = '\u2696 ' + t('report.compare');
+    cmpBtn.addEventListener('click', function () {
+      location.href = '/compare?a=' + encodeURIComponent(r.domain) + '&lang=' + lang;
+    });
     shareBtn.textContent = '🔗 ' + t('report.share');
     pdfBtn.textContent = '🖨 ' + t('report.pdf');
     newBtn.textContent = '↺ ' + t('report.new');
@@ -1066,7 +1115,7 @@
     });
     pdfBtn.addEventListener('click', function () { window.print(); });
     newBtn.addEventListener('click', function () { location.href = '/'; });
-    acts.appendChild(shareBtn); acts.appendChild(pdfBtn); acts.appendChild(newBtn);
+    acts.appendChild(cmpBtn); acts.appendChild(shareBtn); acts.appendChild(pdfBtn); acts.appendChild(newBtn);
     return acts;
   }
 
@@ -1540,7 +1589,7 @@
     document.querySelectorAll('[data-i18n]').forEach(function (elx) { elx.textContent = t(elx.getAttribute('data-i18n')); });
     document.getElementById('lang-en').classList.toggle('on', lang === 'en');
     document.getElementById('lang-zh').classList.toggle('on', lang === 'zh');
-    if (lastReport) renderReport(lastReport, false);
+    if (lastReport) { renderReport(lastReport, false); renderHistory(lastReport.domain); }
     else if (lastError) renderError(lastError);
   }
   function setLang(l) {
@@ -1564,7 +1613,7 @@
     fetch('/api/scan?domain=' + encodeURIComponent(domain) + '&fresh=1')
       .then(function (res) { return res.json().then(function (body) { return { ok: res.ok, body: body }; }); })
       .then(function (out) {
-        if (out.ok && out.body.checks) { renderReport(out.body, true); }
+        if (out.ok && out.body.checks) { renderReport(out.body, true); renderHistory(out.body.domain); }
         else { renderError(out.body.detail || out.body.error || t('report.err.generic')); }
       })
       .catch(function () { renderError(t('report.err.network')); })
