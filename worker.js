@@ -113,6 +113,7 @@ export default {
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: { "X-Content-Type-Options": "nosniff", "Allow": "GET, POST, OPTIONS" } });
     try {
       if (url.pathname === "/api/scan") return await handleScan(url, request, env);
+    if (url.pathname === "/api/scan-history") return await handleScanHistory(url, request, env);
       if (url.pathname === "/api/compare") return await handleCompareApi(url, request, env);
       if (url.pathname === "/api/methodology") return json(methodologyData(), 200, { "Cache-Control": "public, max-age=3600" });
       if (url.pathname === "/api/waitlist") return await handleWaitlist(request, env);
@@ -1184,6 +1185,43 @@ async function scanDomainCore(domain, env) {
 // projection (report_json / tool_surface_hash stripped), cache write.
 // Rate limiting stays with the HTTP caller (a compare request scans twice
 // but counts once against the caller's budget).
+/* Public scan history (feature 2026-09-03, plan A). Append-only ledger of
+   SUCCESSFUL scans. Privacy contract (privacy.html "Public scan history"):
+   no scanner identity; domain+score+grade+per-check statuses+version+time.
+   Throttle: at most one row per domain per HOUR (our report page re-scans on
+   every view — without this we would flood the ledger with our own traffic).
+   Prune: keep the newest 50 rows per domain and drop anything older than
+   12 months (matches the retention promised in the privacy page).
+   Recorded only for scored (non-blocked) reports; blocked/unreachable scans
+   are answers, not ledger events. */
+const SCAN_HISTORY_TTL_MS = 60 * 60 * 1000;   // 1 write per domain per hour
+const SCAN_HISTORY_MAX_ROWS = 50;             // retention cap per domain
+const SCAN_HISTORY_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000; // 12 months
+
+async function recordScanHistory(domain, publicReport, env) {
+  if (!env.SCAN_DB || !env.KV || publicReport.score == null) return;
+  const now = Date.now();
+  const last = await env.KV.get("hist:" + domain).catch(() => null);
+  if (last && now - Number(last) < SCAN_HISTORY_TTL_MS) return; // throttled
+  const detail = {
+    checks: (publicReport.checks || []).map(c => ({ id: c.id, status: c.status, points: c.points, max: c.max })),
+  };
+  try {
+    await env.SCAN_DB.prepare(
+      "INSERT INTO scan_history (domain, scanned_at, score, grade, scoring_version, detail_json) VALUES (?, ?, ?, ?, ?, ?)"
+    ).bind(domain, now, publicReport.score, publicReport.grade || "", publicReport.scoring_version || "", JSON.stringify(detail)).run();
+  } catch (_) { /* insert failure -> no ledger row; still throttle below to avoid hammering a broken D1 */ }
+  // The throttle stamp is independent of insert/prune outcomes: any failure
+  // here must not re-arm retries every request.
+  await env.KV.put("hist:" + domain, String(now), { expirationTtl: 3700 }).catch(() => {});
+  try {
+    // Prune: beyond the newest 50 or older than 12 months.
+    await env.SCAN_DB.prepare(
+      "DELETE FROM scan_history WHERE domain = ? AND (id IN (SELECT id FROM scan_history WHERE domain = ? ORDER BY scanned_at DESC LIMIT -1 OFFSET ?) OR scanned_at < ?)"
+    ).bind(domain, domain, SCAN_HISTORY_MAX_ROWS, now - SCAN_HISTORY_MAX_AGE_MS).run();
+  } catch (_) { /* prune is best-effort */ }
+}
+
 async function scanPublicReport(domain, forceFresh, env) {
   if (env.KV && !forceFresh) {
     const cached = await env.KV.get("scan:" + domain, "json");
@@ -1225,7 +1263,24 @@ async function scanPublicReport(domain, forceFresh, env) {
   // Cache write: short TTL (300s) so data stays fresh.
   // Blocked reports use shorter TTL (1800s) above since WAF state is sticky.
   if (env.KV) { try { await env.KV.put("scan:" + domain, JSON.stringify(publicReport), { expirationTtl: 300 }); } catch (_) {} }
+  await recordScanHistory(domain, publicReport, env);
   return { status: 200, body: publicReport, cacheControl: "public, max-age=60" };
+}
+
+async function handleScanHistory(url, request, env) {
+  const domain = normalizeDomain(url.searchParams.get("domain"));
+  if (!domain) return json({ error: "invalid_domain", detail: "Provide a public domain like example.com" }, 400);
+  if (!env.SCAN_DB) return json({ ok: true, domain, rows: [] }, 200);
+  try {
+    const { results } = await env.SCAN_DB.prepare(
+      "SELECT domain, scanned_at, score, grade, scoring_version FROM scan_history WHERE domain = ? ORDER BY scanned_at DESC LIMIT 50"
+    ).bind(domain).all();
+    // Public rows carry no scanner identity and no PII by construction
+    // (schema has no such columns) — see privacy.html "Public scan history".
+    return json({ ok: true, domain, rows: results }, 200, { "Cache-Control": "public, max-age=60" });
+  } catch (_) {
+    return json({ ok: true, domain, rows: [] }, 200); // ledger unavailable -> empty, never 500
+  }
 }
 
 async function handleScan(url, request, env) {
