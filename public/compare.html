@@ -347,6 +347,9 @@
       document.getElementById('h1').textContent = a + ' vs ' + b;
       load(a, b);
     } else {
+      // Deep link with only ?a= (the report page's Compare button) — pre-fill
+      // the owner's domain so they only type the competitor.
+      if (a) document.getElementById('in-a').value = a;
       document.getElementById('h1').textContent = t('cmp.h1.form');
     }
   }
