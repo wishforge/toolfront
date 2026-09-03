@@ -2,7 +2,9 @@
 import fs from 'fs';
 import { JSDOM } from 'jsdom';
 
-const html = fs.readFileSync('./public/index.html', 'utf8');
+// report.html owns renderReport (the homepage split moved it there long ago);
+// meta-relative path keeps the suite CWD-independent.
+const html = fs.readFileSync(new URL('../public/report.html', import.meta.url), 'utf8');
 // Fetch a real report instead of reading a /tmp fixture: the suite must be
 // self-contained, otherwise CI runners (which have no such file) fail on startup.
 const s1 = await (await fetch('https://toolfront.dev/api/scan?domain=example.com')).json();
@@ -46,8 +48,11 @@ console.log('═══ A. 篡改 localStorage → HTML 注入 ═══');
 // A2: 完全非法的 JSON（应静默降级为无基线）
 {
   const d = bootRender('this is not json {{{', { ...s1, domain: 'example.com', scannedAt: '2026-08-30T10:00:00.000Z' });
-  const vsNote = d.querySelector('.vs-note');
-  ok('A2 烂 JSON 静默降级 → 显示"首次扫描"', !!vsNote && vsNote.textContent.includes('首次'));
+  // Baseline markup changed: 'first scan' renders as a .vs-item inside the vs
+  // block, and a .vs-note (local-storage notice) is always present. The
+  // silent-degrade contract: the page renders AND shows the first-scan copy.
+  const firstScan = d.body.textContent.includes('首次扫描该域名');
+  ok('A2 烂 JSON 静默降级 → 显示"首次扫描"', firstScan && !!d.querySelector('.grade'));
 }
 
 // A3: 原型污染尝试（__proto__ 字段）
@@ -71,7 +76,7 @@ console.log('═══ A. 篡改 localStorage → HTML 注入 ═══');
 {
   const payload = JSON.stringify({ score: 'not-a-number', ts: '2026-01-01', checks: 'not-an-array' });
   const d = bootRender(payload, { ...s1, domain: 'example.com', scannedAt: '2026-08-30T10:00:00.000Z' });
-  ok('A5 畸形结构不崩（score 非 数字/checks 非数组）', !!d.querySelector('.grade-big'));
+  ok('A5 畸形结构不崩（score 非 数字/checks 非数组）', !!d.querySelector('.grade'));
 }
 
 // A6: 伪造超大 score
