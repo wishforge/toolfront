@@ -55,7 +55,7 @@
   tr:last-child td { border-bottom: 0; }
   td.num, th.num { text-align: right; font-family: var(--mono); }
   td b { color: var(--ink); font-weight: 600; }
-  .chk-id { font-family: var(--mono); font-size: 12px; color: var(--ink-3); }
+  .chk-id { font-family: var(--mono); font-size: 11px; color: var(--ink-4); margin-top: 1px; }
   .ev { font-family: var(--mono); font-size: 10.5px; border-radius: var(--r-full); padding: 1px 8px; background: var(--paper-soft); border: 1px solid var(--line); color: var(--ink-3); }
 
   .note { margin-top: 18px; font-size: 13.5px; color: var(--ink-2); }
@@ -83,7 +83,7 @@
   <div class="head">
     <div class="kicker" id="kicker">Methodology</div>
     <h1 id="h1">How we score AI-agent readiness</h1>
-    <p class="lede" id="lede">Every check we run, how much it is worth, and what each result means. A score is a claim — these are the rules behind it.</p>
+    <p class="lede" id="lede">Every check we run, how much it is worth, and what each result means. A score is a promise — here is every rule behind it.</p>
     <div class="verbar" id="verbar"></div>
   </div>
 
@@ -117,30 +117,30 @@
       'm.kicker': 'Methodology',
       'm.h1': 'How we score AI-agent readiness',
       'm.lede': 'Every check we run, how much it is worth, and what each result means. A score is a claim — these are the rules behind it.',
-      'm.checks': 'Checks',
-      'm.check': 'Check', 'm.evidence': 'Evidence', 'm.points': 'Points',
+      'm.checks': 'The checks',
+      'm.check': 'Name', 'm.evidence': 'Confidence', 'm.points': 'Points',
       'm.status': 'What a result means',
       'm.loading': 'Loading…',
       'm.err': 'Could not load the methodology right now.',
-      'm.tier.blocking': 'Blocking — an agent cannot proceed without these',
-      'm.tier.interpretation': 'Interpretation — an agent can get through, but may guess',
-      'm.tier.enrichment': 'Enrichment — makes the agent’s job cheaper and more accurate',
+      'm.pool.essential': 'What every site needs — always scored',
+      'm.pool.surface': 'Scored only if this site actually offers that surface',
+      'm.pool.emerging': 'Worth doing, not yet required — missing this costs you nothing',
       'm.statusNote': '<ul><li><b>pass</b> — full points.</li><li><b>partial</b> — the signal exists but is incomplete; proportional points.</li><li><b>fail</b> — the signal is missing or wrong; zero points.</li><li><b>not applicable</b> — the surface this check needs does not exist here, so it is excluded from both the score and the denominator. You are never penalised for a surface you do not offer.</li></ul>',
       'f.privacy': 'Privacy', 'f.security': 'Security', 'f.md': 'Markdown version',
     },
     zh: {
       'm.kicker': '评分方法',
       'm.h1': '我们如何评估 AI 就绪度',
-      'm.lede': '每一项检查、它的分值，以及每种结果的含义。分数是一种主张——这些就是它背后的规则。',
-      'm.checks': '检查项',
-      'm.check': '检查项', 'm.evidence': '证据等级', 'm.points': '分值',
+      'm.lede': '每一项检查、它的分值，以及每种结果的含义。分数不是拍脑袋给的——这里就是它背后的每一条规则。',
+      'm.checks': '检查项清单',
+      'm.check': '名称', 'm.evidence': '信号强度', 'm.points': '分值',
       'm.status': '结果代表什么',
       'm.loading': '加载中…',
       'm.err': '暂时无法加载评分方法。',
-      'm.tier.blocking': '阻断层——缺少这些，AI 就无法继续',
-      'm.tier.interpretation': '理解层——AI 能通过，但可能靠猜',
-      'm.tier.enrichment': '增强层——让 AI 干活更省、更准',
-      'm.statusNote': '<ul><li><b>pass</b>——拿满分。</li><li><b>partial</b>——信号存在但不完整，按给分。</li><li><b>fail</b>——信号缺失或错误，0 分。</li><li><b>不适用</b>——这项检查所需的能力在这个站点上不存在，因此它同时从分数和分母中剔除。你不会因为没提供某种能力而被扣分。</li></ul>',
+      'm.pool.essential': '每个网站都要答的题——永远计入分数',
+      'm.pool.surface': '只有网站真的提供了这个能力才计分',
+      'm.pool.emerging': '做了更好，不做不扣分的前瞻项',
+      'm.statusNote': '<ul><li><b>通过</b>——拿满分。</li><li><b>部分</b>——信号存在但不完整，按比例给分。</li><li><b>失败</b>——信号缺失或错误，0 分。</li><li><b>不适用</b>——这项检查所需的能力在这个站点上不存在，因此它同时从分数和分母中剔除。你不会因为没提供某种能力而被扣分。</li></ul>',
       'f.privacy': '隐私', 'f.security': '安全', 'f.md': 'Markdown 版',
     },
   };
@@ -191,13 +191,13 @@
 
     var tb = document.getElementById('tbody');
     tb.textContent = '';
-    (DATA.tiers || []).forEach(function (tier) {
-      var rows = (DATA.checks || []).filter(function (c) { return c.tier === tier.tier; });
+    (DATA.pools || []).forEach(function (pool) {
+      var rows = (DATA.checks || []).filter(function (c) { return c.pool === pool.pool; });
       if (!rows.length) return;
       var groupRow = document.createElement('tr');
       var th = document.createElement('td');
       th.colSpan = 3;
-      th.textContent = (t('m.tier.' + tier.tier) || tier.tier) + ' · ' + tier.budget + ' pts';
+      th.textContent = (t('m.pool.' + pool.pool) || pool.pool) + ' · ' + pool.budget + ' pts';
       th.style.fontFamily = 'var(--mono)';
       th.style.fontSize = '11px';
       th.style.color = 'var(--ink-3)';
@@ -207,9 +207,14 @@
       rows.forEach(function (c) {
         var tr = document.createElement('tr');
         var td1 = document.createElement('td');
-        var b = document.createElement('b'); b.textContent = c.label;
-        var id = document.createElement('span'); id.className = 'chk-id'; id.textContent = '  ' + c.id;
-        td1.appendChild(b); td1.appendChild(id);
+        var name = document.createElement('div');
+        name.style.fontWeight = '600';
+        name.style.color = 'var(--ink)';
+        name.textContent = (lang === 'zh' && c.label_zh) ? c.label_zh : c.label;
+        var id = document.createElement('div');
+        id.className = 'chk-id';
+        id.textContent = c.id;
+        td1.appendChild(name); td1.appendChild(id);
         var td2 = document.createElement('td');
         var ev = document.createElement('span'); ev.className = 'ev'; ev.textContent = c.evidence;
         td2.appendChild(ev);

@@ -26,7 +26,8 @@ const parseShare = (raw) => {
   }
   return Number(t);
 };
-for (const m of src.matchAll(/^\s{2}"?([\w-]+)"?: \{ label: "[^"]+", pool: "(\w+)", evidence: "(\w+)", share: ([\d.\s/]+) \}/gm)) {
+// (?:…)? keeps group indices stable whether or not label_zh is present
+for (const m of src.matchAll(/^\s{2}"?([\w-]+)"?: \{ label: "[^"]+",(?: label_zh: "[^"]+",)? pool: "(\w+)", evidence: "(\w+)", share: ([\d.\s/]+) \}/gm)) {
   shares[m[1]] = { pool: m[2], evidence: m[3], share: parseShare(m[4]) };
 }
 

@@ -937,15 +937,15 @@ const POOL_BUDGET = { essential: 86, surface: 14, emerging: 8 };
 const CHECK_POLICY = {
   // pool = which scoring pool; evidence = how sure we are that agents actually
   // consume the signal; share = split of the pool budget.
-  "robots-policy": { label: "AI crawler policy", pool: "essential", evidence: "A", share: 20 / 86 },
-  "machine-surfaces": { label: "Machine-readable surfaces", pool: "essential", evidence: "A", share: 18 / 86 },
-  "structured-data": { label: "Structured data", pool: "essential", evidence: "B", share: 18 / 86 },
-  freshness: { label: "Content freshness", pool: "essential", evidence: "B", share: 12 / 86 },
-  "llms-txt": { label: "llms.txt", pool: "essential", evidence: "C", share: 10 / 86 },
-  "link-headers": { label: "Link response headers", pool: "essential", evidence: "C", share: 8 / 86 },
-  "api-errors": { label: "API error responses", pool: "surface", evidence: "B", share: 6 / 14 },
-  "tool-security": { label: "Tool surface security", pool: "surface", evidence: "A", share: 8 / 14 },
-  webmcp: { label: "WebMCP tools", pool: "emerging", evidence: "A", share: 1.0 },
+  "robots-policy": { label: "AI crawler policy", label_zh: "AI 爬虫策略", pool: "essential", evidence: "A", share: 20 / 86 },
+  "machine-surfaces": { label: "Machine-readable surfaces", label_zh: "机器可读入口", pool: "essential", evidence: "A", share: 18 / 86 },
+  "structured-data": { label: "Structured data", label_zh: "结构化数据", pool: "essential", evidence: "B", share: 18 / 86 },
+  freshness: { label: "Content freshness", label_zh: "内容新鲜度", pool: "essential", evidence: "B", share: 12 / 86 },
+  "llms-txt": { label: "llms.txt", label_zh: "llms.txt 指南文件", pool: "essential", evidence: "C", share: 10 / 86 },
+  "link-headers": { label: "Link response headers", label_zh: "Link 响应头", pool: "essential", evidence: "C", share: 8 / 86 },
+  "api-errors": { label: "API error responses", label_zh: "API 报错格式", pool: "surface", evidence: "B", share: 6 / 14 },
+  "tool-security": { label: "Tool surface security", label_zh: "工具面安全", pool: "surface", evidence: "A", share: 8 / 14 },
+  webmcp: { label: "WebMCP tools", label_zh: "WebMCP 工具注册", pool: "emerging", evidence: "A", share: 1.0 },
 };
 /** Resolve one check's scoring policy into the shape the report needs. */
 function policyOf(id) {
@@ -1083,8 +1083,8 @@ async function scanDomainCore(domain, env) {
     (openapiRes.status >= 200 && openapiRes.status < 300) ||
     (/json/i.test(apiProbe.ctype || "") && apiProbe.status !== 0);
   const notApplicable = (id, why) => ({ ...policyOf(id), status: "na", points: null, detail: why });
-  const NA_NO_TOOLS = "No WebMCP tool surface detected here — nothing to evaluate. Not counted in your score.";
-  const NA_NO_API = "No API surface detected here — nothing to evaluate. Not counted in your score.";
+  const NA_NO_TOOLS = "This site has no WebMCP tools yet — nothing to check here, and nothing deducted.";
+  const NA_NO_API = "This site has no API yet — nothing to check here, and nothing deducted.";
   const checks = [
     hasTools ? scoreCheck("webmcp", checkWebMCP(surface)) : notApplicable("webmcp", NA_NO_TOOLS),
     hasTools ? scoreCheck("tool-security", checkToolSecurity(surface)) : notApplicable("tool-security", NA_NO_TOOLS),
@@ -1244,6 +1244,7 @@ function methodologyData() {
   const checks = Object.entries(CHECK_POLICY).map(([id, p]) => ({
     id,
     label: p.label,
+    label_zh: p.label_zh || p.label,
     pool: p.pool,
     tier: p.pool, // alias kept for one release so older clients keep working
     evidence: p.evidence,
