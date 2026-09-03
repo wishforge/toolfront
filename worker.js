@@ -947,6 +947,36 @@ const CHECK_POLICY = {
   "tool-security": { label: "Tool surface security", label_zh: "工具面安全", pool: "surface", evidence: "A", share: 8 / 14 },
   webmcp: { label: "WebMCP tools", label_zh: "WebMCP 工具注册", pool: "emerging", evidence: "A", share: 1.0 },
 };
+
+/* Cross-industry benchmark distribution (BENCHMARK_VERSION 1): percentile
+   anchors on the scoring-3.0 scale. Derived from a 3,250-domain cross-industry
+   corpus (private benchmark, toolfront-cfg/competitive-benchmark/): each
+   corpus score was mapped onto our scale through 98 dual-engine scan pairs
+   (binned mean delta per score band — low bands are thin, n=3-5, so the two
+   lowest bins are treated as one flattish region), then anchors were read off
+   the estimated population. This corrects for the benchmark's stratified
+   sampling, which over-represents high scorers. Regenerate whenever the
+   corpus is re-scanned; bump BENCHMARK_VERSION and note it in the report. */
+const BENCHMARK_VERSION = "1";
+const BENCHMARK_ANCHORS = [[5, 13], [10, 16], [25, 28], [50, 38], [75, 46], [90, 52], [95, 68]];
+function benchmarkPercentile(score) {
+  if (typeof score !== "number" || Number.isNaN(score)) return null;
+  const A = BENCHMARK_ANCHORS;
+  if (score <= A[0][1]) {
+    // Below the first anchor: extrapolate on the first segment, floor at 1 —
+    // "bottom of the benchmark" is still information, 0 is not.
+    return Math.max(1, Math.round(A[0][0] + (score - A[0][1]) * (A[1][0] - A[0][0]) / (A[1][1] - A[0][1])));
+  }
+  for (let i = 1; i < A.length; i++) {
+    if (score <= A[i][1]) {
+      return Math.round(A[i - 1][0] + (score - A[i - 1][1]) * (A[i][0] - A[i - 1][0]) / (A[i][1] - A[i - 1][1]));
+    }
+  }
+  // Above the last anchor: extrapolate on the last segment, cap at 99 —
+  // being top of a 3,250-domain corpus earns "top 1%", not a boast.
+  const n = A.length;
+  return Math.min(99, Math.round(A[n - 1][0] + (score - A[n - 1][1]) * (A[n - 1][0] - A[n - 2][0]) / (A[n - 1][1] - A[n - 2][1])));
+}
 /** Resolve one check's scoring policy into the shape the report needs. */
 function policyOf(id) {
   const p = CHECK_POLICY[id];
@@ -1130,7 +1160,7 @@ async function scanDomainCore(domain, env) {
   // tool_surface_hash enables rug-pull detection in scheduled-scan diffs; report_json
   // is the durable snapshot stored in D1 scan_reports by the cron.
   const tool_surface_hash = await sha256Hex(JSON.stringify(surface.tools));
-  const report = { domain, score, scoreMax, grade, verdict, checks, tool_surface_hash, rules_version: RULES_VERSION, scoring_version: SCORING_VERSION, scannedAt: new Date().toISOString(), cached: false };
+  const report = { domain, score, scoreMax, grade, verdict, checks, tool_surface_hash, rules_version: RULES_VERSION, scoring_version: SCORING_VERSION, percentile: benchmarkPercentile(score), benchmark_version: BENCHMARK_VERSION, scannedAt: new Date().toISOString(), cached: false };
   // Provenance: a self-scan never touched the network.
   if (selfScan) report.self = true;
   if (unavailable.length) report.unavailable = unavailable;
@@ -1703,6 +1733,7 @@ export {
   scanDomainCore, challengeProbe, checkStructuredData, checkLlmsTxt,
   checkRobotsAI, checkMachineSurfaces, checkApiErrors, checkFreshness,
   checkLinkHeaders, parseTrainingCrawlerBlocks, CHECK_POLICY, POOL_BUDGET,
+  benchmarkPercentile, BENCHMARK_ANCHORS,
   homeTitleOf, llmsSampleFor,
 };
 
