@@ -506,6 +506,7 @@
   .subnav .crumb:hover { color:var(--ink); }
   .subnav .sep { color:var(--ink-4); font-weight:400; }
   .gradechip { font-family:var(--mono); font-variant-numeric:tabular-nums; font-weight:700; font-size:13px; padding:5px 13px; border-radius:999px; border:1px solid var(--line); background:var(--paper-soft); }
+  .metric-note { font-size:12px; color:var(--ink-3); line-height:1.65; margin:-4px 0 6px; max-width:70ch; }
   .methbadge { font-family:var(--mono); font-size:10.5px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-2); text-decoration:none; border:1px solid var(--line); border-radius:999px; padding:6px 13px; background:var(--card); transition:border-color .15s ease; }
   .methbadge:hover { border-color:var(--accent); color:var(--accent-deep); }
   .xlang-note { font-size:12px; color:var(--ink-3); line-height:1.7; margin-top:14px; padding-top:10px; border-top:1px dashed var(--line); }
@@ -615,6 +616,7 @@
       'report.grade.c': 'Community convention — no vendor has confirmed reading it',
     'report.xlang': 'Scores are not comparable across scanners — we additionally check content freshness, machine-readable tool surfaces and API error responses, which most discovery-led scanners skip. ',
     'report.xlang.link': 'See what we check →',
+    'report.metric': 'Achievement against applicable checks — weak areas subtract directly, so this number reads lower than scanners that only report coverage.',
     'rfoot.methodology': 'Methodology',
     'rfoot.privacy': 'Privacy',
     'rfoot.security': 'Security',
@@ -683,6 +685,7 @@
       'report.grade.c': '仅供参考：行业惯例，暂无厂商确认会读取',
     'report.xlang': '分数不可跨扫描器比较——我们额外检查内容新鲜度、机器可读工具面与 API 错误响应，多数偏内容发现的扫描器不测这些。 ',
     'report.xlang.link': '查看我们检查什么 →',
+    'report.metric': '这是适用检查项的达成率——该查的都查了，弱项直接扣分，所以数字会比只算「覆盖了多少」的扫描器低。',
     'rfoot.methodology': '评分方法',
     'rfoot.privacy': '隐私政策',
     'rfoot.security': '安全说明',
@@ -988,6 +991,9 @@
       topRow.appendChild(mv);
     }
     head.appendChild(topRow);
+    // Name the metric: our number is achievement against applicable checks
+    // (weak areas subtract), unlike coverage-style scanners.
+    head.appendChild(el('p', 'metric-note', t('report.metric')));
     var you = el('span', 'you', t('report.printhead') + ' · ' + t('report.scanned') + ' ' + (r.scannedAt ? String(r.scannedAt).slice(0, 10) : ''));
     head.appendChild(you);
     head.appendChild(el('div', 'dom', r.domain));
