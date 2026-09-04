@@ -227,13 +227,16 @@ try {
   for (const vp of [VIEWPORTS[0], VIEWPORTS[VIEWPORTS.length - 1]]) {
     const page = await browser.newPage({ viewport: { width: vp.w, height: vp.h } });
     const cmpUrl = args.url + "/compare?a=" + encodeURIComponent(args.domain) + "&b=toolfront.dev";
-    await page.goto(cmpUrl, { waitUntil: "networkidle", timeout: 45000 }).catch(() =>
-      page.goto(cmpUrl, { waitUntil: "load", timeout: 45000 })
-    );
-    await page.waitForFunction(() => document.querySelectorAll(".pcard").length > 0, { timeout: 45000 }).catch(() => {});
+    // The page fires two /api/scan fetches that stay pending for the whole
+    // scan (~7s+) — networkidle would never settle in that window. Navigate
+    // on domcontentloaded: the staged pending cards render immediately and
+    // are assertable without waiting for the scans to finish.
+    await page.goto(cmpUrl, { waitUntil: "domcontentloaded", timeout: 45000 });
+    await page.waitForFunction(() => document.querySelectorAll(".scard").length > 0, { timeout: 45000 }).catch(() => {});
     await page.waitForTimeout(500);
-    const cards = await page.locator(".pcard").count();
-    check(`${vp.name} compare dual cards`, cards === 2, `count=${cards}`);
+    const cards = await page.locator(".scard").count();
+    const diag = await page.evaluate(() => ({ url: location.href.slice(0, 80), bodyLen: document.body ? document.body.innerHTML.length : -1, ready: document.readyState })).catch(e => ({ diagErr: String(e).slice(0, 80) }));
+    check(`${vp.name} compare dual cards`, cards === 2, `count=${cards} diag=${JSON.stringify(diag)}`);
     const vs = await page.locator(".vs-badge").count();
     check(`${vp.name} compare VS badge`, vs === 1);
     const { sw, iw } = await page.evaluate(() => ({

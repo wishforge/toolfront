@@ -159,21 +159,24 @@
     opacity: 0.5;
   }
 
-  .nav-menu { display: flex; gap: 32px; list-style: none; align-items: center; }
+  /* Pill-container nav (isagentready structure): the whole menu sits in a
+     rounded capsule; the current page is a raised white pill. */
+  .nav-menu {
+    display: flex; gap: 2px; list-style: none; align-items: center;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--r-full); padding: 4px;
+    box-shadow: var(--shadow-xs);
+  }
   .nav-menu a {
-    color: var(--ink-3); text-decoration: none;
-    font-family: var(--sans); font-size: 13px; font-weight: 500;
-    transition: color var(--dur-fast) ease;
-    position: relative;
+    display: inline-block; padding: 7px 16px; border-radius: var(--r-full);
+    font-size: 13.5px; font-weight: 550; color: var(--ink-3);
+    text-decoration: none; transition: all var(--dur-fast) ease;
   }
-  .nav-menu a::after {
-    content: ''; position: absolute; bottom: -3px; left: 0; right: 0;
-    height: 1.5px; background: var(--accent);
-    transform: scaleX(0); transition: transform var(--dur-normal) var(--ease-out);
-    border-radius: 1px;
+  .nav-menu a:hover { color: var(--ink); background: var(--paper-soft); }
+  .nav-menu a.on {
+    color: var(--ink); background: var(--card);
+    box-shadow: var(--shadow-sm); font-weight: 650;
   }
-  .nav-menu a:hover { color: var(--ink); }
-  .nav-menu a:hover::after { transform: scaleX(1); }
 
   .nav-actions { display: flex; gap: 8px; align-items: center; }
   .nav-link-icon {
@@ -210,6 +213,14 @@
     max-width: 1160px; margin: 0 auto;
     padding: clamp(44px, 7vw, 76px) clamp(24px, 4vw, 40px) clamp(52px, 8vw, 88px);
     display: grid; grid-template-columns: 1.08fr 0.92fr; gap: clamp(36px, 5.5vw, 68px); align-items: center;
+    position: relative;
+  }
+  /* Single colorful plane on the page: a faint blue-violet radial mist
+     behind the hero (V6.4 discipline - one accent surface, rest neutral). */
+  .hero::before {
+    content: ''; position: absolute; inset: -80px 15% auto; height: 460px;
+    background: radial-gradient(60% 70% at 50% 30%, rgba(37,99,235,.07), rgba(124,93,250,.045) 55%, transparent 80%);
+    pointer-events: none; z-index: -1;
   }
   .hero-left { padding-right: 20px; }
 
@@ -227,8 +238,8 @@
   @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.35} }
 
   h1 {
-    font-family: var(--serif); font-optical-sizing: auto;
-    font-weight: 420; font-size: clamp(38px, 5vw, 58px);
+    font-family: var(--sans);
+    font-weight: 700; font-size: clamp(38px, 5vw, 58px);
     line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 22px;
   }
   h1 .hl-u {
@@ -243,8 +254,8 @@
   }
 
   .hero-lede {
-    font-family: var(--serif); font-optical-sizing: auto;
-    font-weight: 340; font-size: 17px; line-height: 1.63;
+    font-family: var(--sans);
+    font-weight: 420; font-size: 17px; line-height: 1.63;
     color: var(--ink-2); max-width: 44ch; margin-bottom: 28px;
   }
 
@@ -1054,8 +1065,7 @@
   <div class="nav-inner">
     <a href="/" class="wordmark">toolfront<em>_</em></a>
     <ul class="nav-menu">
-      <li><a href="#band" data-i18n="nav.why">Why</a></li>
-      <li><a href="#steps" data-i18n="nav.how">How it works</a></li>
+      <li><a href="/" class="on" data-i18n="nav.scanner">Scanner</a></li>
       <li><a href="/compare" data-i18n="nav.compare">Compare</a></li>
       <li><a href="/rankings" id="nav-rankings" data-i18n="nav.rankings">Rankings</a></li>
       <li><a href="https://monitor.toolfront.dev/login" id="nav-monitor" data-i18n="nav.monitor" data-monitor-link>Monitor</a></li>
@@ -1413,8 +1423,7 @@
     });
   })();
   var LANGS = { en: {
-  "nav.why": "Why",
-  "nav.how": "How it works",
+  "nav.scanner": "Scanner",
   "nav.monitor": "Monitor",
   "nav.compare": "Compare",
   "home.rank.title": "Live rankings",
@@ -1522,8 +1531,7 @@
   "strip.3": "<b>llms.txt</b> — your own script for AI",
   "strip.4": "<b>Sitemap / OpenAPI</b> — the site map for machines"
 }, zh: {
-  "nav.why": "为什么",
-  "nav.how": "工作原理",
+  "nav.scanner": "扫描器",
   "nav.monitor": "持续监控",
   "nav.compare": "对比",
   "home.rank.title": "实时排行榜",
