@@ -1294,6 +1294,13 @@ async function scanPublicReport(domain, forceFresh, env) {
 async function handleScanHistory(url, request, env) {
   const domain = normalizeDomain(url.searchParams.get("domain"));
   if (!domain) return json({ error: "invalid_domain", detail: "Provide a public domain like example.com" }, 400);
+  // Rate limit like /api/scan: the ledger read is cheap per call, but an
+  // unthrottled public endpoint is a free D1 read-amplification surface
+  // (audit finding — handleScan throttled, this one wasn't).
+  const ip = request.headers.get("CF-Connecting-IP") || "anon";
+  if (!(await rateLimitAllow(ip, env))) {
+    return json({ error: "rate_limited", detail: "Too many requests. Try again later." }, 429);
+  }
   if (!env.SCAN_DB) return json({ ok: true, domain, rows: [] }, 200);
   try {
     const { results } = await env.SCAN_DB.prepare(
