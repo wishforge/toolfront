@@ -469,6 +469,17 @@
     .fix-actions { flex-direction: row; padding: 0 16px 12px; justify-content: flex-end; }
     .fix-btn { padding: 7px 16px; }
   }
+  /* diagnostics strip (per-check outcome counts + extremes) */
+  .diag { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin:12px 0 4px }
+  @media(max-width:600px){ .diag { grid-template-columns:repeat(3,1fr) } }
+  .diag .dcell { background:var(--paper-soft,#F6F5F1); border-radius:10px; padding:10px 12px; text-align:center }
+  .diag .dn { font-family:var(--mono,monospace); font-variant-numeric:tabular-nums; font-weight:700; font-size:19px }
+  .diag .dl { font-size:10.5px; color:var(--ink-2,#444); margin-top:2px }
+  .diag .dn.ok{color:var(--good,#059669)} .diag .dn.m{color:var(--mid,#B4690E)} .diag .dn.f{color:var(--bad,#B42323)} .diag .dn.x{color:var(--ink-3,#6B7280)}
+  .diag-ext { display:flex; flex-direction:column; gap:6px; margin-top:12px; font-size:12.5px; color:var(--ink-2,#444) }
+  .diag-ext b { font-weight:650 }
+  .hist-delta { font-family:var(--mono,monospace); font-variant-numeric:tabular-nums; font-weight:700; font-size:12px; margin-left:8px }
+  .hist-delta.up{color:var(--good,#059669)} .hist-delta.dn{color:var(--bad,#B42323)}
 </style>
 </head>
 <body>
@@ -527,6 +538,7 @@
       'report.biz.mid': 'Bottom line: AI half-understands your site — at the moments that matter it still misdescribes or skips you. Fixing the items below starts paying back immediately.',
       'report.biz.high': 'Bottom line: your site already speaks AI fluently — you are ahead of most competitors. Keep it that way and keep monitoring.',
       'report.biz.allgood': 'Nothing urgent: AI can already read and work with your site. Keep monitoring so redesigns don\u2019t break it.',
+      'report.diag.title': 'Scan diagnostics', 'report.diag.assessed': 'assessed', 'report.diag.passed': 'passed', 'report.diag.partial': 'partial', 'report.diag.failed': 'failed', 'report.diag.na': 'n/a', 'report.diag.strongest': 'Strongest', 'report.diag.weakest': 'Weakest',
       'report.compare': 'Compare with a competitor', 'report.hist.title': 'Previous scans', 'report.hist.cmp': 'Compare with a competitor — click to pre-fill', 'report.share': 'Share', 'report.pdf': 'Save as PDF', 'report.new': 'New scan', 'report.copied': 'Link copied', 'report.copyfail': 'Copy failed — copy it from the address bar',
       'report.printhead': 'Agent-readiness report — toolfront.dev',
       'report.raise': '<b>One redesign can drop this score.</b> Monitor checks weekly and emails you only when it moves:',
@@ -592,6 +604,7 @@
       'report.biz.mid': '总结：AI 只读懂了你的一半——关键时刻还是说不清、推不动。补齐下面几项，立刻见效。',
       'report.biz.high': '总结：你的网站已经"会说 AI 的语言"——领先大多数对手。保持住，定期复查。',
       'report.biz.allgood': '暂时不用改：AI 已经能读懂并用好你的网站。定期回扫，别让下次改版悄悄把它搞坏。',
+      'report.diag.title': '扫描诊断', 'report.diag.assessed': '项已评估', 'report.diag.passed': '通过', 'report.diag.partial': '部分', 'report.diag.failed': '失败', 'report.diag.na': '不适用', 'report.diag.strongest': '最强项', 'report.diag.weakest': '最弱项',
       'report.compare': '与竞品对比', 'report.hist.title': '历史扫描', 'report.hist.cmp': '与竞品对比——点击预填本域名', 'report.share': '分享', 'report.pdf': '存为 PDF', 'report.new': '重新扫描', 'report.copied': '链接已复制', 'report.copyfail': '复制失败——请从地址栏复制',
       'report.printhead': 'AI 就绪度报告 — toolfront.dev',
       'report.raise': '<b>一次改版，分数可能就掉了。</b>Monitor 每周扫一次，掉了才发邮件：',
@@ -910,6 +923,48 @@
     return card;
   }
 
+  // Diagnostics strip: outcome counts across all checks plus the strongest
+  // and weakest applicable items (ratio points/max). Pure client-side math
+  // over the report the API already returns — no extra endpoint.
+  function buildDiag(r) {
+    var cs = (r.checks || []).filter(function (c) { return c.status !== 'na'; });
+    if (!cs.length) return null;
+    var pass = cs.filter(function (c) { return c.status === 'pass'; }).length;
+    var part = cs.filter(function (c) { return c.status === 'partial'; }).length;
+    var fail = cs.filter(function (c) { return c.status === 'fail'; }).length;
+    var na = (r.checks || []).length - cs.length;
+    var wrap = el('div');
+    var grid = el('div', 'diag');
+    [[String(cs.length), t('report.diag.assessed'), ''],
+     [String(pass), t('report.diag.passed'), 'ok'],
+     [String(part), t('report.diag.partial'), 'm'],
+     [String(fail), t('report.diag.failed'), 'f'],
+     [String(na), t('report.diag.na'), 'x']].forEach(function (d) {
+      var cell = el('div', 'dcell');
+      cell.appendChild(el('div', 'dn ' + d[2], d[0]));
+      cell.appendChild(el('div', 'dl', d[1]));
+      grid.appendChild(cell);
+    });
+    wrap.appendChild(grid);
+    function ratio(c) { return (typeof c.points === 'number' && c.max > 0) ? c.points / c.max : -1; }
+    var applicable = cs.filter(function (c) { return ratio(c) >= 0; });
+    if (applicable.length >= 2) {
+      var sorted = applicable.slice().sort(function (a, b) { return ratio(b) - ratio(a); });
+      var hi = sorted[0], lo = sorted[sorted.length - 1];
+      if (ratio(hi) > ratio(lo)) {
+        var ext = el('div', 'diag-ext');
+        ext.appendChild(el('div', null, ''));
+        var sEl = el('div'); var b1 = el('b', null, t('report.diag.strongest')); sEl.appendChild(b1);
+        sEl.appendChild(document.createTextNode(' — ' + localLabel(hi) + ' ' + hi.points + '/' + hi.max));
+        var wEl = el('div'); var b2 = el('b', null, t('report.diag.weakest')); wEl.appendChild(b2);
+        wEl.appendChild(document.createTextNode(' — ' + localLabel(lo) + ' ' + lo.points + '/' + lo.max));
+        ext.appendChild(sEl); ext.appendChild(wEl);
+        wrap.appendChild(ext);
+      }
+    }
+    return wrap;
+  }
+
   function buildPills(r) {
     var pills = el('div', 'pills');
     (r.checks || []).forEach(function (c) {
@@ -964,6 +1019,7 @@
         if (old && old.parentNode) old.parentNode.removeChild(old);
         var body = el('div', 'hist-body');
         var locale = lang === 'zh' ? 'zh-CN' : 'en-US';
+        var prevScore = null;
         rows.slice(0, 12).forEach(function (row) {
           var dt = new Date(row.scanned_at);
           var dstr = dt.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) + ' ' + dt.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
@@ -974,6 +1030,17 @@
           rowEl.appendChild(el('span', 'hist-date', dstr));
           rowEl.appendChild(g);
           rowEl.appendChild(el('span', 'hist-score', String(row.score)));
+          // Δ vs the previous ledger row — only meaningful within one
+          // scoring_version, otherwise the delta lies about progress.
+          if (prevScore !== null && row.scoring_version && rows[0].scoring_version === row.scoring_version) {
+            var d = row.score - prevScore;
+            if (d !== 0) {
+              var dEl = el('span', 'hist-delta ' + (d > 0 ? 'up' : 'dn'), (d > 0 ? '+' : '') + d);
+              dEl.title = 'vs previous scan';
+              rowEl.appendChild(dEl);
+            }
+          }
+          prevScore = row.score;
           rowEl.appendChild(el('span', 'hist-ver', row.scoring_version || ''));
           body.appendChild(rowEl);
         });
@@ -1484,6 +1551,8 @@
     b1.appendChild(hero);
     b1.appendChild(buildTrack(r, first));
     b1.appendChild(buildPills(r));
+    var diag = buildDiag(r);
+    if (diag) b1.appendChild(diag);
     if (Array.isArray(r.unavailable) && r.unavailable.length) {
       b1.appendChild(el('div', 'warn-banner', t('report.unavailable.warn').replace('{n}', String(r.unavailable.length))));
     }
@@ -1574,6 +1643,17 @@
     b1.appendChild(acts);
     resultBox.appendChild(buildCard(t('report.blocked.title'), b1, false));
     try { history.replaceState(null, '', '/report?domain=' + encodeURIComponent(r.domain) + '&lang=' + lang); } catch (_) {}
+    updateTitle(r);
+  }
+  // Title carries domain + score: every report is an SEO landing page and
+  // the same string feeds og:title on social shares. Called on render (new
+  // scan) and from applyLang (language switch) — not on the error path.
+  function updateTitle(r) {
+    if (r && typeof r.score === 'number') {
+      document.title = r.domain + ' - Score: ' + r.score + '/' + (r.scoreMax || 100) + ' · ToolFront Agent Readiness';
+    } else {
+      document.title = 'ToolFront — ' + t('report.label') + (lastReport ? ' · ' + lastReport.domain : '');
+    }
   }
 
   function renderError(msg) {
@@ -1585,7 +1665,7 @@
   /* ── language ── */
   function applyLang() {
     document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
-    document.title = 'ToolFront — ' + t('report.label') + (lastReport ? ' · ' + lastReport.domain : '');
+    updateTitle(lastReport);
     document.querySelectorAll('[data-i18n]').forEach(function (elx) { elx.textContent = t(elx.getAttribute('data-i18n')); });
     document.getElementById('lang-en').classList.toggle('on', lang === 'en');
     document.getElementById('lang-zh').classList.toggle('on', lang === 'zh');
@@ -1613,7 +1693,7 @@
     fetch('/api/scan?domain=' + encodeURIComponent(domain) + '&fresh=1')
       .then(function (res) { return res.json().then(function (body) { return { ok: res.ok, body: body }; }); })
       .then(function (out) {
-        if (out.ok && out.body.checks) { renderReport(out.body, true); renderHistory(out.body.domain); }
+        if (out.ok && out.body.checks) { renderReport(out.body, true); updateTitle(out.body); renderHistory(out.body.domain); }
         else { renderError(out.body.detail || out.body.error || t('report.err.generic')); }
       })
       .catch(function () { renderError(t('report.err.network')); })

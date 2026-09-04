@@ -72,7 +72,14 @@ const HTML = readFileSync(join(ROOT, "public/compare.html"), "utf8");
     runScripts: "dangerously",
     pretendToBeVisual: true,
     beforeParse(window) {
-      window.fetch = async () => ({ ok: true, json: async () => ({ a: REP("good.example", 71), b: REP("better.example", 88), a_status: 200, b_status: 200 }) });
+      // The page now runs one /api/scan per side (first-finished-first-
+      // rendered) — mock routes each domain to its single-side report.
+      window.fetch = async (url) => {
+        const m = String(url).match(/domain=([^&]+)/);
+        const dom = m ? decodeURIComponent(m[1]) : "";
+        const body = dom === "good.example" ? REP("good.example", 71) : REP("better.example", 88);
+        return { ok: true, json: async () => body };
+      };
     },
   });
   await new Promise(r => setTimeout(r, 80));
@@ -82,7 +89,7 @@ const HTML = readFileSync(join(ROOT, "public/compare.html"), "utf8");
   ok("标题带两个域名", (doc.querySelector("#h1") || {}).textContent === "good.example vs better.example", (doc.querySelector("#h1") || {}).textContent);
   ok("delta pill 指向胜者 +N 分", /better\.example leads by 17 pts/.test((doc.querySelector(".delta-pill") || {}).textContent || ""), (doc.querySelector(".delta-pill") || {}).textContent);
   ok("逐项对比表有行", doc.querySelectorAll(".dtable tbody tr").length === 2);
-  ok("胜方卡片有高亮边框", doc.querySelectorAll(".pcard.win").length === 1);
+  ok("胜方卡片有高亮边框", doc.querySelectorAll(".scard.win").length === 1);
 }
 
 /* C. zh re-render */
@@ -93,7 +100,10 @@ console.log("\n[C] zh locale");
     runScripts: "dangerously",
     pretendToBeVisual: true,
     beforeParse(window) {
-      window.fetch = async () => ({ ok: true, json: async () => ({ a: REP("good.example", 71), b: REP("better.example", 71), a_status: 200, b_status: 200 }) });
+      window.fetch = async (url) => {
+        const body = REP("good.example", 71);
+        return { ok: true, json: async () => body };
+      };
     },
   });
   await new Promise(r => setTimeout(r, 80));

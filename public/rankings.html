@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent-Readiness Rankings — ToolFront</title>
+<link rel="stylesheet" href="/fonts/fonts.css">
+<style>
+:root{
+  --paper:#FCFCFD; --paper-2:#F4F5F7; --white:#FFF;
+  --ink:#16181D; --ink-2:#3F434B; --ink-3:#757A83; --ink-4:#A2A7B0; --ink-5:#D6D9DE;
+  --line:#E8EAEE; --hair:#F1F2F5;
+  --accent:#2F5FE0; --accent-deep:#1E44A8; --accent-wash:#EEF2FC;
+  --good:#1C7C54; --mid:#B4690E; --bad:#B42323;
+  --sans:"Space Grotesk","Noto Sans SC",-apple-system,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1060px;margin:0 auto;padding:0 24px 90px}
+.topnav{display:flex;justify-content:space-between;align-items:center;padding:22px 0}
+.wordmark{font-weight:700;font-size:18px;letter-spacing:-.01em;text-decoration:none;color:var(--ink)}
+.wordmark i{font-style:normal;color:var(--accent)}
+.ph{padding:26px 0 8px}
+.ph h1{font-weight:700;font-size:clamp(28px,4vw,40px);letter-spacing:-.022em;margin-bottom:10px}
+.ph .sub{font-size:14.5px;color:var(--ink-3);max-width:640px;line-height:1.7}
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:28px 0 24px}
+@media(max-width:780px){.statgrid{grid-template-columns:repeat(2,1fr)}}
+.scard{background:var(--white);padding:20px 22px}
+.scard .sl{font-size:10px;letter-spacing:.1em;color:var(--ink-4);font-weight:600;margin-bottom:9px}
+.scard .sv{font-family:var(--mono);font-variant-numeric:tabular-nums;font-weight:600;font-size:29px;letter-spacing:-.03em;line-height:1}
+.scard .sv i{font-style:normal;font-size:13px;color:var(--ink-4);font-weight:450}
+.scard .sd{font-size:11px;color:var(--ink-4);margin-top:7px}
+.filters{display:flex;flex-wrap:wrap;gap:7px;margin:4px 0 16px}
+.fpill{font-size:12.5px;font-weight:550;padding:8px 17px;border-radius:999px;border:1px solid var(--ink-5);background:var(--white);color:var(--ink-3);cursor:pointer;letter-spacing:.01em;transition:all .18s}
+.fpill:hover{color:var(--ink);border-color:var(--ink-4)}
+.fpill.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.ctrl-row{display:flex;gap:12px;margin-bottom:6px;flex-wrap:wrap;align-items:center}
+.search{flex:1;min-width:220px;display:flex;align-items:center;gap:9px;border:1px solid var(--ink-5);border-radius:9px;padding:9px 14px;background:var(--white)}
+.search input{border:none;outline:none;flex:1;font-family:var(--sans);font-size:13px;color:var(--ink);background:transparent}
+.search input::placeholder{color:var(--ink-4)}
+.seg{display:flex;gap:2px;border-bottom:1px solid var(--line);max-width:100%;overflow-x:auto}
+.seg button{border:none;background:none;font-family:var(--sans);font-size:12.5px;font-weight:500;color:var(--ink-3);padding:8px 13px;cursor:pointer;position:relative;white-space:nowrap}
+.seg button.on{color:var(--ink);font-weight:600}
+.seg button.on::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;background:var(--accent)}
+.count{font-size:12px;color:var(--ink-4);margin:16px 0 6px}
+.rtable{width:100%;border-collapse:collapse;display:block;overflow-x:auto}
+.rtable th{font-size:10.5px;letter-spacing:.08em;color:var(--ink-4);font-weight:600;text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+.rtable th.num,.rtable td.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.rtable td{padding:15px 14px;border-bottom:1px solid var(--hair);vertical-align:middle}
+.rtable tr.rowt td{cursor:pointer;transition:background .15s}
+.rtable tr.rowt:hover td{background:var(--white)}
+.rrow{display:flex;align-items:center;gap:11px}
+.fav{width:26px;height:26px;border-radius:6px;background:var(--paper-2);display:grid;place-items:center;font-size:11px;font-weight:650;color:var(--ink-3);flex:none}
+.rdom{font-family:var(--mono);font-weight:600;font-size:13.5px}
+.rwhen{font-size:10.5px;color:var(--ink-4);margin-top:2px}
+.score-cell .n{font-family:var(--mono);font-weight:600;font-size:18px;letter-spacing:-.02em}
+.score-cell .g{font-size:11px;font-weight:650}
+.gA{color:var(--good)}.gB{color:var(--mid)}.gC{color:var(--mid)}.gD,.gF{color:var(--bad)}
+.empty{padding:40px;text-align:center;color:var(--ink-4);font-size:13px}
+.foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-4);display:flex;gap:20px;flex-wrap:wrap}
+.foot a{color:var(--ink-3);text-decoration:none}
+.foot a:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topnav">
+    <a class="wordmark" href="/">ToolFront<i>_</i></a>
+    <div style="display:flex;gap:18px;align-items:center;font-size:13px">
+      <a href="/" style="color:var(--ink-3);text-decoration:none" data-i18n="nav.scan">Scanner</a>
+      <a href="/compare" style="color:var(--ink-3);text-decoration:none" data-i18n="nav.cmp">Compare</a>
+      <a href="https://monitor.toolfront.dev/monitoring" style="color:var(--ink-3);text-decoration:none" data-i18n="nav.mon">Monitor</a>
+    </div>
+  </div>
+
+  <div class="ph">
+    <h1 data-i18n="title">Agent-readiness Rankings</h1>
+    <p class="sub" data-i18n="sub">每一行都是一次真实扫描——榜单绝不编造分数。按行业过滤，按分数与档位探索，找到你的对标。</p>
+  </div>
+
+  <div class="statgrid">
+    <div class="scard"><div class="sl" data-i18n="st.ranked">WEBSITES RANKED</div><div class="sv" id="stTotal">–</div></div>
+    <div class="scard"><div class="sl" data-i18n="st.avg">AVERAGE SCORE</div><div class="sv" id="stAvg">–<i>/100</i></div></div>
+    <div class="scard"><div class="sl" data-i18n="st.ready">AGENT-READY</div><div class="sv" id="stReady">–</div><div class="sd" data-i18n="st.readyd">score ≥ 70</div></div>
+    <div class="scard"><div class="sl" data-i18n="st.work">NEEDS WORK</div><div class="sv" id="stWork">–</div><div class="sd" data-i18n="st.workd">score &lt; 70</div></div>
+  </div>
+
+  <div class="filters" id="indRow"></div>
+  <div class="ctrl-row">
+    <div class="search">⌕<input placeholder="Search domain..." id="q"></div>
+    <div class="seg" id="gradeSeg"></div>
+    <div class="seg" id="sortSeg"></div>
+  </div>
+  <div class="count" id="count"></div>
+  <table class="rtable">
+    <thead><tr>
+      <th style="width:34px"></th>
+      <th data-i18n="th.dom">DOMAIN</th>
+      <th data-i18n="th.grade">GRADE</th>
+      <th class="num" data-i18n="th.score">SCORE</th>
+      <th class="num" data-i18n="th.when">SCANNED</th>
+    </tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+  <div class="foot">
+    <span data-i18n="foot.note">每个数字都可复现——查看任意站点的完整报告与评分方法。</span>
+    <a href="/methodology" data-i18n="foot.meth">Methodology →</a>
+  </div>
+</div>
+
+<script>
+/* ── i18n ── */
+let LANG = localStorage.getItem('tf-lang') || (navigator.language || '').indexOf('zh') === 0 ? (localStorage.getItem('tf-lang') || 'zh') : 'en';
+if (new URLSearchParams(location.search).get('lang')) LANG = new URLSearchParams(location.search).get('lang');
+const PAIRS = {
+ title:['Agent-readiness Rankings','Agent 就绪度排行榜'],
+ sub:['每一行都是一次真实扫描——榜单绝不编造分数。按行业过滤，按分数与档位探索，找到你的对标。','Every row is a real scan — the board never invents scores. Filter by industry, explore by score and grade, find your benchmark.'],
+ 'st.ranked':['WEBSITES RANKED','已收录站点'],'st.avg':['AVERAGE SCORE','平均分'],
+ 'st.ready':['AGENT-READY','达到就绪'],'st.readyd':['score ≥ 70','分数 ≥ 70'],
+ 'st.work':['NEEDS WORK','有待改进'],'st.workd':['score < 70','分数 < 70'],
+ 'th.dom':['DOMAIN','域名'],'th.grade':['GRADE','评级'],'th.score':['SCORE','分数'],'th.when':['SCANNED','扫描时间'],
+ 'nav.scan':['Scanner','扫描器'],'nav.cmp':['Compare','对比'],'nav.mon':['Monitor','监控'],
+ 'foot.note':['Every number is reproducible — open any site for the full report and scoring method.','每个数字都可复现——查看任意站点的完整报告与评分方法。'],
+ 'foot.meth':['Methodology →','评分方法 →'],
+ 'search.ph':['Search domain...','搜索域名…'],
+ 'count':['Showing {n} of {total} scanned domains','显示 {total} 个已扫域名中的 {n} 个'],
+ 'empty':['No domains match — the board never invents a row.','没有匹配的域名——榜单绝不编造行。'],
+ 'all':['All','全部'],
+};
+function t(k){const p=PAIRS[k];return p?(LANG==='zh'?p[1]:p[0]):k}
+function applyLang(){
+  document.documentElement.lang = LANG==='zh'?'zh-CN':'en';
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n)});
+  document.getElementById('q').placeholder=t('search.ph');
+}
+
+/* ── data ── */
+var MON = (location.hostname==='localhost'||location.hostname==='127.0.0.1') ? 'http://localhost:8787' : 'https://monitor.toolfront.dev';
+var VERTS = [['all',t('all')],['hosting','Hosting'],['payments','Payments'],['devtools','Dev Tools'],['ai','AI']];
+var fVert='all', fGra='All', sortBy='score';
+var ROWS=[], TOTAL=0;
+var qEl=document.getElementById('q');
+
+function seg(id,items,cur,fn,pill){
+  document.getElementById(id).innerHTML=items.map(function(x){
+    var v=x[0],lb=x[1];
+    return '<button class="'+(pill?'fpill ':'')+(v===cur?'on':'')+'" onclick="'+fn+'(\''+v+'\')">'+lb+'</button>';
+  }).join('');
+}
+function gradeSegItems(){return [['All',t('all')],['A-B','A-B'],['C','C'],['D-F','D-F']]}
+function sortSegItems(){return [['score',t('st.avg')],['asc','A-Z'],['recent',LANG==='zh'?'最近':'Recent']]}
+function drawFilters(){
+  seg('indRow',VERTS,fVert,'setVert',true);
+  seg('gradeSeg',gradeSegItems(),fGra,'setGra');
+  seg('sortSeg',sortSegItems(),sortBy,'setSort');
+}
+function setVert(v){fVert=v;drawFilters();load()}
+function setGra(g){fGra=g;drawFilters()}
+function setSort(s){sortBy=s;drawFilters();render()}
+function gradeBand(s){if(s>=70)return 'A-B';if(s>=50)return 'C';return 'D-F'}
+function render(){
+  var q=(qEl.value||'').toLowerCase();
+  var rs=ROWS.filter(function(r){
+    if(fGra==='A-B')return r.score>=70;
+    if(fGra==='C')return r.score>=50&&r.score<70;
+    if(fGra==='D-F')return r.score<50;
+    return true;
+  }).filter(function(r){return !q||r.d.indexOf(q)>=0});
+  if(sortBy==='score')rs.sort(function(a,b){return b.s-a.s});
+  else if(sortBy==='asc')rs.sort(function(a,b){return a.d<b.d?-1:1});
+  else if(sortBy==='recent')rs.sort(function(a,b){return b.t-a.t});
+  document.getElementById('count').textContent=t('count').replace('{n}',rs.length).replace('{total}',TOTAL);
+  var tb=document.getElementById('rows');
+  if(!rs.length){tb.innerHTML='<tr><td colspan="5" class="empty">'+t('empty')+'</td></tr>';return}
+  tb.innerHTML=rs.map(function(r,i){
+    var g=(r.g||'D').toUpperCase();
+    return '<tr class="rowt" onclick="location.href=\'/report?domain='+encodeURIComponent(r.d)+'&lang='+LANG+'\'">\
+      <td class="num" style="color:var(--ink-4)">'+(i+1)+'</td>\
+      <td><div class="rrow"><span class="fav">'+r.d[0].toUpperCase()+'</span><span><span class="rdom">'+r.d+'</span><div class="rwhen">'+new Date(r.t).toISOString().slice(0,10)+'</div></span></div></td>\
+      <td class="num"><span class="g'+g+'">'+g+'</span></td>\
+      <td class="num score-cell"><span class="n" style="font-weight:600">'+r.s+'</span></td>\
+      <td class="num" style="color:var(--ink-4);font-size:11.5px">'+new Date(r.t).toISOString().slice(0,10)+'</td>\
+    </tr>';
+  }).join('');
+}
+function applyStats(rs){
+  var n=rs.length;
+  var avg=n?Math.round(rs.reduce(function(a,r){return a+r.s},0)/n):0;
+  var ready=rs.filter(function(r){return r.s>=70}).length;
+  document.getElementById('stTotal').textContent=n.toLocaleString();
+  document.getElementById('stAvg').innerHTML=avg+'<i>/100</i>';
+  document.getElementById('stReady').textContent=ready.toLocaleString();
+  document.getElementById('stWork').textContent=(n-ready).toLocaleString();
+}
+function render2(){ /* rows flattened into ROWS by load(); filter+stats+render */ 
+  var rs=ROWS;
+  applyStats(rs);
+  render();
+}
+function load(){
+  fetch(MON+'/api/rankings?vertical='+fVert)
+    .then(function(r){return r.json()})
+    .then(function(d){
+      TOTAL=(d&&d.count)||0;
+      ROWS=((d&&d.rows)||[]).map(function(r){return {d:r.domain,s:r.score,g:(r.grade||'D').toUpperCase(),t:r.scanned_at}});
+      render2();
+    })
+    .catch(function(){ document.getElementById('rows').innerHTML='<tr><td colspan="5" class="empty">'+TT_ERR()+'</td></tr>' });
+}
+function TT_ERR(){return LANG==='zh'?'榜单暂时不可用——稍后重试。':'Board temporarily unavailable — try again shortly.'}
+qEl.addEventListener('input',render);
+applyLang();drawFilters();load();
+</script>
+</body>
+</html>

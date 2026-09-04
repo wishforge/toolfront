@@ -850,7 +850,7 @@ async function buildSupplemental(env, domain, robotsText, selfScan) {
       tdmrep: wellKnownStatus(tdmRep),
       web_bot_auth: wellKnownStatus(webBotAuth),
       // Verifying Common Crawl presence needs an external index query —
-      // deliberately not fetched (isagentready shows the same "unknown").
+      // deliberately not fetched (other scanners in this category show the same "unknown").
       common_crawl: { status: "unknown", detail: "Not checked during this scan." },
     },
     agent_auth: {
@@ -1206,9 +1206,10 @@ async function recordScanHistory(domain, publicReport, env) {
   const now = Date.now();
   const last = await env.KV.get("hist:" + domain).catch(() => null);
   if (last && now - Number(last) < SCAN_HISTORY_TTL_MS) return; // throttled
-  const detail = {
-    checks: (publicReport.checks || []).map(c => ({ id: c.id, status: c.status, points: c.points, max: c.max })),
-  };
+  // Full public report: ledger rows double as the warm cache tier, so the
+  // row must restore into a complete report (verdict/checks included).
+  // detail_json never leaves D1 — the public API whitelists its own fields.
+  const detail = { ...publicReport };
   try {
     await env.SCAN_DB.prepare(
       "INSERT INTO scan_history (domain, scanned_at, score, grade, scoring_version, detail_json) VALUES (?, ?, ?, ?, ?, ?)"
@@ -1229,6 +1230,26 @@ async function scanPublicReport(domain, forceFresh, env) {
   if (env.KV && !forceFresh) {
     const cached = await env.KV.get("scan:" + domain, "json");
     if (cached) return { status: 200, body: { ...cached, cached: true }, cacheControl: "public, max-age=60" };
+  }
+  // Warm tier: a recent full report from the scan ledger, so repeats of a
+  // domain after the 5-minute KV window don't re-crawl the target. Legacy
+  // summary-only ledger rows (no verdict) are skipped — they cannot be
+  // rendered as a report.
+  if (env.SCAN_DB && !forceFresh) {
+    try {
+      const row = await env.SCAN_DB.prepare(
+        "SELECT detail_json, scanned_at FROM scan_history WHERE domain = ? ORDER BY scanned_at DESC LIMIT 1"
+      ).bind(domain).first();
+      if (row && row.detail_json) {
+        const parsed = JSON.parse(row.detail_json);
+        const restoreReady = parsed && parsed.verdict !== undefined && parsed.checks && (Date.now() - row.scanned_at < 24 * 60 * 60 * 1000);
+        if (restoreReady) {
+          // Backfill the hot cache so the next hits skip D1 entirely.
+          if (env.KV) { try { await env.KV.put("scan:" + domain, JSON.stringify(parsed), { expirationTtl: 300 }); } catch (_) {} }
+          return { status: 200, body: { ...parsed, cached: true, cached_at: row.scanned_at }, cacheControl: "public, max-age=60" };
+        }
+      }
+    } catch (_) { /* ledger hiccup -> fall through to a live scan */ }
   }
 
   const report = await scanDomainCore(domain, env);
