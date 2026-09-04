@@ -143,12 +143,24 @@ var fVert='all', fGra='All', sortBy='score';
 var ROWS=[], TOTAL=0;
 var qEl=document.getElementById('q');
 
+// NOTE: buttons carry data-set/data-v and a single document-level click
+// delegate below drives them — no onclick= source text. The v values are
+// hardcoded enumerations (whitelists above), so data-v is structurally
+// inert; data attributes keep it inert even if that premise ever changes.
 function seg(id,items,cur,fn,pill){
   document.getElementById(id).innerHTML=items.map(function(x){
     var v=x[0],lb=x[1];
-    return '<button class="'+(pill?'fpill ':'')+(v===cur?'on':'')+'" onclick="'+fn+'(\''+v+'\')">'+lb+'</button>';
+    return '<button data-set="'+fn+'" data-v="'+v+'" class="'+(pill?'fpill ':'')+(v===cur?'on':'')+'">'+lb+'</button>';
   }).join('');
 }
+document.addEventListener('click',function(e){
+  var go=e.target.closest('[data-go]');
+  if(go){location.href=go.getAttribute('data-go');return;}
+  var b=e.target.closest('[data-set]');
+  if(!b)return;
+  var fn=window[b.getAttribute('data-set')];
+  if(typeof fn==='function')fn(b.getAttribute('data-v'));
+});
 function gradeSegItems(){return [['All',t('all')],['A-B','A-B'],['C','C'],['D-F','D-F']]}
 function sortSegItems(){return [['score',t('st.avg')],['asc','A-Z'],['recent',LANG==='zh'?'最近':'Recent']]}
 function drawFilters(){
@@ -176,7 +188,7 @@ function render(){
   if(!rs.length){tb.innerHTML='<tr><td colspan="5" class="empty">'+t('empty')+'</td></tr>';return}
   tb.innerHTML=rs.map(function(r,i){
     var g=(r.g||'D').toUpperCase();
-    return '<tr class="rowt" onclick="location.href=\'/report?domain='+encodeURIComponent(r.d)+'&lang='+LANG+'\'">\
+    return '<tr class="rowt" data-go="/report?domain='+encodeURIComponent(r.d)+'&amp;lang='+LANG+'">\
       <td class="num" style="color:var(--ink-4)">'+(i+1)+'</td>\
       <td><div class="rrow"><span class="fav">'+r.d[0].toUpperCase()+'</span><span><span class="rdom">'+r.d+'</span><div class="rwhen">'+new Date(r.t).toISOString().slice(0,10)+'</div></span></div></td>\
       <td class="num"><span class="g'+g+'">'+g+'</span></td>\
