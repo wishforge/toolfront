@@ -91,8 +91,13 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:
       <li><a href="https://monitor.toolfront.dev/login" data-i18n="nav.mon">Monitor</a></li>
     </ul>
     <span style="display:flex;background:var(--paper-soft,#F1F4F8);border:1px solid var(--line,#E2E6EE);border-radius:999px;padding:3px;gap:2px">
-      <button id="lang-en" onclick="localStorage.setItem('tf-lang','en');location.search='?lang=en'" style="border:none;background:transparent;font:600 11.5px sans-serif;color:var(--ink-3,#6B7280);padding:5px 14px;border-radius:999px;cursor:pointer">EN</button>
-      <button id="lang-zh" onclick="localStorage.setItem('tf-lang','zh');location.search='?lang=zh'" style="border:none;background:transparent;font:600 11.5px sans-serif;color:var(--ink-3,#6B7280);padding:5px 14px;border-radius:999px;cursor:pointer">中文</button>
+      <button id="lang-en" class="langbtn" onclick="localStorage.setItem('tf-lang','en');location.search='?lang=en'">EN</button>
+      <button id="lang-zh" class="langbtn" onclick="localStorage.setItem('tf-lang','zh');location.search='?lang=zh'">中文</button>
+      <style>
+        .langbtn{border:none;background:transparent;font:600 11.5px var(--sans,inherit);color:var(--ink-3,#6B7280);padding:5px 14px;border-radius:999px;cursor:pointer;transition:all .15s ease}
+        .langbtn.on{background:var(--ink,#0C1222);color:var(--paper,#FFF)}
+      </style>
+
     </span>
   </div>
 
@@ -134,11 +139,13 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:
 
 <script>
 /* ── i18n ── */
-let LANG = localStorage.getItem('tf-lang') || (navigator.language || '').indexOf('zh') === 0 ? (localStorage.getItem('tf-lang') || 'zh') : 'en';
-if (new URLSearchParams(location.search).get('lang')) LANG = new URLSearchParams(location.search).get('lang');
+let LANG = localStorage.getItem('tf-lang');
+if (LANG !== 'zh' && LANG !== 'en') LANG = (navigator.language || '').indexOf('zh') === 0 ? 'zh' : 'en';
+const urlLang = new URLSearchParams(location.search).get('lang');
+if (urlLang === 'zh' || urlLang === 'en') { LANG = urlLang; localStorage.setItem('tf-lang', urlLang); }
 const PAIRS = {
  title:['Agent-readiness Rankings','Agent 就绪度排行榜'],
- sub:['每一行都是一次真实扫描——榜单绝不编造分数。按行业过滤，按分数与档位探索，找到你的对标。','Every row is a real scan — the board never invents scores. Filter by industry, explore by score and grade, find your benchmark.'],
+ sub:['Every row is a real scan — the board never invents scores. Filter by industry, explore by score and grade, find your benchmark.','每一行都是一次真实扫描——榜单绝不编造分数。按行业过滤，按分数与档位探索，找到你的对标。'],
  'st.ranked':['WEBSITES RANKED','已收录站点'],'st.avg':['AVERAGE SCORE','平均分'],
  'st.ready':['AGENT-READY','达到就绪'],'st.readyd':['score ≥ 70','分数 ≥ 70'],
  'st.work':['NEEDS WORK','有待改进'],'st.workd':['score < 70','分数 < 70'],
@@ -153,6 +160,8 @@ const PAIRS = {
 };
 function t(k){const p=PAIRS[k];return p?(LANG==='zh'?p[1]:p[0]):k}
 function applyLang(){
+  document.getElementById('lang-en').classList.toggle('on',LANG==='en');
+  document.getElementById('lang-zh').classList.toggle('on',LANG==='zh');
   document.documentElement.lang = LANG==='zh'?'zh-CN':'en';
   document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n)});
   document.getElementById('q').placeholder=t('search.ph');
