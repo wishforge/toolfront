@@ -8,7 +8,7 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   X-Frame-Options: DENY
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; object-src 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://monitor.toolfront.dev http://localhost:8787; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; object-src 'none'
   Permissions-Policy: camera=(), microphone=(), geolocation=()
   Link: </sitemap.xml>; rel="sitemap", </openapi.json>; rel="service-desc"
 

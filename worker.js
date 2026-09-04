@@ -198,8 +198,11 @@ async function handleInternalScan(url, request, env) {
 /* ————— security headers for our own pages/assets —————
    CSP note: script/style 'unsafe-inline' is required by the single-page
    bundle; everything else is locked to 'self'. External script injection
-   (the escalation path of any future HTML bug) dies here. */
-const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; object-src 'none'";
+   (the escalation path of any future HTML bug) dies here.
+   connect-src permits the monitor subdomain (live rankings strip on the
+   home page fetches monitor.toolfront.dev/api/rankings) plus its local
+   dev origin. Keep this list tight — every entry widens the XHR surface. */
+const CSP = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://monitor.toolfront.dev http://localhost:8787; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; object-src 'none'";
 
 function harden(res) {
   const h = new Headers(res.headers);
