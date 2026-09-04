@@ -1738,6 +1738,10 @@
   /* Live rankings strip: real rows from the monitor's public API, or nothing.
      Compliance rule mirrors the rankings board itself — never invent a score. */
   (function () {
+    // DOM helper (same contract as report.html / compare.html). Must be
+    // defined here — the strip code uses it, and index.html has no shared
+    // script that provides it globally.
+    function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
     var base = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
       ? 'http://localhost:8787' : 'https://monitor.toolfront.dev';
     var sec = document.getElementById('rankings');
