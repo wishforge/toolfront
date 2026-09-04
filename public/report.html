@@ -518,7 +518,11 @@
   .hist-row:hover { border-color:var(--accent); box-shadow:var(--shadow-sm); }
   .hist-row .hr-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
   .hist-row .hr-date { color:var(--ink-2); }
-  .hist-row .hr-bottom { display:flex; justify-content:space-between; align-items:center; }
+  .hist-row .hr-bottom { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:nowrap; }
+  .hist-row .hist-score { width:auto; font-size:16px; }
+  .hist-row .hr-cmp { white-space:nowrap; }
+  .hist-row.latest { border-color:var(--good,#059669); background:var(--good-soft,#ECFDF5); }
+  .hist-row.latest:hover { border-color:var(--good,#059669); }
   .hist-row .hr-cmp { font-size:11px; font-weight:650; color:var(--accent-deep); }
 
 </style>
@@ -1086,7 +1090,7 @@
         rows.slice(0, 12).forEach(function (row) {
           var dt = new Date(row.scanned_at);
           var dstr = dt.toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }) + ' ' + dt.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
-          var rowEl = el('a', 'hist-row');
+          var rowEl = el('a', 'hist-row' + (row === rows[0] ? ' latest' : ''));
           rowEl.href = '/compare?a=' + encodeURIComponent(domain) + '&lang=' + lang;
           rowEl.title = t('report.hist.cmp');
           var top = el('div', 'hr-top');
@@ -1117,7 +1121,10 @@
         // "Scanned <latest> UTC" — freshness cue at the card's top-right,
         // isagentready parity.
         card.querySelector('.cbar').appendChild(el('span', 'hist-meta', meta.textContent));
-        resultBox.appendChild(card);
+        // Scan history sits at the TOP of the page (right under the title) —
+        // it is the freshness/trust proof a returning visitor looks for first,
+        // not an afterthought at the bottom (isagentready parity).
+        resultBox.insertBefore(card, resultBox.children[1]);
       })
       .catch(function () { /* history is best-effort — a failed fetch hides the card */ });
   }
