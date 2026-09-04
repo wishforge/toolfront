@@ -43,5 +43,8 @@ ok("each row pre-fills Compare with this domain", page.includes("'/compare?a=' +
 ok("duplicate card guarded across re-renders", page.includes("document.getElementById('hist-card')") && page.includes("removeChild"));
 ok("bilingual keys present", page.includes("'report.hist.title': 'Previous scans'") && page.includes("'report.hist.title': '历史扫描'"));
 
+ok("history endpoint is rate limited like /api/scan (read-amplification guard)", worker.includes("async function handleScanHistory") && /handleScanHistory[\s\S]{0,600}rateLimitAllow/.test(worker.slice(worker.indexOf("async function handleScanHistory"))));
+ok("history 429 response is uniform with scan 429", worker.slice(worker.indexOf("async function handleScanHistory"), worker.indexOf("async function handleScanHistory") + 700).includes("rate_limited"));
+
 console.log("\nscan-history 结果: " + pass + " 通过 / " + fail + " 失败");
 process.exit(fail ? 1 : 0);
