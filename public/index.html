@@ -677,52 +677,6 @@
     font-weight: 340; font-size: 13.5px; line-height: 1.6; color: var(--ink-2);
   }
 
-  /* ═══ CODE SECTION ═══ */
-  .code-section {
-    max-width: 1160px; margin: 0 auto;
-    padding: 0 clamp(24px, 4vw, 40px) clamp(52px, 8vw, 92px);
-    border-top: 1px solid var(--line-light); padding-top: 68px;
-  }
-  .code-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
-    margin-top: 36px;
-  }
-  .code-text h3 {
-    font-family: var(--serif); font-optical-sizing: auto;
-    font-weight: 430; font-size: 29px; line-height: 1.14;
-    letter-spacing: -0.01em; margin-bottom: 18px;
-  }
-  .code-text p {
-    font-family: var(--serif); font-optical-sizing: auto;
-    font-weight: 340; font-size: 14.5px; line-height: 1.62; color: var(--ink-2);
-    margin-bottom: 24px;
-  }
-  .code-block {
-    background: var(--surface-dark); border-radius: var(--r-4);
-    overflow: hidden; box-shadow: var(--shadow-lg);
-    border: 1px solid rgba(255,255,255,0.06);
-  }
-  .code-hdr {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 12px 20px; background: rgba(255,255,255,0.03);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
-  .code-hdr span { font-family: var(--mono); font-size: 11px; color: #555; }
-  .code-lang {
-    font-family: var(--sans); font-size: 10px; font-weight: 600;
-    color: #777; letter-spacing: 0.05em; padding: 4px 10px;
-    background: rgba(255,255,255,0.06); border-radius: var(--r-1);
-  }
-  .code-pre { padding: 24px; overflow-x: auto; }
-  pre {
-    font-family: var(--mono); font-size: 12px; line-height: 1.78; color: #A1AAB8; margin: 0;
-    tab-size: 2;
-  }
-  .ck { color: #C678DD; } .cs { color: #98C379; }
-  .cc { color: #5C6370; font-style: italic; }
-  .cf { color: #61AFEF; } .cp { color: #E5C07B; }
-  .cn { color: #56B6C2; }
-
   /* ═══ FEATURES GRID (SVG Icons) ═══ */
   .features-section {
     max-width: 1160px; margin: 0 auto;
@@ -1263,35 +1217,6 @@
 </section>
 
 <!-- ═══ CODE / TECH ═══ -->
-<section class="code-section">
-  <div class="code-text">
-    <p class="kicker" style="margin-bottom:12px;" data-i18n="code.kicker">What we generate</p>
-    <h3 data-i18n-html="code.h3">One line of code.<br>Your site becomes agent-ready.</h3>
-    <p data-i18n="code.p">We generate WebMCP tool definitions, structured data schemas, llms.txt files, and AI crawler policies — all from analyzing your existing frontend. No backend changes needed.</p>
-    <a href="https://github.com/wishforge/toolfront" target="_blank" rel="noopener" class="btn-nav-solid" style="display:inline-flex;font-size:12.5px;padding:12px 26px;" data-i18n="code.btn">View on GitHub →</a>
-  </div>
-  <div class="code-block">
-    <div class="code-hdr">
-      <span class="code-lang">toolfront-generated.js</span>
-      <span>JavaScript · TypeScript</span>
-    </div>
-    <div class="code-pre">
-<pre><span class="cc" data-i18n="code.cc1">// This page registered a live tool: scan_domain</span>
-<span class="ck">document</span>.modelContext.<span class="cf">registerTool</span>({
-  <span class="cp">name</span>: <span class="cs">"add-to-cart"</span>,
-  <span class="cp">description</span>: <span class="cs">"Add a product variant to visitor's cart"</span>,
-  <span class="cp">inputSchema</span>: {
-    <span class="cp">sku</span>: <span class="cs">"string"</span>,
-    <span class="cp">qty</span>: <span class="cs">"number"</span>
-  },
-  <span class="cp">risk</span>: <span class="cs">"low"</span>,   <span class="cc" data-i18n="code.cc2">// auto-confirmed by default</span>
-}, addToCart);
-
-<span class="cc" data-i18n="code.cc3">// Your existing function, reused as-is — no rewrite needed</span></pre>
-    </div>
-  </div>
-</section>
-
 <!-- ═══ FEATURES (SVG Icons) ═══ -->
 <section class="features-section">
   <h2 data-i18n="feat.h2">Everything an agent needs to use your site.</h2>
@@ -1479,9 +1404,6 @@
   "step2d": "ToolFront writes the machine-readable tool definitions your site is missing — inferred from what you already have. One tag to install, zero rebuild.",
   "step3t": "Stay in control",
   "step3d": "Agents can use your site, but sensitive actions still require human confirmation. You keep the keys — with a full audit trail of every interaction.",
-  "code.kicker": "What we generate",
-  "code.p": "We generate WebMCP tool definitions, structured data schemas, llms.txt files, and AI crawler policies — all from analyzing your existing frontend. No backend changes needed.",
-  "code.btn": "View on GitHub →",
   "f1t": "WebMCP tool definitions",
   "f1d": "Structured actions agents can call directly — search, add-to-cart, book appointments, subscriptions.",
   "f2t": "Structured data & schema.org",
@@ -1511,9 +1433,6 @@
     "mon.note": "We only email when something changes. Unsubscribe anytime. <a href=\"/privacy\" data-i18n=\"mon.plink\">Privacy policy →</a>",
   "foot.privacy": "Privacy",
   "foot.terms": "Terms",
-  "code.cc1": "// This page registered a live tool: scan_domain",
-  "code.cc2": "// auto-confirmed by default",
-  "code.cc3": "// Your existing function, reused as-is — no rewrite needed",
   "foot.tagline": "Built on the open WebMCP proposal.",
   "foot.example": "See an example report →",
   "foot.scanner": "Scanner info",
@@ -1523,7 +1442,6 @@
   "hero.h1": "Your next customers send<br><span class=\"hl-u\">AI agents</span>,<br>not browsers.",
   "hero.meta": "no signup · checks <b>WebMCP · structured data · llms.txt · robots · sitemap</b>",
   "rp.fix": "<b>Fastest win:</b> add <code>/llms.txt</code> — one markdown file so agents introduce you by your own script. <b>+15 pts</b>",
-  "code.h3": "One line of code.<br>Your site becomes agent-ready.",
   "dog.h3": "This page registered a live tool: <code>scan_domain</code>",
   "dog.p": "If you're viewing this in a WebMCP-enabled browser (Chrome 146+ Origin Trial), an AI agent on this page can call <code style=\"font-family:var(--mono);background:var(--good-soft);color:var(--good);padding:2px 7px;border-radius:4px;font-size:13px;\">scan_domain</code> right now and scan any website — same as the form above. That's the whole idea: your pages become places agents can <em>work</em>, not just read.",
   "strip.1": "<b>WebMCP tools</b> — agents operate, not just read",
@@ -1588,9 +1506,6 @@
   "step2d": "网站现有功能不动，自动生成缺的工具定义。一行代码装上，不改架构。",
   "step3t": "保持掌控",
   "step3d": "AI 可以操作你的网站，但关键动作还是你说了算。每次操作都有记录，随时可查。",
-  "code.kicker": "我们帮你生成什么",
-  "code.p": "我们帮你生成 WebMCP 工具定义、结构化数据、llms.txt 和 AI 爬虫规则——只分析你现有的前端代码，后端完全不用动。",
-  "code.btn": "在 GitHub 上查看 →",
   "f1t": "WebMCP 工具定义",
   "f1d": "AI 可以直接调用的结构化接口——搜索、加购物车、预约、订阅。",
   "f2t": "结构化数据 & schema.org",
@@ -1620,9 +1535,6 @@
     "mon.note": "只有真出事才发邮件 · 不想用了随时退订。<a href=\"/privacy\" data-i18n=\"mon.plink\">隐私政策 →</a>",
   "foot.privacy": "隐私政策",
   "foot.terms": "服务条款",
-  "code.cc1": "// 本页注册了一个真实工具：scan_domain",
-  "code.cc2": "// 默认自动确认",
-  "code.cc3": "// 你现有的函数，原样复用——无需重写",
   "foot.tagline": "基于开放的 WebMCP 提案。",
   "foot.example": "看一份报告样例 →",
   "foot.scanner": "扫描器说明",
@@ -1631,7 +1543,6 @@
   "doc.title": "ToolFront — 你的网站准备好迎接 AI 智能体了吗？",
   "hero.meta": "无需注册 · 检测 <b>WebMCP · 结构化数据 · llms.txt · robots · sitemap</b>",
   "rp.fix": "<b>最快拿分：</b>加一个 <code>/llms.txt</code>——一份 markdown，按你准备好的说法介绍你。<b>+15 分</b>",
-  "code.h3": "一行代码。<br>AI 从此看得懂你的网站。",
   "dog.h3": "本页注册了一个真正能用的工具：<code>scan_domain</code>",
   "dog.p": "如果你用的是支持 WebMCP 的浏览器（Chrome 146+ Origin Trial），本页上的 AI 现在就能调用 <code style=\"font-family:var(--mono);background:var(--good-soft);color:var(--good);padding:2px 7px;border-radius:4px;font-size:13px;\">scan_domain</code> 扫描任意网站——跟上面的表单效果一样。这就是我们的理念：让你的网页变成 AI 能<strong>干活</strong>的地方，而不只是能<strong>看</strong>的地方。",
   "strip.1": "<span class=\"strip-dot\" style=\"background:var(--good)\"></span><b>WebMCP 工具</b>——AI 能直接操作，不只是能看",
