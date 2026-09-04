@@ -497,6 +497,30 @@
   .diag-ext b { font-weight:650 }
   .hist-delta { font-family:var(--mono,monospace); font-variant-numeric:tabular-nums; font-weight:700; font-size:12px; margin-left:8px }
   .hist-delta.up{color:var(--good,#059669)} .hist-delta.dn{color:var(--bad,#B42323)}
+
+  /* Sub-navigation strip (isagentready parity): Scanner crumb + domain +
+     grade/score chip on the right — orients the reader before the summary. */
+  .rhead-top { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+  .subnav { display:inline-flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--line); border-radius:999px; padding:7px 8px 7px 14px; font-size:13px; font-weight:600; color:var(--ink); }
+  .subnav .crumb { color:var(--ink-3); font-weight:550; text-decoration:none; }
+  .subnav .crumb:hover { color:var(--ink); }
+  .subnav .sep { color:var(--ink-4); font-weight:400; }
+  .gradechip { font-family:var(--mono); font-variant-numeric:tabular-nums; font-weight:700; font-size:13px; padding:5px 13px; border-radius:999px; border:1px solid var(--line); background:var(--paper-soft); }
+  .gradechip.good { color:var(--good,#059669); border-color:var(--good,#059669); background:var(--good-soft,#ECFDF5); }
+  .gradechip.mid { color:var(--mid,#B4690E); border-color:var(--mid,#B4690E); background:var(--mid-soft,#FFFBEB); }
+  .gradechip.bad { color:var(--bad,#DC2626); border-color:var(--bad,#DC2626); background:var(--bad-soft,#FEF2F2); }
+  /* History as a horizontal card grid (isagentready parity): each scan is a
+     tappable card with date, score and an explicit Compare affordance. */
+  .hist-meta { display:flex; justify-content:flex-end; font-size:11.5px; color:var(--ink-4); margin-bottom:8px; margin-left:auto; font-family:var(--sans); font-weight:450; letter-spacing:0; text-transform:none; }
+  .hist-body { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  @media(max-width:760px){ .hist-body { grid-template-columns:1fr; } }
+  .hist-row { display:flex; flex-direction:column; gap:6px; padding:12px 14px; border:1px solid var(--line); border-radius:12px; background:var(--card); text-decoration:none; font-family:var(--mono); font-size:12.5px; transition:border-color .15s ease, box-shadow .15s ease; }
+  .hist-row:hover { border-color:var(--accent); box-shadow:var(--shadow-sm); }
+  .hist-row .hr-top { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .hist-row .hr-date { color:var(--ink-2); }
+  .hist-row .hr-bottom { display:flex; justify-content:space-between; align-items:center; }
+  .hist-row .hr-cmp { font-size:11px; font-weight:650; color:var(--accent-deep); }
+
 </style>
 </head>
 <body>
@@ -562,7 +586,7 @@
       'report.biz.high': 'Bottom line: your site already speaks AI fluently — you are ahead of most competitors. Keep it that way and keep monitoring.',
       'report.biz.allgood': 'Nothing urgent: AI can already read and work with your site. Keep monitoring so redesigns don\u2019t break it.',
       'report.diag.title': 'Scan diagnostics', 'report.diag.assessed': 'assessed', 'report.diag.passed': 'passed', 'report.diag.partial': 'partial', 'report.diag.failed': 'failed', 'report.diag.na': 'n/a', 'report.diag.strongest': 'Strongest', 'report.diag.weakest': 'Weakest',
-      'report.compare': 'Compare with a competitor', 'report.hist.title': 'Previous scans', 'report.hist.cmp': 'Compare with a competitor — click to pre-fill', 'report.share': 'Share', 'report.pdf': 'Save as PDF', 'report.new': 'New scan', 'report.copied': 'Link copied', 'report.copyfail': 'Copy failed — copy it from the address bar',
+      'report.compare': 'Compare with a competitor', 'nav.scanner': 'Scanner', 'report.hist.title': 'Previous scans', 'report.hist.scanned': 'Scanned', 'report.hist.cmpbtn': 'Compare →', 'report.hist.cmp': 'Compare with a competitor — click to pre-fill', 'report.share': 'Share', 'report.pdf': 'Save as PDF', 'report.new': 'New scan', 'report.copied': 'Link copied', 'report.copyfail': 'Copy failed — copy it from the address bar',
       'report.printhead': 'Agent-readiness report — toolfront.dev',
       'report.raise': '<b>One redesign can drop this score.</b> Monitor checks weekly and emails you only when it moves:',
       'report.raise.keep': '<b>Good score \u2014 but one redesign can still drop it.</b> Monitor checks weekly and emails you only when it moves:',
@@ -628,7 +652,7 @@
       'report.biz.high': '总结：你的网站已经"会说 AI 的语言"——领先大多数对手。保持住，定期复查。',
       'report.biz.allgood': '暂时不用改：AI 已经能读懂并用好你的网站。定期回扫，别让下次改版悄悄把它搞坏。',
       'report.diag.title': '扫描诊断', 'report.diag.assessed': '项已评估', 'report.diag.passed': '通过', 'report.diag.partial': '部分', 'report.diag.failed': '失败', 'report.diag.na': '不适用', 'report.diag.strongest': '最强项', 'report.diag.weakest': '最弱项',
-      'report.compare': '与竞品对比', 'report.hist.title': '历史扫描', 'report.hist.cmp': '与竞品对比——点击预填本域名', 'report.share': '分享', 'report.pdf': '存为 PDF', 'report.new': '重新扫描', 'report.copied': '链接已复制', 'report.copyfail': '复制失败——请从地址栏复制',
+      'report.compare': '与竞品对比', 'nav.scanner': '扫描器', 'report.hist.title': '历史扫描', 'report.hist.scanned': '最近扫描', 'report.hist.cmpbtn': '对比 →', 'report.hist.cmp': '与竞品对比——点击预填本域名', 'report.share': '分享', 'report.pdf': '存为 PDF', 'report.new': '重新扫描', 'report.copied': '链接已复制', 'report.copyfail': '复制失败——请从地址栏复制',
       'report.printhead': 'AI 就绪度报告 — toolfront.dev',
       'report.raise': '<b>一次改版，分数可能就掉了。</b>Monitor 每周扫一次，掉了才发邮件：',
       'report.raise.keep': '<b>分数不低——但一次改版还是能悄悄掉下去。</b>Monitor 每周扫一次，掉了才发邮件：',
@@ -930,6 +954,21 @@
 
   function buildHead(r) {
     var head = el('div', 'rhead');
+    // Sub-navigation strip: orients the reader (which site, which grade)
+    // before the summary — isagentready parity.
+    var topRow = el('div', 'rhead-top');
+    var sub = el('div', 'subnav');
+    var crumb = el('a', 'crumb', t('nav.scanner'));
+    crumb.href = '/';
+    sub.appendChild(crumb);
+    sub.appendChild(el('span', 'sep', '›'));
+    sub.appendChild(document.createTextNode(r.domain));
+    topRow.appendChild(sub);
+    if (typeof r.grade === 'string' && typeof r.score === 'number') {
+      var chip = el('span', 'gradechip ' + cls(r.score), r.grade + ' · ' + r.score + '/' + (r.scoreMax || 100));
+      topRow.appendChild(chip);
+    }
+    head.appendChild(topRow);
     var you = el('span', 'you', t('report.printhead') + ' · ' + t('report.scanned') + ' ' + (r.scannedAt ? String(r.scannedAt).slice(0, 10) : ''));
     head.appendChild(you);
     head.appendChild(el('div', 'dom', r.domain));
@@ -1040,6 +1079,7 @@
         if (!rows.length) return; // no ledger rows -> no card (never fake history)
         var old = document.getElementById('hist-card');
         if (old && old.parentNode) old.parentNode.removeChild(old);
+        var meta = el('div', 'hist-meta', t('report.hist.scanned') + ' ' + new Date(rows[0].scanned_at).toISOString().slice(0, 16).replace('T', ' ') + ' UTC');
         var body = el('div', 'hist-body');
         var locale = lang === 'zh' ? 'zh-CN' : 'en-US';
         var prevScore = null;
@@ -1049,10 +1089,12 @@
           var rowEl = el('a', 'hist-row');
           rowEl.href = '/compare?a=' + encodeURIComponent(domain) + '&lang=' + lang;
           rowEl.title = t('report.hist.cmp');
-          var g = el('span', 'hist-grade ' + cls(row.score), row.grade || '\u2013');
-          rowEl.appendChild(el('span', 'hist-date', dstr));
-          rowEl.appendChild(g);
-          rowEl.appendChild(el('span', 'hist-score', String(row.score)));
+          var top = el('div', 'hr-top');
+          top.appendChild(el('span', 'hr-date', dstr));
+          top.appendChild(el('span', 'hist-grade ' + cls(row.score), row.grade || '\u2013'));
+          rowEl.appendChild(top);
+          var bottom = el('div', 'hr-bottom');
+          var sc = el('span', 'hist-score', String(row.score));
           // Δ vs the previous ledger row — only meaningful within one
           // scoring_version, otherwise the delta lies about progress.
           if (prevScore !== null && row.scoring_version && rows[0].scoring_version === row.scoring_version) {
@@ -1060,15 +1102,21 @@
             if (d !== 0) {
               var dEl = el('span', 'hist-delta ' + (d > 0 ? 'up' : 'dn'), (d > 0 ? '+' : '') + d);
               dEl.title = 'vs previous scan';
-              rowEl.appendChild(dEl);
+              bottom.appendChild(dEl);
             }
           }
           prevScore = row.score;
+          bottom.appendChild(sc);
+          bottom.appendChild(el('span', 'hr-cmp', t('report.hist.cmpbtn')));
+          rowEl.appendChild(bottom);
           rowEl.appendChild(el('span', 'hist-ver', row.scoring_version || ''));
           body.appendChild(rowEl);
         });
         var card = buildCard(t('report.hist.title'), body, false);
         card.id = 'hist-card';
+        // "Scanned <latest> UTC" — freshness cue at the card's top-right,
+        // isagentready parity.
+        card.querySelector('.cbar').appendChild(el('span', 'hist-meta', meta.textContent));
         resultBox.appendChild(card);
       })
       .catch(function () { /* history is best-effort — a failed fetch hides the card */ });
