@@ -96,6 +96,21 @@
   </div>
 
   <div class="card">
+    <div class="card-head">Why our scores may differ from other scanners</div>
+    <div style="padding: 14px 18px; font-size: 13.5px; line-height: 1.75; color: var(--ink-2);">
+      <p style="margin:0 0 10px;">Scores are <strong>not comparable across scanners</strong> — each tool measures a different slice of "agent readiness", usually with different weights and grade bands.</p>
+      <p style="margin:0 0 10px;">On top of the dimensions discovery-led scanners check, we additionally measure what agents need to <em>operate</em>, not just find you:</p>
+      <ul style="margin:0 0 10px; padding-left:20px;">
+        <li><strong>Content freshness</strong> — dateModified / Last-Modified signals, so an agent can tell how current your content is</li>
+        <li><strong>Machine-readable tool surfaces</strong> — OpenAPI / structured endpoints an agent can call directly</li>
+        <li><strong>API error responses</strong> — what an agent sees when a call fails</li>
+        <li><strong>WebMCP tool registration</strong> — when present</li>
+      </ul>
+      <p style="margin:0;">Extra dimensions mean our denominator differs, and a lower number here does not mean a worse site — it means more things were checked. Every point traces to a concrete check listed in the report.</p>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="card-head" id="statusHead">What a result means</div>
     <div style="padding: 14px 18px;">
       <div class="bands" id="bands"></div>
