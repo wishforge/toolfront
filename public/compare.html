@@ -109,6 +109,30 @@
     .vs { padding: 10px 0; }
   }
   @media print { .top, .cmp-form, .colo { display: none !important; } }
+
+  /* staged per-side progress (first-finished-first-rendered) */
+  .duel2{display:grid;grid-template-columns:1fr auto 1fr;gap:0;align-items:stretch}
+  @media(max-width:760px){.duel2{grid-template-columns:1fr}.duel2 .vs{display:none}}
+  .scard{border:1px solid var(--line,#E5E1D8);border-radius:16px;padding:24px;background:#FFF;min-width:0}
+  .scard.done{box-shadow:0 4px 20px -8px rgba(0,0,0,.10)}
+  .scard.pend .pd{font-family:var(--mono,monospace);font-weight:600;font-size:14px;margin-bottom:14px}
+  .progline{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2,#444);margin-bottom:6px}
+  .progline .pct{font-weight:700}
+  .pbar{height:4px;border-radius:2px;background:var(--paper-soft,#F1F4F8);overflow:hidden;margin-bottom:14px}
+  .pbar i{display:block;height:100%;background:var(--accent,#2563EB);width:0;transition:width .5s}
+  .vtl{margin:4px 0}
+  .vstage{display:flex;align-items:center;gap:12px;padding:7px 0;position:relative}
+  .vstage .ic{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:none;background:#FFF;border:1.5px solid var(--ink-5,#D1D5DB);position:relative;z-index:1}
+  .vstage .nm{font-size:12.5px;color:var(--ink-3,#6B7280)}
+  .vstage::before{content:"";position:absolute;left:12px;top:-15px;height:15px;width:1.5px;background:var(--line,#E5E1D8)}
+  .vstage:first-child::before{display:none}
+  .vstage.ok .ic{background:var(--good,#059669);border-color:var(--good,#059669)}
+  .vstage.ok .ic::before{content:"✓";color:#FFF;font-size:11px;font-weight:700}
+  .vstage.ok .nm{color:var(--ink-2,#444)}
+  .vstage.ok::before{background:var(--good,#059669);opacity:.35}
+  .vstage.cur .ic{border-color:var(--accent,#2563EB);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  .vstage.cur .nm{color:var(--ink,#111);font-weight:600}
+
 </style>
 </head>
 <body>
@@ -150,6 +174,10 @@
       'cmp.go': 'Compare',
       'cmp.fine': 'Both sites are scanned live — and the page link is yours to share.',
       'cmp.loading': 'Scanning both sites…',
+      'cmp.checking': 'Checking',
+      'cmp.scanning': 'Scanning',
+      'cmp.analyzing': 'Analyzing both websites for AI agent readiness',
+      'cmp.done': 'Complete',
       // API error codes are for machines; users get the human version.
       'cmp.err': 'That comparison did not work: ',
       'cmp.err.rate_limited': 'Too many scans from here. Wait a minute and try again.',
@@ -354,27 +382,101 @@
     }
   }
 
+  var STAGES = ['AI Content Discovery', 'AI Search Signals', 'Content & Semantics', 'Agent Protocols', 'Security & Trust'];
+  function timelineEl(done, cur) {
+    var tl = el('div', 'vtl');
+    for (var i = 0; i < STAGES.length; i++) {
+      var cls = i < done ? 'ok' : (i === cur ? 'cur' : '');
+      var nm = i < done ? STAGES[i] : (i === cur ? t('cmp.checking') + ' ' + STAGES[i] + '…' : STAGES[i]);
+      var row = el('div', 'vstage ' + cls);
+      row.appendChild(el('span', 'ic'));
+      row.appendChild(el('span', 'nm', nm));
+      tl.appendChild(row);
+    }
+    return tl;
+  }
+  function sidePending(domain) {
+    var card = el('div', 'scard pend');
+    card.appendChild(el('div', 'pd', domain));
+    var line = el('div', 'progline');
+    var st = el('span', 'st', t('cmp.checking') + ' …');
+    var pc = el('span', 'pct', '0%');
+    line.appendChild(st); line.appendChild(pc);
+    card.appendChild(line);
+    var bar = el('div', 'pbar'); var fill = el('i'); bar.appendChild(fill);
+    card.appendChild(bar);
+    card.appendChild(timelineEl(0, 0));
+    return { card: card, st: st, pc: pc, fill: fill };
+  }
+  // First-finished-first-rendered: each side runs its own scan request and
+  // paints independently — a cached side appears instantly while the other
+  // side still shows its staged progress. /api/compare stays available for
+  // old links; the page itself no longer depends on it.
   function load(a, b) {
     var out = document.getElementById('out');
     out.textContent = '';
-    out.appendChild(el('div', 'scan-loading', t('cmp.loading')));
-    fetch('/api/compare?a=' + encodeURIComponent(a) + '&b=' + encodeURIComponent(b))
-      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-      .then(function (r) {
-        // Prefer the machine error code over `detail` — detail is an English
-        // sentence, the code is what the human-copy map keys on.
-        if (!r.ok) { throw new Error(r.j && r.j.error || r.j && r.j.detail || 'request failed'); }
-        render(r.j);
-        try { history.replaceState(null, '', '/compare?a=' + encodeURIComponent(a) + '&b=' + encodeURIComponent(b) + '&lang=' + lang); } catch (_) {}
-      })
-      .catch(function (e) {
-        // The thrown message carries the API error code (rate_limited, …) —
-        // translate it to plain language; never surface the raw field.
-        var msg = String((e && e.message) || e || '');
-        var key = 'cmp.err.' + (API_ERRORS.indexOf(msg) >= 0 ? msg : 'generic');
-        out.textContent = '';
-        out.appendChild(el('div', 'err', t('cmp.err') + t(key)));
-      });
+    var duel = el('div', 'duel2');
+    var sides = {};
+    ['A', 'B'].forEach(function (side, idx) {
+      var domain = idx === 0 ? a : b;
+      var sh = sidePending(domain);
+      sides[side] = sh; duel.appendChild(sh.card);
+      if (idx === 0) { var vs = el('div', 'vs'); vs.appendChild(el('div', 'vs-badge', 'VS')); duel.appendChild(vs); }
+    });
+    out.appendChild(duel);
+    var sideData = { A: null, B: null };
+    function maybeDelta() {
+      if (!(sideData.A !== undefined && sideData.B !== undefined)) return;
+      var da = sideData.A, db = sideData.B;
+      var okA = da && typeof da.score === 'number';
+      var okB = db && typeof db.score === 'number';
+      if (okA && okB) {
+        var d = da.score - db.score;
+        var pill = el('div', 'delta-row');
+        var badge = el('span', 'delta-pill ' + (d === 0 ? 'tie' : 'a'),
+          d === 0 ? t('cmp.tie').replace('{n}', String(da.score))
+                  : t('cmp.leads').replace('{w}', d > 0 ? da.domain : db.domain).replace('{n}', String(Math.abs(d))));
+        pill.appendChild(badge);
+        out.appendChild(pill);
+        if (d !== 0) duel.children[d > 0 ? 0 : 2].classList.add('win');
+        out.appendChild(diffTable(da, db));
+      }
+    }
+    function fetchSide(side, domain) {
+      var sh = sides[side];
+      var step = 0;
+      var timer = setInterval(function () {
+        step++;
+        if (step < STAGES.length) {
+          sh.st.textContent = t('cmp.checking') + ' ' + STAGES[step] + '…';
+          var pc = Math.round(step / STAGES.length * 100);
+          sh.pc.textContent = pc + '%'; sh.fill.style.width = pc + '%';
+          sh.card.querySelector('.vtl').replaceWith(timelineEl(step, step));
+        }
+      }, 650);
+      fetch('/api/scan?domain=' + encodeURIComponent(domain))
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (r) {
+          clearInterval(timer);
+          if (!r.ok) throw new Error(r.j && r.j.error || 'scan failed');
+          sh.card.textContent = '';
+          sh.card.appendChild(sideCard(side, r.j, 200));
+          sh.card.classList.add('done');
+          return r.j;
+        })
+        .catch(function (e) {
+          clearInterval(timer);
+          sh.card.textContent = '';
+          sh.card.appendChild(el('div', 'err', t('cmp.err') + String(e.message || e)));
+          return null;
+        })
+        .then(function (data) {
+          sideData[side] = data === undefined ? null : data;
+          maybeDelta();
+        });
+    }
+    fetchSide('A', a); fetchSide('B', b);
+    try { history.replaceState(null, '', '/compare?a=' + encodeURIComponent(a) + '&b=' + encodeURIComponent(b) + '&lang=' + lang); } catch (_) {}
   }
 
   document.getElementById('cmpform').addEventListener('submit', function (e) {
