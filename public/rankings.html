@@ -111,8 +111,8 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:
   <div class="statgrid">
     <div class="scard"><div class="sl" data-i18n="st.ranked">WEBSITES RANKED</div><div class="sv" id="stTotal">–</div></div>
     <div class="scard"><div class="sl" data-i18n="st.avg">AVERAGE SCORE</div><div class="sv" id="stAvg">–<i>/100</i></div></div>
-    <div class="scard"><div class="sl" data-i18n="st.ready">AGENT-READY</div><div class="sv" id="stReady">–</div><div class="sd" data-i18n="st.readyd">score ≥ 70</div></div>
-    <div class="scard"><div class="sl" data-i18n="st.work">NEEDS WORK</div><div class="sv" id="stWork">–</div><div class="sd" data-i18n="st.workd">score &lt; 70</div></div>
+    <div class="scard"><div class="sl" data-i18n="st.ready">AGENT-READY</div><div class="sv" id="stReady">–</div><div class="sd" data-i18n="st.readyd">grade A–B</div></div>
+    <div class="scard"><div class="sl" data-i18n="st.work">NEEDS WORK</div><div class="sv" id="stWork">–</div><div class="sd" data-i18n="st.workd">grade C or below</div></div>
   </div>
 
   <div class="filters" id="indRow"></div>
@@ -147,8 +147,8 @@ const PAIRS = {
  title:['Agent-readiness Rankings','Agent 就绪度排行榜'],
  sub:['Every row is a real scan — the board never invents scores. Filter by industry, explore by score and grade, find your benchmark.','每一行都是一次真实扫描——榜单绝不编造分数。按行业过滤，按分数与档位探索，找到你的对标。'],
  'st.ranked':['WEBSITES RANKED','已收录站点'],'st.avg':['AVERAGE SCORE','平均分'],
- 'st.ready':['AGENT-READY','达到就绪'],'st.readyd':['score ≥ 70','分数 ≥ 70'],
- 'st.work':['NEEDS WORK','有待改进'],'st.workd':['score < 70','分数 < 70'],
+ 'st.ready':['AGENT-READY','达到就绪'],'st.readyd':['grade A–B','评级 A–B'],
+ 'st.work':['NEEDS WORK','有待改进'],'st.workd':['grade C or below','评级 C 及以下'],
  'th.dom':['DOMAIN','域名'],'th.grade':['GRADE','评级'],'th.score':['SCORE','分数'],'th.when':['SCANNED','扫描时间'],
  'foot.note':['Every number is reproducible — open any site for the full report and scoring method.','每个数字都可复现——查看任意站点的完整报告与评分方法。'],
  'search.ph':['Search domain...','搜索域名…'],
@@ -212,7 +212,6 @@ function drawFilters(){
 function setVert(v){fVert=v;drawFilters();load()}
 function setGra(g){fGra=g;drawFilters();render()}
 function setSort(s){sortBy=s;drawFilters();render()}
-function gradeBand(s){if(s>=70)return 'A-B';if(s>=50)return 'C';return 'D-F'}
 function render(){
   var q=(qEl.value||'').toLowerCase();
   var rs=ROWS.filter(function(r){
@@ -239,13 +238,18 @@ function render(){
   }).join('');
 }
 function applyStats(rs){
+  // Stats are computed over the full board (applyStats is only fed ROWS from
+  // load(); grade-filter changes re-render the table, not these cards). Score
+  // is the capability /100 scale (cap100), and the ready/needs-work buckets
+  // follow the mastery grade letters, not raw-score thresholds.
   var n=rs.length;
-  var avg=n?Math.round(rs.reduce(function(a,r){return a+r.s},0)/n):0;
-  var ready=rs.filter(function(r){return r.s>=70}).length;
+  var avg=n?Math.round(rs.reduce(function(a,r){return a+cap100(r.s)},0)/n):0;
+  var ready=rs.filter(function(r){return r.g==='A'||r.g==='B'}).length;
+  var work=rs.filter(function(r){return r.g==='C'||r.g==='D'||r.g==='F'}).length;
   document.getElementById('stTotal').textContent=n.toLocaleString();
   document.getElementById('stAvg').innerHTML=avg+'<i>/100</i>';
   document.getElementById('stReady').textContent=ready.toLocaleString();
-  document.getElementById('stWork').textContent=(n-ready).toLocaleString();
+  document.getElementById('stWork').textContent=work.toLocaleString();
 }
 function render2(){ /* rows flattened into ROWS by load(); filter+stats+render */ 
   var rs=ROWS;

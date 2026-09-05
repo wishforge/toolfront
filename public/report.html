@@ -964,7 +964,7 @@
      dictionary keyed by check status; no dynamic data ever reaches it. */
   function setIcon(node, name) { node.innerHTML = ICONS[name] || ''; }
 
-  function buildHead(r) {
+  function buildHead(r, basis) {
     var head = el('div', 'rhead');
     // Sub-navigation strip: orients the reader (which site, which grade)
     // before the summary — isagentready parity.
@@ -978,8 +978,12 @@
     topRow.appendChild(sub);
     if (typeof r.grade === 'string' && typeof r.score === 'number') {
       var sm = r.scoreMax || 100;
-      var pctBase = (r.capPct != null) ? r.capPct : Math.round(r.score / sm * 100);
-      var chip = el('span', 'gradechip ' + cls(r.score), r.grade + ' · ' + ((r.capPct != null) ? r.capPct + '/100' : r.score + '/' + sm) + ' · ' + pctBase + '%');
+      // Same layered predicate as the hero: `r.mastery` present AND capPct a
+      // number. (buildHead runs outside renderReport, so this is the local
+      // equivalent of renderReport's hasLayers.)
+      var layered = !!(r.mastery && typeof r.capPct === 'number');
+      var pctBase = layered ? r.capPct : Math.round(r.score / sm * 100);
+      var chip = el('span', 'gradechip ' + cls(typeof basis === 'number' ? basis : pctBase), r.grade + ' · ' + (layered ? r.capPct + '/100' : r.score + '/' + sm) + ' · ' + pctBase + '%');
       topRow.appendChild(chip);
     }
     if (r.scoring_version) {
@@ -1282,10 +1286,12 @@
     return acts;
   }
 
-  function buildBiz(r) {
+  function buildBiz(r, basis) {
     var body = el('div', 'cbody');
     var biz = el('div', 'biz');
-    var band = r.score >= 70 ? 'report.biz.high' : r.score >= 40 ? 'report.biz.mid' : 'report.biz.low';
+    // Band thresholds match the mastery basis the engine grades on (>=70
+    // Agent-ready, >=40 Partially readable), never raw r.score.
+    var band = basis >= 70 ? 'report.biz.high' : basis >= 40 ? 'report.biz.mid' : 'report.biz.low';
     biz.appendChild(el('div', 'biz-sum', t(band)));
     var shown = 0;
     (r.checks || []).forEach(function (c) {
@@ -1315,6 +1321,9 @@
     var fixable = (r.checks || []).filter(function (c) { return c.status === 'fail' || c.status === 'partial'; });
     var fixDict = (CHECKS_L10N[lang] && CHECKS_L10N[lang].fixes) || {};
     var totalGain = 0;
+    // Local layered-equivalent of renderReport's hasLayers: when the engine
+    // shipped mastery+capPct, the graded letter lives on the mastery scale.
+    var layered = !!(r.mastery && typeof r.capPct === 'number');
 
     // Auto-fix strip (only when there is something to fix): point the visitor
     // at the installable fix-skills repo their own agent can execute.
@@ -1500,6 +1509,7 @@
     function project(rr) {
       var checkedGain = 0;
       var availableMax = 0;
+      var masteryGain = 0; // applied gains that sit in the mastery-graded pool
       var rows = body.querySelectorAll('.fix');
       var idx = 0;
       fixable.forEach(function (c) {
@@ -1510,7 +1520,13 @@
         if (row.classList.contains('dismissed')) return;
         availableMax += gainN; // track remaining potential
         var cb = row.querySelector('input');
-        if (cb && cb.checked) checkedGain += gainN;
+        if (cb && cb.checked) {
+          checkedGain += gainN;
+          // Mastery grades the essential pool only — surface/emerging gains
+          // lift capability but never the graded letter, so they must not
+          // move the projected letter on layered reports either.
+          if (layered && tierOf(c) === 'essential') masteryGain += gainN;
+        }
       });
       var sum = Math.min(maxScore, (typeof r.score === 'number' ? r.score : 0) + checkedGain);
       fill.style.width = Math.round((sum / maxScore) * 100) + '%';
@@ -1519,7 +1535,19 @@
       // computed on the percentage scale — a 100-hardcoded "/ 100" broke
       // every report where bot protection excluded a check (44/100 shown
       // while the real ceiling was 89).
-      var label = t('report.proj.est').replace('{s}', String(sum)).replace('{m}', String(maxScore)).replace('{g}', letter(Math.round((sum / maxScore) * 100)));
+      // On layered reports the projected letter must live on the SAME scale
+      // the engine grades on: current mastery.earned + only the applied
+      // essential-pool gains, over r.mastery.max. Legacy reports keep the
+      // raw sum/maxScore percentage. The raw {s}/{m} display below is left
+      // on its existing (points) scale.
+      var gPct;
+      if (layered && r.mastery && r.mastery.max > 0) {
+        var projEarned = Math.min(r.mastery.max, (r.mastery.earned || 0) + masteryGain);
+        gPct = Math.round(projEarned / r.mastery.max * 100);
+      } else {
+        gPct = Math.round((sum / maxScore) * 100);
+      }
+      var label = t('report.proj.est').replace('{s}', String(sum)).replace('{m}', String(maxScore)).replace('{g}', letter(gPct));
       if (availableMax > 0 && sum < maxScore) {
         var remain = availableMax - checkedGain;
         var moreHint = (lang === 'zh')
@@ -1604,20 +1632,30 @@
     var first = animate && !animated;
     if (first) { animated = true; document.body.classList.add('anim'); }
 
-    resultBox.appendChild(buildHead(r));
+    // Single grading basis for this report: the engine now grades mastery
+    // (masteryPct over the essential pool) and derives capPct /100 from the
+    // full rubric. Legacy cached reports carry neither, so they fall back to
+    // raw score normalised to scoreMax. Every same-screen consumer below
+    // (verdict, letter/chip colour, business band, projected fix grade) reads
+    // THIS number instead of raw r.score, so a mastery-graded report can never
+    // display raw-scale thresholds next to mastery-derived letters.
+    var hasLayers = !!(r.mastery && typeof r.capPct === "number");
+    var smBasis = (typeof r.scoreMax === 'number' && r.scoreMax > 0) ? r.scoreMax : 100;
+    var basis = hasLayers ? r.mastery.pct : Math.round((typeof r.score === 'number' ? r.score : 0) / smBasis * 100);
+
+    resultBox.appendChild(buildHead(r, basis));
 
     // Card 1 — summary
     var b1 = el('div', 'cbody');
     b1.appendChild(el('div', 'scan-fx'));
     b1.scanFx = true;
     var hero = el('div', 'hero-row');
-    hero.appendChild(el('div', 'grade ' + cls(r.score), r.grade));
+    hero.appendChild(el('div', 'grade ' + cls(basis), r.grade));
     var nums = el('div', 'nums');
-    var hasLayers = !!(r.mastery && typeof r.capPct === "number");
     var scoreEl = el('span', null, String(hasLayers ? r.capPct : r.score));
     scoreEl.id = 'scoreNum';
     var score = el('div', 'score');
-    score.setAttribute('title', t('report.cap.label'));
+    if (hasLayers) score.setAttribute('title', t('report.cap.label'));
     score.appendChild(scoreEl);
     score.appendChild(el('span', 'of', hasLayers ? ' / 100' : ' / ' + ((typeof r.scoreMax === 'number' && r.scoreMax > 0) ? r.scoreMax : 100)));
     var prev = null;
@@ -1641,7 +1679,7 @@
     hero.appendChild(nums);
     var vd = el('div', 'verdict');
     // Split on first sentence-ending punctuation (. or 。) for bold/plain rendering
-    var vt = localVerdict(r.score);
+    var vt = localVerdict(basis);
     var dotIdx = Math.max(vt.indexOf('.'), vt.indexOf('。'));
     var strong = el('b', null, dotIdx > -1 ? vt.slice(0, dotIdx + 1) : vt);
     vd.appendChild(strong);
@@ -1665,7 +1703,7 @@
     resultBox.appendChild(buildCard(t('report.summary'), b1, true));
 
     // Card 2 — business impact
-    resultBox.appendChild(buildCard(t('report.biz.title'), buildBiz(r), false));
+    resultBox.appendChild(buildCard(t('report.biz.title'), buildBiz(r, basis), false));
 
     // Card 3 — fix list
     resultBox.appendChild(buildCard(t('report.fix.title'), buildFixes(r), false));

@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import { layeredScores } from "../worker.js";
 
 const PB = { essential: 86, surface: 14, emerging: 8 };
@@ -45,6 +44,5 @@ const ok = (n, c) => { if (c) { pass++; } else { fail++; console.log("  ✗ " + 
   const L = layeredScores(checks, PB);
   ok("blocked essential: masteryMax=68", L.masteryMax === 68);
 }
-ok("suite complete", true);
 console.log(`[SL] ${pass} pass / ${fail} fail`);
 process.exit(fail ? 1 : 0);
