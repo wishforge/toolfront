@@ -79,6 +79,8 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:
 .foot a{color:var(--ink-3);text-decoration:none}
 .foot a:hover{color:var(--ink)}
 </style>
+  <script src="/i18n/common.js"></script>
+  <script src="/i18n/runtime.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -91,8 +93,8 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:
       <li><a href="https://monitor.toolfront.dev/monitoring" data-i18n="nav.mon">Monitor</a></li>
     </ul>
     <span style="display:flex;background:var(--paper-soft,#F1F4F8);border:1px solid var(--line,#E2E6EE);border-radius:999px;padding:3px;gap:2px">
-      <button id="lang-en" class="langbtn" onclick="localStorage.setItem('tf-lang','en');location.search='?lang=en'">EN</button>
-      <button id="lang-zh" class="langbtn" onclick="localStorage.setItem('tf-lang','zh');location.search='?lang=zh'">中文</button>
+      <button id="lang-en" class="langbtn">EN</button>
+      <button id="lang-zh" class="langbtn">中文</button>
       <style>
         .langbtn{border:none;background:transparent;font:600 11.5px var(--sans,inherit);color:var(--ink-3,#6B7280);padding:5px 14px;border-radius:999px;cursor:pointer;transition:all .15s ease}
         .langbtn.on{background:var(--ink,#0C1222);color:var(--paper,#FFF)}
@@ -139,10 +141,8 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:
 
 <script>
 /* ── i18n ── */
-let LANG = localStorage.getItem('tf-lang');
-if (LANG !== 'zh' && LANG !== 'en') LANG = (navigator.language || '').indexOf('zh') === 0 ? 'zh' : 'en';
-const urlLang = new URLSearchParams(location.search).get('lang');
-if (urlLang === 'zh' || urlLang === 'en') { LANG = urlLang; localStorage.setItem('tf-lang', urlLang); }
+// detect() priority owned by i18n/runtime.js
+let LANG = (window.tfLang && window.tfLang()) || 'en';
 const PAIRS = {
  title:['Agent-readiness Rankings','Agent 就绪度排行榜'],
  sub:['Every row is a real scan — the board never invents scores. Filter by industry, explore by score and grade, find your benchmark.','每一行都是一次真实扫描——榜单绝不编造分数。按行业过滤，按分数与档位探索，找到你的对标。'],
@@ -150,16 +150,14 @@ const PAIRS = {
  'st.ready':['AGENT-READY','达到就绪'],'st.readyd':['score ≥ 70','分数 ≥ 70'],
  'st.work':['NEEDS WORK','有待改进'],'st.workd':['score < 70','分数 < 70'],
  'th.dom':['DOMAIN','域名'],'th.grade':['GRADE','评级'],'th.score':['SCORE','分数'],'th.when':['SCANNED','扫描时间'],
- 'nav.scan':['Scanner','扫描器'],'nav.cmp':['Compare','对比'],'nav.mon':['Monitor','监控'],
  'foot.note':['Every number is reproducible — open any site for the full report and scoring method.','每个数字都可复现——查看任意站点的完整报告与评分方法。'],
- 'foot.meth':['Methodology →','评分方法 →'],
  'search.ph':['Search domain...','搜索域名…'],
  'count':['Showing {n} of {total} scanned domains','显示 {total} 个已扫域名中的 {n} 个'],
  'empty':['No domains match — the board never invents a row.','没有匹配的域名——榜单绝不编造行。'],
  'all':['All','全部'],
-'nav.rank':['Rankings','排行榜'],'rank.all':['All','全部'],'rank.hosting':['Hosting','主机服务'],'rank.payments':['Payments','支付服务'],'rank.devtools':['Dev Tools','开发工具'],'rank.ai':['AI','AI']
+'rank.all':['All','全部'],'rank.hosting':['Hosting','主机服务'],'rank.payments':['Payments','支付服务'],'rank.devtools':['Dev Tools','开发工具'],'rank.ai':['AI','AI']
 };
-function t(k){const p=PAIRS[k];return p?(LANG==='zh'?p[1]:p[0]):k}
+function t(k){const p=PAIRS[k];if(p)return (LANG==='zh'?p[1]:p[0]);return (window.tfCommon&&window.tfCommon(null,LANG,k))||k}
 function applyLang(){
   document.getElementById('lang-en').classList.toggle('on',LANG==='en');
   document.getElementById('lang-zh').classList.toggle('on',LANG==='zh');
@@ -167,6 +165,13 @@ function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n)});
   document.getElementById('q').placeholder=t('search.ph');
 }
+// Toggle ownership lives in i18n/runtime.js; this page re-renders itself and
+// refreshes the category chips (built once at load from VERTS).
+if (window.tfOnLang) window.tfOnLang(function (l) {
+  LANG = l; applyLang();
+  if (typeof VERTS !== 'undefined') { VERTS[0][1]=t('rank.all'); VERTS[1][1]=t('rank.hosting'); VERTS[2][1]=t('rank.payments'); VERTS[3][1]=t('rank.devtools'); VERTS[4][1]=t('rank.ai'); }
+  try { drawFilters(); } catch (_) {}
+});
 
 /* ── data ── */
 var MON = (location.hostname==='localhost'||location.hostname==='127.0.0.1') ? 'http://localhost:8787' : 'https://monitor.toolfront.dev';

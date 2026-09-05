@@ -1011,6 +1011,8 @@
   .rank-rows .sc { width: 44px; text-align: right; color: var(--ink); font-weight: 700; }
   .rank-rows li.top .sc { color: var(--accent); }
 </style>
+  <script src="/i18n/common.js"></script>
+  <script src="/i18n/runtime.js"></script>
 </head>
 <body>
 
@@ -1348,13 +1350,9 @@
     });
   })();
   var LANGS = { en: {
-  "nav.scanner": "Scanner",
-  "nav.monitor": "Monitor",
-  "nav.compare": "Compare",
   "home.rank.title": "Live rankings",
   "home.rank.sub": "Every row is a real scan of a real domain — the board never invents a score.",
   "home.rank.viewall": "View all rankings →",
-  "nav.rankings": "Rankings",
   "nav.cta": "Get started →",
   "hero.kicker": "AI-readiness scan · ~5s",
   "hero.lede": "Agents browse, compare and buy on your site's behalf. If your site is a black box to them, they complete the errand with a competitor. Scan it — get the grade agents see.",
@@ -1431,12 +1429,9 @@
   "trust.3s": "● Live",
   "mon.plink": "Privacy policy →",
     "mon.note": "We only email when something changes. Unsubscribe anytime. <a href=\"/privacy\" data-i18n=\"mon.plink\">Privacy policy →</a>",
-  "foot.privacy": "Privacy",
-  "foot.terms": "Terms",
   "foot.tagline": "Built on the open WebMCP proposal.",
   "foot.example": "See an example report →",
   "foot.scanner": "Scanner info",
-  "foot.security": "Security",
   "foot.copy": "© 2026 ToolFront",
   "doc.title": "ToolFront — Is your site ready for AI agents?",
   "hero.h1": "Your next customers send<br><span class=\"hl-u\">AI agents</span>,<br>not browsers.",
@@ -1449,13 +1444,9 @@
   "strip.3": "<b>llms.txt</b> — your own script for AI",
   "strip.4": "<b>Sitemap / OpenAPI</b> — the site map for machines"
 }, zh: {
-  "nav.scanner": "扫描器",
-  "nav.monitor": "持续监控",
-  "nav.compare": "对比",
   "home.rank.title": "实时排行榜",
   "home.rank.sub": "每一行都是一次真实扫描——榜单绝不编造分数。",
   "home.rank.viewall": "查看完整榜单 →",
-  "nav.rankings": "排行榜",
   "nav.cta": "立即开始 →",
   "hero.kicker": "AI 友好度检测 · 约 5 秒出结果",
   "hero.lede": "AI 正在替你的客户找产品、比价、下单。你的网站它读不懂，这单就落到竞争对手头上。扫一次，看看你在 AI 眼里是什么样。",
@@ -1533,12 +1524,9 @@
   "trust.3s": "● 已上线",
   "mon.plink": "隐私政策 →",
     "mon.note": "只有真出事才发邮件 · 不想用了随时退订。<a href=\"/privacy\" data-i18n=\"mon.plink\">隐私政策 →</a>",
-  "foot.privacy": "隐私政策",
-  "foot.terms": "服务条款",
   "foot.tagline": "基于开放的 WebMCP 提案。",
   "foot.example": "看一份报告样例 →",
   "foot.scanner": "扫描器说明",
-  "foot.security": "安全",
   "foot.copy": "© 2026 ToolFront",
   "doc.title": "ToolFront — 你的网站准备好迎接 AI 智能体了吗？",
   "hero.meta": "无需注册 · 检测 <b>WebMCP · 结构化数据 · llms.txt · robots · sitemap</b>",
@@ -1552,15 +1540,9 @@
 } };
 
   (function () {
-    var lang = 'en';
-    try { lang = localStorage.getItem('tf-lang') || 'en'; } catch (_) {}
-    try {
-      var qp = new URLSearchParams(location.search).get('lang');
-      if (qp === 'zh') lang = 'zh';
-      if (qp === 'en') lang = 'en';
-    } catch (_) {}
-    if (!Object.prototype.hasOwnProperty.call(LANGS, lang)) lang = 'en';
-    function t(k) { return (LANGS[lang] && LANGS[lang][k]) || LANGS.en[k] || k; }
+    // detect() priority (?lang= > storage > navigator) owned by i18n/runtime.js
+    var lang = (window.tfLang && window.tfLang()) || 'en';
+    function t(k) { return (LANGS[lang] && LANGS[lang][k]) || (window.tfCommon && window.tfCommon(LANGS[lang], lang, k)) || LANGS.en[k] || k; }
 
     function applyLang() {
       document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
@@ -1583,9 +1565,9 @@
       try { localStorage.setItem('tf-lang', l); } catch (_) {}
       applyLang();
     }
-    var len = document.getElementById('lang-en'), lzh = document.getElementById('lang-zh');
-    if (len) len.addEventListener('click', function () { setLang('en'); });
-    if (lzh) lzh.addEventListener('click', function () { setLang('zh'); });
+    // Toggle ownership lives in i18n/runtime.js (detect + URL sync + pill);
+    // this page only re-renders.
+    if (window.tfOnLang) window.tfOnLang(function (l) { lang = l; applyLang(); });
 
     function goScan() {
       var input = document.querySelector('.scan-input');
@@ -1649,9 +1631,9 @@
     }
 
     applyLang();
-    // re-render the WebMCP badge when the language changes
-    if (len) len.addEventListener('click', function () { setDogfood(document.getElementById('dogfood-status').textContent.indexOf('ACTIVE') >= 0); });
-    if (lzh) lzh.addEventListener('click', function () { setDogfood(document.getElementById('dogfood-status').textContent.indexOf('ACTIVE') >= 0); });
+    // re-render the WebMCP badge when the language changes (runtime owns the
+    // toggle now — tfOnLang is the only subscriber hook)
+    if (window.tfOnLang) window.tfOnLang(function () { setDogfood(document.getElementById('dogfood-status').textContent.indexOf('ACTIVE') >= 0); });
   })();
 
   /* Live rankings strip: real rows from the monitor's public API, or nothing.

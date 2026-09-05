@@ -151,6 +151,8 @@
   .vstage.cur .nm{color:var(--ink,#111);font-weight:600}
 
 </style>
+  <script src="/i18n/common.js"></script>
+  <script src="/i18n/runtime.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -219,10 +221,6 @@
       'cmp.opted': 'Opted out (robots.txt)',
       'cmp.unreach': 'Unreachable',
       'cmp.invalid': 'Enter two different domains, like example.com vs competitor.com.',
-      'nav.scan': 'Scanner',
-      'nav.cmp': 'Compare',
-      'nav.rank': 'Rankings',
-      'nav.mon': 'Monitor',
       'rfoot.methodology': 'Methodology',
       'rfoot.privacy': 'Privacy', 'rfoot.security': 'Security',
     },
@@ -257,23 +255,11 @@
       'cmp.invalid': '请输入两个不同的域名，例如 example.com 和 competitor.com。',
       'rfoot.methodology': '评分方法',
       'rfoot.privacy': '隐私', 'rfoot.security': '安全',
-      'nav.rank': '排行榜',
-      'nav.scan': '扫描器',
-      'nav.cmp': '对比',
-      'nav.mon': '监控',
-      'lang.en': 'EN',
-      'lang.zh': '中文',
     },
   };
-  var lang = 'en';
-  try { lang = localStorage.getItem('tf-lang') || 'en'; } catch (_) {}
-  try {
-    var qp = new URLSearchParams(location.search).get('lang');
-    if (qp === 'zh') lang = 'zh';
-    if (qp === 'en') lang = 'en';
-  } catch (_) {}
-  if (!Object.prototype.hasOwnProperty.call(LANGS, lang)) lang = 'en';
-  function t(k) { return (LANGS[lang] && LANGS[lang][k]) || LANGS.en[k] || k; }
+  // detect() priority (?lang= > storage > navigator) owned by i18n/runtime.js
+  var lang = (window.tfLang && window.tfLang()) || 'en';
+  function t(k) { return (LANGS[lang] && LANGS[lang][k]) || (window.tfCommon && window.tfCommon(LANGS[lang], lang, k)) || LANGS.en[k] || k; }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function normalize(d) { return String(d || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, ''); }
   var MARK = { pass: ['p', '✓'], partial: ['m', '~'], fail: ['f', '✕'], na: ['x', '–'] };
@@ -291,8 +277,8 @@
     try { document.querySelectorAll('[data-i18n]').forEach(function (elx) { elx.textContent = t(elx.getAttribute('data-i18n')); }); } catch (_) {}
     try { localStorage.setItem('tf-lang', lang); } catch (_) {}
   }
-  document.getElementById('lang-en').addEventListener('click', function () { lang = 'en'; applyLang(); rerender(); });
-  document.getElementById('lang-zh').addEventListener('click', function () { lang = 'zh'; applyLang(); rerender(); });
+  // Toggle ownership lives in i18n/runtime.js; this page only re-renders.
+  if (window.tfOnLang) window.tfOnLang(function (l) { lang = l; applyLang(); try { if (lastData && typeof rerender === 'function') rerender(); } catch (_) {} });
 
   var lastData = null;
 

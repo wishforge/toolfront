@@ -7,6 +7,13 @@ import { JSDOM } from "jsdom";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const HTML = readFileSync(join(ROOT, "public/report.html"), "utf8");
+/* JSDOM does not fetch external <script src>; inline the shared i18n files so
+   the page runs against the real runtime instead of falling back to English. */
+const I18N_COMMON = readFileSync(join(ROOT, "public/i18n/common.js"), "utf8");
+const I18N_RUNTIME = readFileSync(join(ROOT, "public/i18n/runtime.js"), "utf8");
+const HTML_WIRED = HTML
+  .replace('<script src="/i18n/common.js"></script>', "<script>" + I18N_COMMON + "</script>")
+  .replace('<script src="/i18n/runtime.js"></script>', "<script>" + I18N_RUNTIME + "</script>");
 let pass = 0, fail = 0;
 const ok = (name, cond, extra = "") => { if (cond) { pass++; console.log(`  ✓ ${name}`); } else { fail++; console.log(`  ✗ ${name} ${extra}`); } };
 
@@ -32,7 +39,7 @@ const BLOCKED = {
 };
 
 function loadPage(url, fetchMock) {
-  const dom = new JSDOM(HTML, {
+  const dom = new JSDOM(HTML_WIRED, {
     url,
     runScripts: "dangerously",
     pretendToBeVisual: true,

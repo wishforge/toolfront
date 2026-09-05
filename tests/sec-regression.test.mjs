@@ -64,8 +64,16 @@ for (const ip of ["8.8.8.8", "1.1.1.1", "2606:4700::1111"]) ok(`公网放行 ${i
 
 /* ————— C. i18n 白名单（静态断言 + 行为模拟） ————— */
 console.log("\n[C] i18n 语言白名单");
-ok("白名单强制回退存在（hasOwn 防原型链）", /if \(!Object\.prototype\.hasOwnProperty\.call\(LANGS, lang\)\) lang = 'en'/.test(HTML));
-ok("localStorage 读取有 try/catch", /try \{ lang = localStorage\.getItem\('tf-lang'\) \|\| 'en'; \} catch \(_\) \{\}/.test(HTML));
+// The language whitelist moved out of the page into the shared runtime
+// (i18n/runtime.js) — the control is the same, the location is not.
+const RT = readFileSync("./public/i18n/runtime.js", "utf8");
+ok("语言白名单存在（runtime valid() 仅 en/zh，防原型链污染）",
+  /function valid\(l\) \{ return l === 'en' \|\| l === 'zh'; \}/.test(RT)
+  && /if \(valid\(q\)\)/.test(RT) && /if \(valid\(saved\)\)/.test(RT) && /if \(!valid\(l\)\) return;/.test(RT));
+ok("runtime localStorage 读取/写入有 try/catch",
+  /try \{[\s\S]*?localStorage\.getItem\(LS\)[\s\S]*?\} catch \(e\) \{\}/.test(RT)
+  && /try \{ localStorage\.setItem\(LS, l\); \} catch \(e\) \{\}/.test(RT));
+ok("页面自身不再直读语言（统一走 runtime）", !/lang = localStorage\.getItem\('tf-lang'\) \|\| 'en'/.test(HTML));
 { // 模拟污染路径
   const LANGS = { en: { a: 1 }, zh: { a: 2 } };
   for (const evil of ['fr-CA<script>', '"};alert(1);{",', 'zh\u0000', "__proto__", "constructor"]) {
