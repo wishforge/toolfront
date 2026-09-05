@@ -56,7 +56,7 @@
 
   <div class="en">
     <h1>Privacy Policy</h1>
-    <p class="meta">Version 1.3 · Effective date: September 2, 2026 · toolfront.dev</p>
+    <p class="meta">Version 1.4 · Effective date: September 5, 2026 · toolfront.dev</p>
     <p class="lede">This policy covers <strong>toolfront.dev</strong> (the AI-readiness scanner) and <strong>monitor.toolfront.dev</strong> (the Monitor account system), operated by the same controller under the same commitments below.</p>
 
     <h2>Who we are (the controller)</h2>
@@ -67,10 +67,11 @@
       <li><strong>Email address</strong> — only when you voluntarily join the waitlist or request a tool blueprint.</li>
       <li><strong>Domain you scanned</strong> — the domain name entered into the scanner, associated with your waitlist request if provided.</li>
       <li><strong>IP address and timestamps</strong> — collected for rate limiting, abuse prevention, and (for waitlist signups) as your consent record under GDPR Art. 7.</li>
-      <li><strong>Language preference</strong> — stored in your browser's localStorage (key <code>tf-lang</code>) to remember your language choice. This is strictly functional storage; no cookies or third-party trackers are used.</li>
+      <li><strong>Language preference</strong> — stored in your browser's localStorage (key <code>tf-lang</code>) to remember your language choice. This is strictly functional storage; the scanner itself uses no cookies or third-party trackers.</li>
       <li><strong>Browser-local comparison data</strong> — your fix-list checkboxes and a convenience copy of your latest result (keys <code>tf-fix:*</code> and <code>tf-last:*</code>) are stored in your browser's localStorage to power the "since your last scan" comparison and remember progress. This copy never leaves your browser and can be cleared in browser settings. (The authoritative record of a scan is covered under <em>Public scan history</em> below.)</li>
       <li><strong>Public scan history</strong> — when a scan of a domain succeeds, a record of that scan — domain, score, grade, per-check statuses, scoring version and timestamp — is stored server-side and is <strong>publicly visible</strong> on the report page and in rankings, so scores can be compared over time. A scan fetches only publicly reachable pages, the way a crawler does: no credentials are used and forms are never submitted. Sites that opt out in robots.txt are never scanned. IP addresses are used only for rate limiting and are never stored with a scan record.</li>
       <li><strong>Aggregate usage statistics</strong> — counts of product events (e.g., signups, email confirmations, logins, monitors added) and their coarse outcome, used to understand the signup funnel and improve the product. These counters <strong>cannot identify you</strong>: they contain no email address, no domain, no IP address, and no language. Stored by our host in Cloudflare Analytics Engine for 90 days.</li>
+      <li><strong>Functional log-in cookie (Monitor)</strong> — when you request a log-in link on monitor.toolfront.dev, we set one first-party cookie (<code>tfm-autologin</code>; HttpOnly; Secure; SameSite=Lax; 30-minute lifetime) that lets your browser consume the link in one click and prevents email-gateway link previews from burning the token. It is strictly functional — no tracking, no advertising, no third parties — and expires automatically.</li>
       <li><strong>Monitor account data</strong> — if you create a Monitor account (monitor.toolfront.dev): your email address and password (stored only as a salted PBKDF2 hash — never readable), the domains you choose to monitor, login timestamps and IP addresses (for rate limiting and account lockout), scan reports and alert messages for your monitored domains, and a suppression record if you unsubscribe (a one-way hash of your email + the unsubscribe timestamp).</li>
     </ul>
     <p>Our scanner fetches only publicly accessible pages (<code>/</code>, <code>/robots.txt</code>, <code>/llms.txt</code>, <code>/sitemap.xml</code>, <code>/openapi.json</code>) of domains you submit. We never scan private networks or authenticated content.</p>
@@ -119,12 +120,12 @@
     <p>Readiness scores, grades, and alerts are computed from publicly fetched technical signals of the domain you submit or monitor — file presence, markup, headers. They evaluate a <strong>website</strong>, not a natural person: no profiling, no automated decisions about an individual (GDPR Art. 22), and no cross-site tracking of you. The scan itself fetches only public pages and never executes the target's scripts.</p>
 
     <h2>Changes</h2>
-    <p>We will update this page if our practices change; material changes will be announced on the site before taking effect. This is version 1.3 of the policy.</p>
+    <p>We will update this page if our practices change; material changes will be announced on the site before taking effect. This is version 1.4 of the policy (v1.4 discloses the Monitor log-in cookie; v1.3 covered the scoring-engine update).</p>
   </div>
 
   <div class="zh">
     <h1>隐私政策</h1>
-    <p class="meta">版本 1.3 · 生效日期：2026 年 9 月 2 日 · toolfront.dev</p>
+    <p class="meta">版本 1.4 · 生效日期：2026 年 9 月 5 日 · toolfront.dev</p>
     <p class="lede">本政策适用于 <strong>toolfront.dev</strong>（AI 就绪度扫描器）与 <strong>monitor.toolfront.dev</strong>（Monitor 账号系统），两者由同一处理者按下列相同承诺运营。</p>
 
     <h2>我们是谁（个人信息处理者）</h2>
@@ -135,10 +136,11 @@
       <li><strong>电子邮箱</strong>——仅当你主动加入候补名单或索取工具蓝图时收集。</li>
       <li><strong>你扫描的域名</strong>——你在扫描器中输入的域名，如与候补请求一同提交则关联保存。</li>
       <li><strong>IP 地址与时间戳</strong>——用于限流、防滥用，以及（针对候补注册）作为 GDPR 第 7 条要求的同意凭证。</li>
-      <li><strong>语言偏好</strong>——存储在你浏览器的 localStorage（键名 <code>tf-lang</code>）中，用于记住语言选择。这是严格功能性存储；本站不使用 Cookie 或第三方跟踪器。</li>
+      <li><strong>语言偏好</strong>——存储在你浏览器的 localStorage（键名 <code>tf-lang</code>）中，用于记住语言选择。这是严格功能性存储；扫描器本身不使用 Cookie 或第三方跟踪器。</li>
       <li><strong>浏览器本地对比数据</strong>——你的修复清单勾选状态与最近一次结果的便利副本（键名 <code>tf-fix:*</code>、<code>tf-last:*</code>）存储于浏览器 localStorage，用于"对比上次扫描"与记住修复进度。这份副本永不离开浏览器，可在浏览器设置中清除（扫描的权威记录见下方<em>公开扫描历史</em>）。</li>
       <li><strong>公开扫描历史</strong>——当某域名的扫描成功时，该次扫描的记录（域名、分数、等级、逐项检查状态、评分版本与时间）会存储于服务器并<strong>公开展示</strong>在报告页与排行榜上，以便跨时间比较分数。扫描仅抓取公网可达页面（与爬虫方式相同）：不使用任何凭据，绝不提交表单。通过 robots.txt 声明拒绝扫描的站点永远不会被扫描。IP 地址仅用于限流，绝不与扫描记录一同存储。</li>
       <li><strong>聚合用量统计</strong>——产品事件计数（如注册、邮箱确认、登录、添加监控）及其粗粒度结果，用于理解注册漏斗、改进产品。这些计数器<strong>无法识别你</strong>：不包含邮箱、域名、IP 或语言。存储于我们的主机方 Cloudflare Analytics Engine，保留 90 天。</li>
+      <li><strong>功能性登录 Cookie（Monitor）</strong>——当你在 monitor.toolfront.dev 请求登录链接时，我们会设置一个第一方 Cookie（<code>tfm-autologin</code>；HttpOnly；Secure；SameSite=Lax；有效期 30 分钟），用于让浏览器一键消费登录链接，并防止邮件网关的链接预览消耗令牌。它是严格功能性的——不跟踪、不用于广告、不涉及第三方——到期自动失效。</li>
       <li><strong>Monitor 账号数据</strong>——如你在 monitor.toolfront.dev 创建 Monitor 账号：邮箱地址与密码（仅以加盐 PBKDF2 哈希存储，不可还原）、你选择监控的域名、登录时间戳与 IP（用于限流与账号锁定）、你监控域名的扫描报告与告警消息，以及退订抑制记录（邮箱单向哈希 + 退订时间戳）。</li>
     </ul>
     <p>扫描器只抓取你提交域名的公开页面（<code>/</code>、<code>/robots.txt</code>、<code>/llms.txt</code>、<code>/sitemap.xml</code>、<code>/openapi.json</code>），绝不扫描私网或需要登录的内容。</p>
