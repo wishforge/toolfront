@@ -96,6 +96,11 @@
   </div>
 
   <div class="card">
+    <div class="card-head" id="twomHead">Mastery and capability</div>
+    <div id="twomBody" style="padding: 14px 18px; font-size: 13.5px; line-height: 1.75; color: var(--ink-2);"><p style="margin:0;">Every site is graded on the same mandatory core: the <strong>essential pool (86 points)</strong>. Your <strong>mastery</strong> is the share of that core you earn — it alone decides your grade (A ≥ 85%, B ≥ 70%, C ≥ 50%, D ≥ 30%). Checks that cannot apply to your site are excluded, never penalised. On top of the core, <strong>capability</strong> measures how much of the full 108-point rubric — including the tool surface (WebMCP, API error format) — you have made real. Two sites with the same mastery can rank differently on the board: the one that also built a tool surface has the higher capability.</p></div>
+  </div>
+
+  <div class="card">
     <div class="card-head">Why our scores may differ from other scanners</div>
     <div style="padding: 14px 18px; font-size: 13.5px; line-height: 1.75; color: var(--ink-2);">
       <p style="margin:0 0 10px;">Scores are <strong>not comparable across scanners</strong> — each tool measures a different slice of "agent readiness", usually with different weights and grade bands.</p>
@@ -141,6 +146,8 @@
       'm.pool.surface': 'Scored only if this site actually offers that surface',
       'm.pool.emerging': 'Worth doing, not yet required — missing this costs you nothing',
       'm.statusNote': '<ul><li><b>pass</b> — full points.</li><li><b>partial</b> — the signal exists but is incomplete; proportional points.</li><li><b>fail</b> — the signal is missing or wrong; zero points.</li><li><b>not applicable</b> — the surface this check needs does not exist here, so it is excluded from both the score and the denominator. You are never penalised for a surface you do not offer.</li></ul>',
+      'm.twom.head': 'Mastery and capability',
+      'm.twom.body': '<p style="margin:0;">Every site is graded on the same mandatory core: the <strong>essential pool (86 points)</strong>. Your <strong>mastery</strong> is the share of that core you earn — it alone decides your grade (A ≥ 85%, B ≥ 70%, C ≥ 50%, D ≥ 30%). Checks that cannot apply to your site are excluded, never penalised. On top of the core, <strong>capability</strong> measures how much of the full 108-point rubric — including the tool surface (WebMCP, API error format) — you have made real. Two sites with the same mastery can rank differently on the board: the one that also built a tool surface has the higher capability.</p>',
       'f.privacy': 'Privacy', 'f.security': 'Security', 'f.md': 'Markdown version',
     },
     zh: {
@@ -156,6 +163,8 @@
       'm.pool.surface': '只有网站真的提供了这个能力才计分',
       'm.pool.emerging': '做了更好，不做不扣分的前瞻项',
       'm.statusNote': '<ul><li><b>通过</b>——拿满分。</li><li><b>部分</b>——信号存在但不完整，按比例给分。</li><li><b>失败</b>——信号缺失或错误，0 分。</li><li><b>不适用</b>——这项检查所需的能力在这个站点上不存在，因此它同时从分数和分母中剔除。你不会因为没提供某种能力而被扣分。</li></ul>',
+      'm.twom.head': '掌握度与能力总分',
+      'm.twom.body': '<p style="margin:0;">所有网站都考同一套<strong>必考核心（86 分）</strong>。<strong>掌握度</strong>是你在核心卷上的得分率——它单独决定等级（A ≥ 85%、B ≥ 70%、C ≥ 50%、D ≥ 30%）。对你的站点无法适用的检查项会被剔除，绝不因此扣分。在核心卷之上，<strong>能力总分</strong>衡量你把整套 108 分评测——包括工具面（WebMCP、API 报错格式）——落地了多少。掌握度相同的两个站，榜单排名可能不同：把工具面做出来的那个，能力总分更高。</p>',
       'f.privacy': '隐私', 'f.security': '安全', 'f.md': 'Markdown 版',
     },
   };
@@ -184,6 +193,9 @@
     document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
     // statusNote carries deliberate markup from a static dictionary only.
     document.getElementById('statusNote').innerHTML = t('m.statusNote');
+    document.getElementById('twomHead').textContent = t('m.twom.head');
+    // twomBody carries deliberate markup from a static dictionary only.
+    document.getElementById('twomBody').innerHTML = t('m.twom.body');
     try { localStorage.setItem('tf-lang', lang); } catch (_) {}
     render();
   }
