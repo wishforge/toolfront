@@ -57,7 +57,7 @@ for (const id of ids) {
   const max = Math.round(POOL_BUDGET[p.pool] * p.share);
   ok(`${id} max positive (${max})`, max > 0);
 }
-ok("SCORING_VERSION is 3.0.0 (three-pool model)", /const SCORING_VERSION = "3\.0\.0";/.test(WORKER_SRC));
+ok("SCORING_VERSION is 3.1.0 (three-pool model)", /const SCORING_VERSION = "3\.1\.0";/.test(WORKER_SRC));
 
 console.log(`\nproduct-checks 结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail ? 1 : 0);

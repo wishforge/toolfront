@@ -27,7 +27,7 @@ ok("case-insensitive directives", parseTrainingCrawlerBlocks(`user-agent: gptbot
 console.log("\n[B] scoring untouched — supplemental must not affect the score");
 ok("still 9 checks in CHECK_POLICY", Object.keys(CHECK_POLICY).length === 9);
 ok("no supplemental check leaked into policy", !("supplemental" in CHECK_POLICY) && !Object.keys(CHECK_POLICY).some(k => k.includes("training") || k.includes("auth")));
-ok("supplemental adds no score weight — version comes from the engine, not from this test", /const SCORING_VERSION = "3\.0\.0";/.test((await import("node:fs")).readFileSync(new URL("../worker.js", import.meta.url), "utf8")));
+ok("supplemental adds no score weight — version comes from the engine, not from this test", /const SCORING_VERSION = "3\.1\.0";/.test((await import("node:fs")).readFileSync(new URL("../worker.js", import.meta.url), "utf8")));
 console.log("\n[C] self-scan carries supplemental (dogfood-style, mocked network)");
 {
   const { readFileSync, existsSync } = await import("node:fs");
