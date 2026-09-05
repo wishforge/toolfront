@@ -1602,12 +1602,15 @@
     return body;
   }
 
-  function buildCta(r) {
+  // CTA copy keys on the same grading basis as the verdict/colour above it
+  // (mastery pct when layered, normalised pct for legacy) — never raw r.score,
+  // which mixed scales and could tell a C-grade site to "keep monitoring".
+  function buildCta(r, basis) {
     var cta = el('div', 'cta');
     var copy = el('div');
     copy.appendChild(el('div', 'kicker', t('report.cta.kicker')));
     var raise = el('h3');
-    raise.innerHTML = t(r.score >= 70 ? 'report.raise.keep' : 'report.raise'); // trusted static dict (contains <b>)
+    raise.innerHTML = t((typeof basis === 'number' ? basis : (r.score >= 70 ? 70 : 0)) >= 70 ? 'report.raise.keep' : 'report.raise'); // trusted static dict (contains <b>)
     copy.appendChild(raise);
     copy.appendChild(el('div', 'fine', t('report.cta.fine')));
     cta.appendChild(copy);
@@ -1724,7 +1727,7 @@
       }
     } catch (_) {}
 
-    resultBox.appendChild(buildCta(r));
+    resultBox.appendChild(buildCta(r, basis));
 
     // Version stamp: rules and scoring versions are the methodology contract —
     // showing them signals that scores can change when standards do (and that
