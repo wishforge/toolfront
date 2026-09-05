@@ -157,19 +157,19 @@
   <div class="top">
     <a class="wordmark" href="/">toolfront_</a>
     <ul class="pillnav">
-      <li><a href="/">Scanner</a></li>
-      <li><a href="/compare" class="on">Compare</a></li>
-      <li><a href="/rankings">Rankings</a></li>
-      <li><a href="https://monitor.toolfront.dev/monitoring">Monitor</a></li>
+      <li><a href="/" data-i18n="nav.scan">Scanner</a></li>
+      <li><a href="/compare" class="on" data-i18n="nav.cmp">Compare</a></li>
+      <li><a href="/rankings" data-i18n="nav.rank">Rankings</a></li>
+      <li><a href="https://monitor.toolfront.dev/monitoring" data-i18n="nav.mon">Monitor</a></li>
     </ul>
     <div class="top-right">
-      <span class="lang"><button id="lang-en" class="on">EN</button><button id="lang-zh">中文</button></span>
+      <span class="lang"><button id="lang-en" class="on" data-i18n="lang.en">EN</button><button id="lang-zh" data-i18n="lang.zh">中文</button></span>
     </div>
   </div>
 
   <div class="head">
     <div class="kicker" id="kicker">AI-readiness duel · ~5s</div>
-    <h1 id="h1">Two sites. One agent-readiness verdict.</h1>
+    <h1 id="h1" data-i18n="cmp.h1.form">Two sites. One agent-readiness verdict.</h1>
   </div>
 
   <form class="cmp-form" id="cmpform">
@@ -219,6 +219,10 @@
       'cmp.opted': 'Opted out (robots.txt)',
       'cmp.unreach': 'Unreachable',
       'cmp.invalid': 'Enter two different domains, like example.com vs competitor.com.',
+      'nav.scan': 'Scanner',
+      'nav.cmp': 'Compare',
+      'nav.rank': 'Rankings',
+      'nav.mon': 'Monitor',
       'rfoot.methodology': 'Methodology',
       'rfoot.privacy': 'Privacy', 'rfoot.security': 'Security',
     },
@@ -253,6 +257,12 @@
       'cmp.invalid': '请输入两个不同的域名，例如 example.com 和 competitor.com。',
       'rfoot.methodology': '评分方法',
       'rfoot.privacy': '隐私', 'rfoot.security': '安全',
+      'nav.rank': '排行榜',
+      'nav.scan': '扫描器',
+      'nav.cmp': '对比',
+      'nav.mon': '监控',
+      'lang.en': 'EN',
+      'lang.zh': '中文',
     },
   };
   var lang = 'en';
@@ -276,6 +286,9 @@
     document.getElementById('lang-en').classList.toggle('on', lang === 'en');
     document.getElementById('lang-zh').classList.toggle('on', lang === 'zh');
     document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    // Generic pass: translate all data-i18n attributes so newly added ones
+    // (nav, h1, etc.) apply without further hand-codec.
+    try { document.querySelectorAll('[data-i18n]').forEach(function (elx) { elx.textContent = t(elx.getAttribute('data-i18n')); }); } catch (_) {}
     try { localStorage.setItem('tf-lang', lang); } catch (_) {}
   }
   document.getElementById('lang-en').addEventListener('click', function () { lang = 'en'; applyLang(); rerender(); });
