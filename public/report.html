@@ -597,7 +597,7 @@
       'report.biz.high': 'Bottom line: your site already speaks AI fluently — you are ahead of most competitors. Keep it that way and keep monitoring.',
       'report.biz.allgood': 'Nothing urgent: AI can already read and work with your site. Keep monitoring so redesigns don\u2019t break it.',
       'report.diag.title': 'Scan diagnostics', 'report.diag.assessed': 'assessed', 'report.diag.passed': 'passed', 'report.diag.partial': 'partial', 'report.diag.failed': 'failed', 'report.diag.na': 'n/a', 'report.diag.strongest': 'Strongest', 'report.diag.weakest': 'Weakest',
-      'report.compare': 'Compare with a competitor', 'report.hist.title': 'Previous scans', 'report.hist.scanned': 'Scanned', 'report.hist.cmpbtn': 'Compare →', 'report.hist.cmp': 'Compare with a competitor — click to pre-fill', 'report.share': 'Share', 'report.pdf': 'Save as PDF', 'report.new': 'New scan', 'report.copied': 'Link copied', 'report.copyfail': 'Copy failed — copy it from the address bar',
+      'report.compare': 'Compare with a competitor', 'report.mastery': 'Mastery {pct}% — core fundamentals {e}/{m}', 'report.cap.label': 'Capability score across the full 108-point rubric, shown out of 100', 'report.hist.title': 'Previous scans', 'report.hist.scanned': 'Scanned', 'report.hist.cmpbtn': 'Compare →', 'report.hist.cmp': 'Compare with a competitor — click to pre-fill', 'report.share': 'Share', 'report.pdf': 'Save as PDF', 'report.new': 'New scan', 'report.copied': 'Link copied', 'report.copyfail': 'Copy failed — copy it from the address bar',
       'report.printhead': 'Agent-readiness report — toolfront.dev',
       'report.raise': '<b>One redesign can drop this score.</b> Monitor checks weekly and emails you only when it moves:',
       'report.raise.keep': '<b>Good score \u2014 but one redesign can still drop it.</b> Monitor checks weekly and emails you only when it moves:',
@@ -666,7 +666,7 @@
       'report.biz.high': '总结：你的网站已经"会说 AI 的语言"——领先大多数对手。保持住，定期复查。',
       'report.biz.allgood': '暂时不用改：AI 已经能读懂并用好你的网站。定期回扫，别让下次改版悄悄把它搞坏。',
       'report.diag.title': '扫描诊断', 'report.diag.assessed': '项已评估', 'report.diag.passed': '通过', 'report.diag.partial': '部分', 'report.diag.failed': '失败', 'report.diag.na': '不适用', 'report.diag.strongest': '最强项', 'report.diag.weakest': '最弱项',
-      'report.compare': '与竞品对比',
+      'report.compare': '与竞品对比', 'report.mastery': '掌握度 {pct}%——基础面 {e}/{m}', 'report.cap.label': '能力总分按整套 108 分评测折算为百分制',
       'report.hist.title': '历史扫描', 'report.hist.scanned': '最近扫描', 'report.hist.cmpbtn': '对比 →', 'report.hist.cmp': '与竞品对比——点击预填本域名', 'report.share': '分享', 'report.pdf': '存为 PDF', 'report.new': '重新扫描', 'report.copied': '链接已复制', 'report.copyfail': '复制失败——请从地址栏复制',
       'report.printhead': 'AI 就绪度报告 — toolfront.dev',
       'report.raise': '<b>一次改版，分数可能就掉了。</b>Monitor 每周扫一次，掉了才发邮件：',
@@ -978,8 +978,8 @@
     topRow.appendChild(sub);
     if (typeof r.grade === 'string' && typeof r.score === 'number') {
       var sm = r.scoreMax || 100;
-      var pct = Math.round(r.score / sm * 100);
-      var chip = el('span', 'gradechip ' + cls(r.score), r.grade + ' · ' + r.score + '/' + sm + ' · ' + pct + '%');
+      var pctBase = (r.capPct != null) ? r.capPct : Math.round(r.score / sm * 100);
+      var chip = el('span', 'gradechip ' + cls(r.score), r.grade + ' · ' + ((r.capPct != null) ? r.capPct + '/100' : r.score + '/' + sm) + ' · ' + pctBase + '%');
       topRow.appendChild(chip);
     }
     if (r.scoring_version) {
@@ -1613,11 +1613,12 @@
     var hero = el('div', 'hero-row');
     hero.appendChild(el('div', 'grade ' + cls(r.score), r.grade));
     var nums = el('div', 'nums');
-    var scoreEl = el('span', null, String(r.score));
+    var hasLayers = !!(r.mastery && typeof r.capPct === "number");
+    var scoreEl = el('span', null, String(hasLayers ? r.capPct : r.score));
     scoreEl.id = 'scoreNum';
     var score = el('div', 'score');
     score.appendChild(scoreEl);
-    score.appendChild(el('span', 'of', ' / ' + ((typeof r.scoreMax === 'number' && r.scoreMax > 0) ? r.scoreMax : 100)));
+    score.appendChild(el('span', 'of', hasLayers ? ' / 100' : ' / ' + ((typeof r.scoreMax === 'number' && r.scoreMax > 0) ? r.scoreMax : 100)));
     var prev = null;
     try { prev = JSON.parse(localStorage.getItem('tf-last:' + r.domain) || 'null'); } catch (_) {}
     var curTs = r.scannedAt || '';
@@ -1635,6 +1636,7 @@
     if (typeof r.percentile === 'number') {
       nums.appendChild(el('div', 'pct-line', t('report.percentile').replace('{p}', String(r.percentile))));
     }
+    if (hasLayers) nums.appendChild(el('div', 'pct-line', t('report.mastery').replace('{pct}', String(r.mastery.pct)).replace('{e}', String(r.mastery.earned)).replace('{m}', String(r.mastery.max))));
     hero.appendChild(nums);
     var vd = el('div', 'verdict');
     // Split on first sentence-ending punctuation (. or 。) for bold/plain rendering
@@ -1699,7 +1701,7 @@
 
     if (first && !reducedMotion()) {
       var scoreNum = document.getElementById('scoreNum');
-      var target = r.score, t0 = null, DUR = 1000;
+      var target = hasLayers ? r.capPct : r.score, t0 = null, DUR = 1000;
       setTimeout(function () {
         function tick(ts) {
           if (!t0) t0 = ts;
