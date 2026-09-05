@@ -291,17 +291,25 @@
     var body = el('div', 'pbody');
     if (report && report.grade != null) {
       body.appendChild(el('div', 'pdom', report.domain));
-      var g = el('div', 'pgrade ' + (report.score >= 70 ? 'good' : report.score >= 40 ? 'mid' : 'bad'), report.grade);
+      // Layered reports (3.1.0) carry mastery + capPct: display the capability
+      // score on the same /100 basis as the report page, and colour the grade
+      // on the mastery basis the engine grades on. Legacy (3.0.0) payloads keep
+      // the raw score/scoreMax rendering.
+      var layers2 = !!(report.mastery && typeof report.capPct === 'number');
+      var sm2 = (typeof report.scoreMax === 'number' && report.scoreMax > 0) ? report.scoreMax : 100;
+      var basis2 = layers2 ? report.mastery.pct : Math.round((typeof report.score === 'number' ? report.score : 0) / sm2 * 100);
+      var g = el('div', 'pgrade ' + (basis2 >= 70 ? 'good' : basis2 >= 40 ? 'mid' : 'bad'), report.grade);
       body.appendChild(g);
-      var sc = el('div', 'pscore', String(report.score));
-      sc.appendChild(el('span', 'of', ' / ' + (report.scoreMax || 100)));
+      var sc = el('div', 'pscore', String(layers2 ? report.capPct : report.score));
+      sc.appendChild(el('span', 'of', ' / ' + (layers2 ? 100 : (report.scoreMax || 100))));
       body.appendChild(sc);
       var tr = el('div', 'ptrack');
       var cur = el('div', 'cur');
       tr.appendChild(cur);
       body.appendChild(tr);
-      // rAF so the transition from 0 actually plays
-      requestAnimationFrame(function () { requestAnimationFrame(function () { cur.style.left = Math.min(100, Math.max(0, report.score)) + '%'; }); });
+      // rAF so the transition from 0 actually plays; layered reports sit on the
+      // /100 capability scale, legacy ones keep the raw percentage
+      requestAnimationFrame(function () { requestAnimationFrame(function () { cur.style.left = Math.min(100, Math.max(0, layers2 ? report.capPct : report.score)) + '%'; }); });
       if (report.cached) body.appendChild(el('div', 'pnote', 'cached'));
     } else if (report && report.blocked) {
       body.appendChild(el('div', 'pdom', report.domain));
@@ -457,10 +465,13 @@
       var okA = da && typeof da.score === 'number';
       var okB = db && typeof db.score === 'number';
       if (okA && okB) {
-        var d = da.score - db.score;
+        // Display delta on the same basis the cards use: capability /100 when
+        // layered, raw score otherwise (ordering is identical either way).
+        var capOf = function (r) { return (r.mastery && typeof r.capPct === 'number') ? r.capPct : r.score; };
+        var d = capOf(da) - capOf(db);
         var pill = el('div', 'delta-row');
         var badge = el('span', 'delta-pill ' + (d === 0 ? 'tie' : 'a'),
-          d === 0 ? t('cmp.tie').replace('{n}', String(da.score))
+          d === 0 ? t('cmp.tie').replace('{n}', String(capOf(da)))
                   : t('cmp.leads').replace('{w}', d > 0 ? da.domain : db.domain).replace('{n}', String(Math.abs(d))));
         pill.appendChild(badge);
         out.appendChild(pill);
@@ -480,8 +491,19 @@
           sh.card.querySelector('.vtl').replaceWith(timelineEl(step, step));
         }
       }, 650);
-      fetch('/api/scan?domain=' + encodeURIComponent(domain))
-        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+      var grab = function (fresh) {
+        return fetch('/api/scan?domain=' + encodeURIComponent(domain) + (fresh ? '&fresh=1' : ''))
+          .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); });
+      };
+      grab(false)
+        .then(function (r) {
+          // A cached payload from before layered scoring (3.0.0, no mastery)
+          // would compare on the old variable-denominator basis while a fresh
+          // side renders /100 — refetch fresh so both sides share the current
+          // basis. New-format cache hits render instantly.
+          if (r.ok && r.j.cached && !(r.j.mastery && typeof r.j.capPct === 'number')) return grab(true);
+          return r;
+        })
         .then(function (r) {
           clearInterval(timer);
           if (!r.ok) throw new Error(r.j && r.j.error || 'scan failed');
