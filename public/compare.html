@@ -148,6 +148,10 @@
   .vstage.ok .nm{color:var(--ink-2,#444)}
   .vstage.ok::before{background:var(--good,#059669);opacity:.35}
   .vstage.cur .ic{border-color:var(--accent,#2563EB);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  .cmp-share{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--accent,#2563EB);background:transparent;border:1px solid var(--line,#E2E6EE);border-radius:999px;padding:8px 16px;cursor:pointer;margin-left:8px;transition:all .15s ease}
+  .cmp-share:hover{background:var(--accent-soft,#EFF6FF);border-color:rgba(37,99,235,.35)}
+  .cmp-share-toast{font-family:var(--mono);font-size:12px;color:var(--good,#16A34A);margin-left:12px;animation:share-fade 1.6s ease forwards}
+  @keyframes share-fade { 0% {opacity:0} 10% {opacity:1} 80% {opacity:1} 100% {opacity:0} }
   .vstage.cur .nm{color:var(--ink,#111);font-weight:600}
 
 </style>
@@ -178,6 +182,8 @@
     <input class="cmp-input" id="in-a" placeholder="yourdomain.com" autocomplete="off">
     <input class="cmp-input" id="in-b" placeholder="competitor.com" autocomplete="off">
     <button class="cmp-btn" id="cmpbtn" type="submit">Compare</button>
+    <button class="cmp-share" id="share" type="button" data-i18n="cmp.share" style="display:none">Copy share link</button>
+    <span class="cmp-share-toast" id="share-toast" data-i18n="cmp.copied" style="display:none" aria-live="polite"></span>
   </form>
   <div class="fine" id="fine">Both sites are scanned live — the URL of a comparison is shareable.</div>
 
@@ -194,6 +200,9 @@
   var LANGS = {
     en: {
       'cmp.kicker': 'AI-readiness duel · ~5s',
+      'cmp.share': 'Copy share link',
+      'cmp.copied': 'Link copied',
+      'cmp.share.err': 'Could not copy — please copy from the address bar',
       'cmp.h1': 'Which site is more ready for AI agents?',
       'cmp.h1.form': 'Compare two sites',
       'cmp.go': 'Compare',
@@ -230,6 +239,9 @@
     'cmp.checking': '正在核对',
     'cmp.done': '完成',
       'cmp.kicker': 'AI 就绪度对决 · 约 5 秒出结果',
+      'cmp.share': '复制分享链接',
+      'cmp.copied': '链接已复制',
+      'cmp.share.err': '复制失败——请从浏览器地址栏手动复制',
       'cmp.h1': '谁的网站更懂 AI？',
       'cmp.h1.form': '对比两个网站',
       'cmp.go': '开始对比',
@@ -414,6 +426,9 @@
       if (a) document.getElementById('in-a').value = a;
       document.getElementById('h1').textContent = t('cmp.h1.form');
     }
+    // Show the share button only when a comparison is loaded — the URL is the state.
+    var sh = document.getElementById('share');
+    if (sh) sh.style.display = (a && b) ? '' : 'none';
   }
 
   var STAGES = ['AI Content Discovery', 'AI Search Signals', 'Content & Semantics', 'Agent Protocols', 'Security & Trust'];
@@ -539,6 +554,33 @@
     }
     document.getElementById('h1').textContent = a + ' vs ' + b;
     load(a, b);
+  });
+
+  // Share: copy the current URL (which encodes ?a=&b=&lang=) so a recipient
+  // sees the same comparison. Toast shows for 1.6s; on clipboard failure
+  // surfaces the URL so the user can copy manually from the address bar.
+  document.getElementById('share').addEventListener('click', function () {
+    var btn = document.getElementById('share');
+    var toast = document.getElementById('share-toast');
+    var orig = btn.textContent;
+    var ok = function () { toast.textContent = t('cmp.copied'); toast.style.display = ''; setTimeout(function () { toast.style.display = 'none'; }, 1600); };
+    var fail = function () {
+      btn.textContent = t('cmp.share.err');
+      try { window.prompt('', location.href); } catch (_) {}
+      setTimeout(function () { btn.textContent = orig; }, 2400);
+    };
+    var url = location.href;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(ok, fail).catch(fail);
+    } else {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = url; ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); document.body.removeChild(ta);
+        ok();
+      } catch (_) { fail(); }
+    }
   });
 
   rerender();
