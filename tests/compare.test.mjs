@@ -66,8 +66,16 @@ console.log("\n[A] /api/compare contract");
 /* B. Page render */
 console.log("\n[B] /compare page render (jsdom)");
 const HTML = readFileSync(join(ROOT, "public/compare.html"), "utf8");
+/* JSDOM does not fetch external <script src>; inline the shared i18n files so
+   the page runs against the real runtime (detect + toggle ownership), not a
+   stub. Without this the page falls back to its default language. */
+const I18N_COMMON = readFileSync(join(ROOT, "public/i18n/common.js"), "utf8");
+const I18N_RUNTIME = readFileSync(join(ROOT, "public/i18n/runtime.js"), "utf8");
+const HTML_WIRED = HTML
+  .replace('<script src="/i18n/common.js"></script>', "<script>" + I18N_COMMON + "</script>")
+  .replace('<script src="/i18n/runtime.js"></script>', "<script>" + I18N_RUNTIME + "</script>");
 {
-  const dom = new JSDOM(HTML, {
+  const dom = new JSDOM(HTML_WIRED, {
     url: "https://toolfront.dev/compare?a=good.example&b=better.example&lang=en",
     runScripts: "dangerously",
     pretendToBeVisual: true,
@@ -95,7 +103,7 @@ const HTML = readFileSync(join(ROOT, "public/compare.html"), "utf8");
 /* C. zh re-render */
 console.log("\n[C] zh locale");
 {
-  const dom = new JSDOM(HTML, {
+  const dom = new JSDOM(HTML_WIRED, {
     url: "https://toolfront.dev/compare?a=good.example&b=better.example&lang=zh",
     runScripts: "dangerously",
     pretendToBeVisual: true,
