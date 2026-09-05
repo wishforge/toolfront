@@ -1230,28 +1230,28 @@
         function() { window.open('https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(shareUrl),'_blank','width=550,height=420'); }
       ));
 
-      // YouTube
-      row.appendChild(makeIcon('YouTube',
-        '<path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>',
-        function() { window.open('https://www.youtube.com/','_blank'); }
+      // Facebook
+      row.appendChild(makeIcon('Facebook',
+        '<path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>',
+        function() { window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(shareUrl),'_blank','width=550,height=420'); }
       ));
 
-      // Instagram
-      row.appendChild(makeIcon('Instagram',
-        '<path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.026 4.671.35 5.84 2.073 1.175 1.727 2.047 3.587 2.073 5.84.058 1.266.07 1.645.07 4.85v0c3.204 0 3.584-.012 4.85-.07 3.252-.026 4.671-.35 5.84-2.073 1.175-1.727 2.047-3.587 2.073-5.84.058-1.266.07-1.645.07-4.85zM12 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>',
-        function() { window.open('https://www.instagram.com/','_blank'); }
+      // Reddit
+      row.appendChild(makeIcon('Reddit',
+        '<path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>',
+        function() { window.open('https://www.reddit.com/submit?url='+encodeURIComponent(shareUrl)+'&title='+encodeURIComponent(shareTitle),'_blank','width=550,height=600'); }
       ));
 
-      // TikTok
-      row.appendChild(makeIcon('TikTok',
-        '<path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 3.59 2.28.94 4.57 1.65 6.99 1.85.02.82.03 1.64.01 2.46-.34 0-.68.01-1.02.01-1.55.02-3.03-.18-6.05-.62-8.96-1.43-1.73-.48-3.41-1.11-5.01-1.89-.86-.41-1.69-.89-2.48-1.43-.79-.54-1.54-1.14-2.24-1.81-.7-.67-1.35-1.4-1.94-2.18-.59-.78-1.12-1.62-1.59-2.5-.47-.88-.87-1.8-1.21-2.76-.34-.96-.61-1.96-.82-2.98-.21-1.02-.36-2.07-.44-3.13-.08-1.06-.1-2.13-.06-3.2.04-1.07.14-2.13.3-3.18.16-1.05.38-2.08.66-3.09.28-1.01.62-1.99 1.01-2.94.39-.95.83-1.86 1.33-2.73.5-.87 1.05-1.69 1.65-2.46.6-.77 1.25-1.48 1.95-2.13.7-.65 1.45-1.24 2.25-1.76.8-.52 1.64-.97 2.52-1.35.88-.38 1.79-.69 2.73-.92.94-.23 1.9-.38 2.87-.45.97-.07 1.95-.06 2.92.01z"/>',
-        function() { window.open('https://www.tiktok.com/search?q='+encodeURIComponent(shareUrl),'_blank','width=550,height=600'); }
+      // Hacker News
+      row.appendChild(makeIcon('Hacker News',
+        '<rect x="2" y="2" width="20" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="12" y="16.5" text-anchor="middle" font-size="12" font-weight="bold" fill="currentColor">Y</text>',
+        function() { window.open('https://news.ycombinator.com/submitlink?u='+encodeURIComponent(shareUrl)+'&t='+encodeURIComponent(shareTitle),'_blank','width=550,height=600'); }
       ));
 
-      // 小红书
-      row.appendChild(makeIcon('小红书',
-        '<circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><text x="12" y="16" text-anchor="middle" font-size="8" font-weight="bold" fill="currentColor">RED</text>',
-        function() { window.open('https://www.xiaohongshu.com/','_blank','width=550,height=600'); }
+      // Telegram
+      row.appendChild(makeIcon('Telegram',
+        '<path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>',
+        function() { window.open('https://t.me/share/url?url='+encodeURIComponent(shareUrl)+'&text='+encodeURIComponent(shareTitle),'_blank','width=550,height=420'); }
       ));
 
       // 微信
