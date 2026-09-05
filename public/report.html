@@ -1537,9 +1537,9 @@
       // while the real ceiling was 89).
       // On layered reports the projected letter must live on the SAME scale
       // the engine grades on: current mastery.earned + only the applied
-      // essential-pool gains, over r.mastery.max. Legacy reports keep the
-      // raw sum/maxScore percentage. The raw {s}/{m} display below is left
-      // on its existing (points) scale.
+      // essential-pool gains, over r.mastery.max, while the {s}/{m} summary
+      // is projected on the capability /100 basis the hero uses (legacy
+      // reports keep the raw sum/maxScore percentage).
       var gPct;
       if (layered && r.mastery && r.mastery.max > 0) {
         var projEarned = Math.min(r.mastery.max, (r.mastery.earned || 0) + masteryGain);
@@ -1547,13 +1547,25 @@
       } else {
         gPct = Math.round((sum / maxScore) * 100);
       }
-      var label = t('report.proj.est').replace('{s}', String(sum)).replace('{m}', String(maxScore)).replace('{g}', letter(gPct));
-      if (availableMax > 0 && sum < maxScore) {
-        var remain = availableMax - checkedGain;
-        var moreHint = (lang === 'zh')
-          ? '· 剩下还能 +' + remain + ' 分'
-          : '· +' + remain + ' more left';
-        label += moreHint;
+      var label;
+      if (layered && r.capMax) {
+        // Capability is displayed on a /100 basis elsewhere on this page, so the
+        // estimate card must not print the raw points scale (102/102 next to a
+        // 94/100 hero confused two scales on one screen). Project on the rubric:
+        // capped at r.capMax (108) then rounded to the /100 display.
+        var capSum = Math.min(r.capMax, (typeof r.score === 'number' ? r.score : 0) + checkedGain);
+        var projCap = Math.round(capSum / r.capMax * 100);
+        label = t('report.proj.est').replace('{s}', String(projCap)).replace('{m}', '100').replace('{g}', letter(gPct));
+        if (availableMax > 0 && sum < maxScore) {
+          var remainAll = Math.round(Math.min(r.capMax, (typeof r.score === 'number' ? r.score : 0) + checkedGain + (availableMax - checkedGain)) / r.capMax * 100) - projCap;
+          label += (lang === 'zh') ? '· 剩下还能 +' + remainAll + ' 分' : '· +' + remainAll + ' more left';
+        }
+      } else {
+        label = t('report.proj.est').replace('{s}', String(sum)).replace('{m}', String(maxScore)).replace('{g}', letter(gPct));
+        if (availableMax > 0 && sum < maxScore) {
+          var remainRaw = availableMax - checkedGain;
+          label += (lang === 'zh') ? '· 剩下还能 +' + remainRaw + ' 分' : '· +' + remainRaw + ' more left';
+        }
       }
       est.textContent = label;
     }
