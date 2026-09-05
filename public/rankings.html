@@ -79,6 +79,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:
 .foot a{color:var(--ink-3);text-decoration:none}
 .foot a:hover{color:var(--ink)}
 </style>
+  <script src="/i18n/common.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -159,7 +160,7 @@ const PAIRS = {
  'all':['All','全部'],
 'nav.rank':['Rankings','排行榜'],'rank.all':['All','全部'],'rank.hosting':['Hosting','主机服务'],'rank.payments':['Payments','支付服务'],'rank.devtools':['Dev Tools','开发工具'],'rank.ai':['AI','AI']
 };
-function t(k){const p=PAIRS[k];return p?(LANG==='zh'?p[1]:p[0]):k}
+function t(k){const p=PAIRS[k];if(p)return (LANG==='zh'?p[1]:p[0]);return (window.tfCommon&&window.tfCommon(null,LANG,k))||k}
 function applyLang(){
   document.getElementById('lang-en').classList.toggle('on',LANG==='en');
   document.getElementById('lang-zh').classList.toggle('on',LANG==='zh');

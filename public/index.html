@@ -1011,6 +1011,7 @@
   .rank-rows .sc { width: 44px; text-align: right; color: var(--ink); font-weight: 700; }
   .rank-rows li.top .sc { color: var(--accent); }
 </style>
+  <script src="/i18n/common.js"></script>
 </head>
 <body>
 
@@ -1560,7 +1561,7 @@
       if (qp === 'en') lang = 'en';
     } catch (_) {}
     if (!Object.prototype.hasOwnProperty.call(LANGS, lang)) lang = 'en';
-    function t(k) { return (LANGS[lang] && LANGS[lang][k]) || LANGS.en[k] || k; }
+    function t(k) { return (LANGS[lang] && LANGS[lang][k]) || (window.tfCommon && window.tfCommon(LANGS[lang], lang, k)) || LANGS.en[k] || k; }
 
     function applyLang() {
       document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';

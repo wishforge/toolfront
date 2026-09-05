@@ -151,6 +151,7 @@
   .vstage.cur .nm{color:var(--ink,#111);font-weight:600}
 
 </style>
+  <script src="/i18n/common.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -273,7 +274,7 @@
     if (qp === 'en') lang = 'en';
   } catch (_) {}
   if (!Object.prototype.hasOwnProperty.call(LANGS, lang)) lang = 'en';
-  function t(k) { return (LANGS[lang] && LANGS[lang][k]) || LANGS.en[k] || k; }
+  function t(k) { return (LANGS[lang] && LANGS[lang][k]) || (window.tfCommon && window.tfCommon(LANGS[lang], lang, k)) || LANGS.en[k] || k; }
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function normalize(d) { return String(d || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, ''); }
   var MARK = { pass: ['p', '✓'], partial: ['m', '~'], fail: ['f', '✕'], na: ['x', '–'] };
