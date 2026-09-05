@@ -936,7 +936,7 @@ const SUB_CHECKS = [
    Gating costs no extra requests: api-errors is gated on evidence the scan
    already collects (an OpenAPI document or a machine-readable API response),
    and both tool checks are gated on WebMCP tools the scan already extracted. */
-const SCORING_VERSION = "3.0.0";
+const SCORING_VERSION = "3.1.0";
 const POOL_BUDGET = { essential: 86, surface: 14, emerging: 8 };
 const CHECK_POLICY = {
   // pool = which scoring pool; evidence = how sure we are that agents actually
@@ -985,6 +985,26 @@ function benchmarkPercentile(score) {
 function policyOf(id) {
   const p = CHECK_POLICY[id];
   return { id, label: p.label, pool: p.pool, tier: p.pool, evidence: p.evidence, max: Math.round(POOL_BUDGET[p.pool] * p.share) };
+}
+
+// Layered scoring (3.1.0): Mastery = essential pool on a FIXED denominator so
+// percentages are comparable across every site; Capability = the whole rubric
+// (absolute points / 108) shown on a /100 basis, used for board ranking.
+// Rationale + data: docs/superpowers/specs/2026-09-05-scoring-scope-findings.md
+export function layeredScores(checks, poolBudget = POOL_BUDGET) {
+  const capMax = Object.values(poolBudget).reduce((a, b) => a + b, 0); // 108
+  let masteryEarned = 0, masteryMax = 0, capEarned = 0;
+  for (const c of checks) {
+    if (c.points === null) continue;
+    capEarned += c.points;
+    if (c.pool !== "essential") continue;
+    masteryEarned += c.points;
+    masteryMax += c.max;
+  }
+  const masteryPct = masteryMax > 0 ? Math.round((masteryEarned / masteryMax) * 100) : 0;
+  const capPct = capMax > 0 ? Math.round((capEarned / capMax) * 100) : 0;
+  const grade = masteryPct >= 85 ? "A" : masteryPct >= 70 ? "B" : masteryPct >= 50 ? "C" : masteryPct >= 30 ? "D" : "F";
+  return { masteryEarned, masteryMax, masteryPct, capPct, capMax, grade };
 }
 
 // Shared scan core: used by BOTH the free HTTP scan (handleScan) and the
@@ -1154,17 +1174,17 @@ async function scanDomainCore(domain, env) {
     if (c.points === null) { if (c.detail === NA_DETAIL) unavailable.push(c.id); continue; }
     score += c.points; scoreMax += c.max;
   }
-  const pct = scoreMax > 0 ? Math.round((score / scoreMax) * 100) : 0;
-  const grade = pct >= 85 ? "A" : pct >= 70 ? "B" : pct >= 50 ? "C" : pct >= 30 ? "D" : "F";
+  const L = layeredScores(checks);
+  const grade = L.grade;
   const verdict =
-    pct >= 70 ? "Agent-ready. Agents can work with this site deliberately." :
-    pct >= 40 ? "Partially readable. Agents guess some of the time, fail the rest." :
+    L.masteryPct >= 70 ? "Agent-ready. Agents can work with this site deliberately." :
+    L.masteryPct >= 40 ? "Partially readable. Agents guess some of the time, fail the rest." :
                   "Opaque to agents. Every interaction is a screenshot-and-click gamble.";
 
   // tool_surface_hash enables rug-pull detection in scheduled-scan diffs; report_json
   // is the durable snapshot stored in D1 scan_reports by the cron.
   const tool_surface_hash = await sha256Hex(JSON.stringify(surface.tools));
-  const report = { domain, score, scoreMax, grade, verdict, checks, tool_surface_hash, rules_version: RULES_VERSION, scoring_version: SCORING_VERSION, percentile: benchmarkPercentile(score), benchmark_version: BENCHMARK_VERSION, scannedAt: new Date().toISOString(), cached: false };
+  const report = { domain, score, scoreMax, grade, mastery: { earned: L.masteryEarned, max: L.masteryMax, pct: L.masteryPct }, capPct: L.capPct, capMax: L.capMax, verdict, checks, tool_surface_hash, rules_version: RULES_VERSION, scoring_version: SCORING_VERSION, percentile: benchmarkPercentile(score), benchmark_version: BENCHMARK_VERSION, scannedAt: new Date().toISOString(), cached: false };
   // Provenance: a self-scan never touched the network.
   if (selfScan) report.self = true;
   if (unavailable.length) report.unavailable = unavailable;

@@ -19,6 +19,7 @@ const ok = (name, cond, extra = "") => { if (cond) { pass++; console.log(`  ✓ 
 
 const REPORT = {
   domain: "example.com", score: 37, scoreMax: 100, grade: "D",
+  mastery: { earned: 86, max: 86, pct: 100 }, capPct: 94,
   verdict: "Partially readable. Agents guess some of the time, fail the rest.",
   rules_version: "1.0.0", scoring_version: "2.1.0",
   scannedAt: "2026-08-30T07:00:00.000Z", cached: false,
@@ -60,7 +61,9 @@ console.log("\n[A] happy path (37/D report)");
   const doc = dom.window.document;
   const grade = textOf(".grade", dom);
   ok("等级字母渲染 D", grade === "D", `got ${grade}`);
-  ok("分数 37/100", textOf(".nums .score", dom).includes("37"));
+  ok("hero shows capability /100", (doc.querySelector("#scoreNum") || {}).textContent === "94", textOf(".nums .score", dom));
+  ok("hero of 段显示 / 100", (textOf(".nums .score .of", dom) || "") === "/ 100", textOf(".nums .score .of", dom));
+  ok("mastery line renders", [...doc.querySelectorAll(".nums .pct-line")].some(e => /Mastery 100% — core fundamentals 86\/86/.test(e.textContent)), JSON.stringify([...doc.querySelectorAll(".nums .pct-line")].map(e => e.textContent)));
   ok("游标标签含 you · 37", doc.querySelector(".track .cursor").getAttribute("data-label") === "You · 37");
   ok("六枚状态胶囊", doc.querySelectorAll(".pills .pill").length === 6);
   ok("SVG 图标注入胶囊", doc.querySelectorAll(".pills .pill svg").length === 6);
@@ -152,6 +155,20 @@ console.log("\n[F] CTA 不收集邮箱（留资失败面消失）");
   const btn = doc.querySelector(".cta a.btn-primary");
   ok("CTA 带 Monitor 注册标记", !!btn && btn.getAttribute("data-monitor-link") === "signup");
   ok("CTA 指向 monitor 域（环境改写生效）", !!btn && /monitor\./.test(btn.href || ""), btn && btn.href);
+}
+
+/* G. legacy 回退：旧缓存报告无 mastery/capPct → hero 原样渲染 score/scoreMax */
+console.log("\n[G] legacy 报告（无 mastery/capPct）回退渲染");
+{
+  const legacy = { ...REPORT };
+  delete legacy.mastery;
+  delete legacy.capPct;
+  const dom = loadPage("https://toolfront.dev/report?domain=example.com&lang=en", async () => ({ ok: true, json: async () => legacy }));
+  await new Promise(r => setTimeout(r, 50));
+  const doc = dom.window.document;
+  ok("legacy hero 显示原始分", (doc.querySelector("#scoreNum") || {}).textContent === "37", textOf(".nums .score", dom));
+  ok("legacy of 段显示 scoreMax", (textOf(".nums .score .of", dom) || "") === "/ 100", textOf(".nums .score .of", dom));
+  ok("legacy 无 mastery 行", [...doc.querySelectorAll(".nums .pct-line")].every(e => !/Mastery|掌握度/.test(e.textContent)), JSON.stringify([...doc.querySelectorAll(".nums .pct-line")].map(e => e.textContent)));
 }
 
 console.log(`\nreport-dom 结果: ${pass} 通过 / ${fail} 失败`);

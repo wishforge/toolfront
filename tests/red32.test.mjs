@@ -44,7 +44,7 @@ ok("200 + cf-mitigated 异常值 → false", challengeProbe(200, "<p>ok</p>", "s
 /* ————— B. 计分语义（生产源码结构断言）————— */
 console.log("\n[B] na 计分 / blocked 报告语义");
 ok("na 项 points=null 计入 unavailable", /points === null[\s\S]{0,80}unavailable\.push/.test(WORKER_SRC));
-ok("scoreMax 分母可被 na 缩小", /scoreMax \+= c\.max/.test(WORKER_SRC) && /pct = scoreMax > 0 \? Math\.round\(\(score \/ scoreMax\) \* 100\)/.test(WORKER_SRC));
+ok("scoreMax 分母可被 na 缩小", /scoreMax \+= c\.max/.test(WORKER_SRC) && /masteryPct = masteryMax > 0 \? Math\.round\(\(masteryEarned \/ masteryMax\) \* 100\)/.test(WORKER_SRC));
 ok("report.unavailable 仅在非空时输出", /if \(unavailable\.length\) report\.unavailable = unavailable;/.test(WORKER_SRC));
 ok("主页被挑战 → blocked 报告（grade:null）", /challengeProbe\(home\.status, home\.text, home\.cfMitigated\)/.test(WORKER_SRC) && /blocked: true, grade: null, score: null/.test(WORKER_SRC));
 ok("blocked verdict 为固定文案（不回显目标内容）", /Scan blocked by bot protection\. AI agents likely hit the same wall/.test(WORKER_SRC));
