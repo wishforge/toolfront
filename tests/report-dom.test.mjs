@@ -150,7 +150,11 @@ console.log("\n[F] CTA 不收集邮箱（留资失败面消失）");
   const doc = dom.window.document;
   ok("页面无任何邮箱输入", doc.querySelector("input[type=email]") === null);
   const btn = doc.querySelector(".cta a.btn-primary");
-  ok("CTA 带 Monitor 注册标记", !!btn && btn.getAttribute("data-monitor-link") === "signup");
+  /* The CTA is the new-customer start form (/monitoring: website + email, no
+     password), not the password-account signup page — funnel fix, PR #48
+     convention: data-monitor-link="monitoring" everywhere. */
+  ok("CTA 带 Monitor 起步标记（/monitoring 而非 /signup）", !!btn && btn.getAttribute("data-monitor-link") === "monitoring");
+  ok("CTA 指向 /monitoring（新客门）", !!btn && /\/monitoring$/.test(btn.href || ""), btn && btn.href);
   ok("CTA 指向 monitor 域（环境改写生效）", !!btn && /monitor\./.test(btn.href || ""), btn && btn.href);
 }
 

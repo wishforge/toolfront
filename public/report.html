@@ -1587,7 +1587,7 @@
     // The CTA node is detached when buildCta runs (renderReport appends it
     // later), so a document-wide link rewrite can never see it: compute the
     // Monitor URL directly on the node itself.
-    var btn = el('a'); btn.href = monitorBase() + '/signup'; btn.className = 'btn-primary'; btn.textContent = t('report.getfix'); btn.setAttribute('data-monitor-link', 'signup');
+    var btn = el('a'); btn.href = monitorBase() + '/monitoring'; btn.className = 'btn-primary'; btn.textContent = t('report.getfix'); btn.setAttribute('data-monitor-link', 'monitoring');
     wl.appendChild(btn);
     cta.appendChild(wl);
     return cta;
