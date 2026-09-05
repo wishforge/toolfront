@@ -1617,6 +1617,7 @@
     var scoreEl = el('span', null, String(hasLayers ? r.capPct : r.score));
     scoreEl.id = 'scoreNum';
     var score = el('div', 'score');
+    score.setAttribute('title', t('report.cap.label'));
     score.appendChild(scoreEl);
     score.appendChild(el('span', 'of', hasLayers ? ' / 100' : ' / ' + ((typeof r.scoreMax === 'number' && r.scoreMax > 0) ? r.scoreMax : 100)));
     var prev = null;

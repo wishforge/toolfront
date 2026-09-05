@@ -158,6 +158,10 @@ const PAIRS = {
 'rank.all':['All','全部'],'rank.hosting':['Hosting','主机服务'],'rank.payments':['Payments','支付服务'],'rank.devtools':['Dev Tools','开发工具'],'rank.ai':['AI','AI']
 };
 function t(k){const p=PAIRS[k];if(p)return (LANG==='zh'?p[1]:p[0]);return (window.tfCommon&&window.tfCommon(null,LANG,k))||k}
+// Rubric total (essential 86 + surface 14 + emerging 8). The API returns the
+// absolute score; the board displays it on a /100 basis like the report page.
+const RUBRIC_TOTAL = 108;
+const cap100 = (s) => Math.round((Number(s) || 0) / RUBRIC_TOTAL * 100);
 function applyLang(){
   document.getElementById('lang-en').classList.toggle('on',LANG==='en');
   document.getElementById('lang-zh').classList.toggle('on',LANG==='zh');
@@ -206,15 +210,15 @@ function drawFilters(){
   seg('sortSeg',sortSegItems(),sortBy,'setSort');
 }
 function setVert(v){fVert=v;drawFilters();load()}
-function setGra(g){fGra=g;drawFilters()}
+function setGra(g){fGra=g;drawFilters();render()}
 function setSort(s){sortBy=s;drawFilters();render()}
 function gradeBand(s){if(s>=70)return 'A-B';if(s>=50)return 'C';return 'D-F'}
 function render(){
   var q=(qEl.value||'').toLowerCase();
   var rs=ROWS.filter(function(r){
-    if(fGra==='A-B')return r.score>=70;
-    if(fGra==='C')return r.score>=50&&r.score<70;
-    if(fGra==='D-F')return r.score<50;
+    if(fGra==='A-B')return r.g==='A'||r.g==='B';
+    if(fGra==='C')return r.g==='C';
+    if(fGra==='D-F')return r.g==='D'||r.g==='F';
     return true;
   }).filter(function(r){return !q||r.d.indexOf(q)>=0});
   if(sortBy==='score')rs.sort(function(a,b){return b.s-a.s});
@@ -229,7 +233,7 @@ function render(){
       <td class="num" style="color:var(--ink-4)">'+(i+1)+'</td>\
       <td><div class="rrow"><span class="fav">'+r.d[0].toUpperCase()+'</span><span><span class="rdom">'+r.d+'</span><div class="rwhen">'+new Date(r.t).toISOString().slice(0,10)+'</div></span></div></td>\
       <td class="num"><span class="g'+g+'">'+g+'</span></td>\
-      <td class="num score-cell"><span class="n" style="font-weight:600">'+r.s+'</span></td>\
+      <td class="num score-cell"><span class="n">'+cap100(r.s)+'</span><br><span class="g">'+g+' · '+r.s+'/108</span></td>\
       <td class="num" style="color:var(--ink-4);font-size:11.5px">'+new Date(r.t).toISOString().slice(0,10)+'</td>\
     </tr>';
   }).join('');
