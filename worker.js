@@ -114,6 +114,7 @@ export default {
     try {
       if (url.pathname === "/api/scan") return await handleScan(url, request, env);
     if (url.pathname === "/api/scan-history") return await handleScanHistory(url, request, env);
+    if (url.pathname === "/api/survey" && request.method === "POST") return await handleSurvey(request, env);
       if (url.pathname === "/api/compare") return await handleCompareApi(url, request, env);
       if (url.pathname === "/api/methodology") return json(methodologyData(), 200, { "Cache-Control": "public, max-age=3600" });
       if (url.pathname === "/api/waitlist") return await handleWaitlist(request, env);
@@ -1332,6 +1333,21 @@ async function handleScanHistory(url, request, env) {
   } catch (_) {
     return json({ ok: true, domain, rows: [] }, 200); // ledger unavailable -> empty, never 500
   }
+}
+
+/* ————— /api/survey: anonymous single-question conversion research (C6).
+   One KV counter per choice. ponytail: get+put is not atomic — a lost vote
+   under a race is an acceptable ceiling; upgrade path = D1 counter or
+   Analytics Engine. No identity is stored (privacy contract). ————— */
+async function handleSurvey(request, env) {
+  if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+  const ip = request.headers.get("CF-Connecting-IP") || "anon";
+  if (!(await rateLimitAllow(ip, env))) return json({ error: "rate_limited", detail: "Too many requests. Try again later." }, 429);
+  let choice = "";
+  try { choice = String((await request.json()).choice || ""); } catch (_) { return json({ error: "bad_json" }, 400); }
+  if (["false-positives", "data-accuracy", "price"].indexOf(choice) === -1) return json({ error: "invalid_choice" }, 400);
+  if (env.KV) { try { const n = Number(await env.KV.get("survey:" + choice)) || 0; await env.KV.put("survey:" + choice, String(n + 1)); } catch (_) {} }
+  return json({ ok: true });
 }
 
 async function handleScan(url, request, env) {

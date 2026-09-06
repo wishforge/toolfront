@@ -48,3 +48,10 @@ ok("history 429 response is uniform with scan 429", worker.slice(worker.indexOf(
 
 console.log("\nscan-history 结果: " + pass + " 通过 / " + fail + " 失败");
 process.exit(fail ? 1 : 0);
+
+console.log("\n[D] /api/survey — anonymous conversion research (C6)");
+ok("route registered (POST only)", worker.includes('/api/survey" && request.method === "POST"'));
+ok("choice whitelist enforced", worker.includes('["false-positives", "data-accuracy", "price"]'));
+ok("rate limited like every public endpoint", worker.includes("handleSurvey") && worker.includes("rateLimitAllow"));
+ok("anonymous: no identity stored, KV counter only", worker.includes('"survey:" + choice') && !worker.includes("survey:" + "user"));
+ok("bad json -> 400", worker.includes("bad_json"));

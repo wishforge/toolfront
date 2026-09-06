@@ -427,6 +427,15 @@
   .cta a.btn-primary { border: 0; background: var(--grad-primary); color: #FFF; font-weight: 600; font-size: 14px; padding: 14px 30px; border-radius: var(--r-full); cursor: pointer; font-family: var(--sans); letter-spacing: -0.01em; transition: all var(--dur-fast) ease; box-shadow: 0 4px 12px rgba(37,99,235,0.30), 0 0 20px rgba(59,130,246,0.18); text-decoration: none; display: inline-block; text-align: center; white-space: nowrap; }
   .cta a.btn-primary:hover { background: var(--grad-primary-hover); box-shadow: 0 6px 20px rgba(37,99,235,0.42), 0 0 32px rgba(59,130,246,0.28); transform: translateY(-2px); color: #FFF; text-decoration: none; }
   .cta a.btn-primary:active { transform: translateY(0); }
+  .exit-survey { margin-top: 14px; background: var(--paper-soft, #F1F4F8); border-radius: var(--r-3); padding: 12px 16px; }
+  .exit-survey b { font-size: 13px; color: var(--ink-2); }
+  .exit-survey .srow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+  .exit-survey button { border: 1px solid var(--line); background: #fff; border-radius: var(--r-3); padding: 6px 12px; font-size: 12.5px; cursor: pointer; }
+  .exit-survey button:hover { border-color: var(--accent); color: var(--accent); }
+  .copy-all-fab { position: fixed; bottom: 24px; right: 24px; z-index: 80; border: 0; background: var(--ink); color: #FFF; font-family: var(--sans); font-weight: 600; font-size: 13.5px; padding: 13px 22px; border-radius: var(--r-full); cursor: pointer; box-shadow: 0 8px 24px rgba(12,18,34,0.35); display: inline-flex; align-items: center; gap: 8px; transition: transform var(--dur-fast) ease, opacity var(--dur-fast) ease; }
+  .copy-all-fab:hover { transform: translateY(-2px); }
+  .copy-all-fab.hidden { opacity: 0; pointer-events: none; }
+  .copy-all-fab .n { font-family: var(--mono); background: var(--accent); border-radius: var(--r-full); min-width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
   .cta .queued { grid-column: 1 / -1; font-family: var(--mono); font-size: 12px; color: var(--good); }
 
   /* ═══ COLOPHON ═══ */
@@ -609,6 +618,13 @@
       'report.fix.skill': 'How to fix',
       'report.fix.sample': 'Paste-ready /llms.txt',
       'report.fix.copy': 'Copy',
+      'report.fix.prompt': 'Copy prompt',
+      'report.fab': 'Copy all fix briefs',
+      'report.survey.q': 'What almost stopped you from adding Monitor today?',
+      'report.survey.fp': 'Too many false alerts',
+      'report.survey.acc': 'Data accuracy',
+      'report.survey.price': 'Price',
+      'report.survey.thanks': 'Noted \u2014 thank you. This decides what we fix next month.',
       'report.fix.copied': 'Copied',
       'report.fix.group.essential': 'Every site needs these',
       'report.fix.group.surface': 'Scored only where it applies',
@@ -679,6 +695,13 @@
       'report.fix.skill': '怎么修',
       'report.fix.sample': '可直接粘贴的 /llms.txt',
       'report.fix.copy': '复制',
+      'report.fix.prompt': '复制提示词',
+      'report.fab': '复制全部修复简报',
+      'report.survey.q': '今天是什么让你没有添加 Monitor？',
+      'report.survey.fp': '怕误报打扰',
+      'report.survey.acc': '担心数据准确性',
+      'report.survey.price': '价格',
+      'report.survey.thanks': '已记录，谢谢。这决定我们下个月修什么。',
       'report.fix.copied': '已复制',
       'report.fix.group.essential': '每个站点都该有的',
       'report.fix.group.surface': '按本站实际具备的能力评估',
@@ -937,6 +960,61 @@
   var GROUP_ORDER = ['essential', 'surface', 'emerging'];
   /* Authoritative sources per check (spec 2026-09-03 Task 7b): rendered on
      fail/partial fix cards so users see the standards behind each fix. */
+  /* ———— fix-layer v2 (PRD Workflow A): agent brief + copy-all fab ———— */
+  var reportDomain = "";
+  var HAS_SKILL = {
+    "llms-txt": 1, "robots-policy": 1, "machine-surfaces": 1, "structured-data": 1,
+    "webmcp": 1, "tool-security": 1, "freshness": 1, "link-headers": 1, "api-errors": 1
+  };
+  function copyText(text, btn) {
+    var done = function () { btn.textContent = t('report.fix.copied'); setTimeout(function () { btn.textContent = t('report.fix.copy'); }, 1600); };
+    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); }); }
+    else { fallbackCopy(text, done); }
+    function fallbackCopy(text, done) {
+      var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch (_) {}
+      document.body.removeChild(ta); done();
+    }
+  }
+  /* Six-section agent brief (Goal/Issue/Fix/Sample/Skill/Docs/Verify).
+     Verify is ToolFront's addition: the agent can self-check after fixing. */
+  function buildAgentBrief(c, domain) {
+    var srcs = (CHECK_SOURCES[c.id] || []).map(function (s) { return s[1]; }).join(', ');
+    var brief = 'Goal: Fix agent-readiness check "' + c.label + '" on ' + domain +
+      '\n\nIssue: ' + (c.detail || c.label) +
+      '\n\nFix: Apply the sample below, then adapt to the site.';
+    if (c.sample) brief += '\n\nSample:\n' + c.sample;
+    brief += '\n\nSkill: https://toolfront.dev/.well-known/agent-skills/' + c.id + '/SKILL.md' +
+      '\n\nDocs: ' + (srcs || 'https://toolfront.dev/methodology') +
+      '\n\nVerify: https://toolfront.dev/api/scan?domain=' + domain + '&fresh=1';
+    return brief;
+  }
+  window.buildAgentBrief = buildAgentBrief; /* pure fn — testable */
+  var fab = document.createElement('button');
+  fab.id = 'copy-all-fab'; fab.type = 'button'; fab.className = 'copy-all-fab hidden';
+  fab.appendChild(el('span', null, t('report.fab')));
+  fab.appendChild(el('span', 'n', '0'));
+  fab.addEventListener('click', function () {
+    var briefs = [];
+    document.querySelectorAll('.fix').forEach(function (fx) {
+      if (fx.classList.contains('done') || fx.classList.contains('dismissed')) return;
+      var idx = Number(fx.getAttribute('data-idx'));
+      var c = (typeof lastReportChecks !== 'undefined' && lastReportChecks) ? lastReportChecks[idx] : null;
+      if (c) briefs.push(buildAgentBrief(c, reportDomain));
+    });
+    if (briefs.length) copyText(briefs.join('\n\n----------\n\n'), fab);
+  });
+  document.body.appendChild(fab);
+  function updateFab() {
+    var all = document.querySelectorAll('.fix input[type=checkbox]').length;
+    var done = document.querySelectorAll('.fix.done input[type=checkbox]').length;
+    var dis = document.querySelectorAll('.fix.dismissed input[type=checkbox]').length;
+    var pending = all - done - dis;
+    var n = fab.querySelector('.n'); if (n) n.textContent = String(pending);
+    fab.classList.toggle('hidden', pending === 0);
+    var ad = document.getElementById('fix-alldone');
+    if (ad) ad.style.display = (all > 0 && done === all) ? '' : 'none';
+  }
   var CHECK_SOURCES = {
     'webmcp': [['W3C WebMCP proposal', 'https://webmcp.org']],
     'tool-security': [['OWASP ASI02', 'https://genai.owasp.org']],
@@ -1369,8 +1447,10 @@
       return (b.max - (b.points || 0)) - (a.max - (a.points || 0));
     });
     var lastGroup = null;
-    fixable.forEach(function (c) {
+    reportDomain = r.domain;
+    fixable.forEach(function (c, fixIdx) {
       var fx = fixDict[c.id + '.' + c.status] || fixDict[c.id + '.fail'];
+      if (!fx) return;
       if (!fx) return;
       var meta = { group: tierOf(c), grade: evidenceOf(c) };
       var gainN = Math.max(0, c.max - (c.points || 0));
@@ -1384,6 +1464,7 @@
         body.appendChild(el('div', 'fix-group-h', t('report.fix.group.' + meta.group)));
       }
       var item = el('label', 'fix');
+      item.setAttribute('data-idx', fixIdx);
       item.setAttribute('data-sev', sev);
       var cb = el('input'); cb.type = 'checkbox'; cb.checked = done;
       /* Content area: title row (title + evidence grade) + detail + repair link */
@@ -1423,12 +1504,14 @@
         det.appendChild(sum); det.appendChild(pre); det.appendChild(cbtn);
         txt.appendChild(det);
       }
-      var skill = el('a', 'fix-skill-link');
-      skill.href = '/.well-known/agent-skills/' + c.id + '/SKILL.md';
-      skill.target = '_blank';
-      skill.rel = 'noopener';
-      skill.textContent = t('report.fix.skill') + ' →';
-      txt.appendChild(skill);
+      if (HAS_SKILL[c.id]) {
+        var skill = el('a', 'fix-skill-link');
+        skill.href = '/.well-known/agent-skills/' + c.id + '/SKILL.md';
+        skill.target = '_blank';
+        skill.rel = 'noopener';
+        skill.textContent = t('report.fix.skill') + ' →';
+        txt.appendChild(skill);
+      } /* F5: no published SKILL.md -> no link (never a dead end) */
       var srcs = CHECK_SOURCES[c.id];
       if (srcs && srcs.length) {
         var srcRow = el('span', 'fix-sources');
@@ -1445,6 +1528,11 @@
       if (gainN > 0) item.appendChild(el('span', 'gain', '+' + gainN));
       /* Action buttons */
       var acts = el('div', 'fix-actions');
+      var btnBrief = el('button', 'fix-btn fix-prompt-copy');
+      btnBrief.type = 'button';
+      btnBrief.textContent = t('report.fix.prompt');
+      btnBrief.addEventListener('click', function () { copyText(buildAgentBrief(c, r.domain), btnBrief); });
+      acts.appendChild(btnBrief);
       var btnApply = el('button', 'fix-btn fix-btn-apply');
       btnApply.textContent = t('report.fix.apply') || 'Mark as fixed';
       btnApply.type = 'button';
@@ -1505,8 +1593,12 @@
     var est = el('span', 'est', '');
     pot.appendChild(est);
     body.appendChild(pot);
+    var alldone = el('div', 'fix passed'); alldone.id = 'fix-alldone'; alldone.style.display = 'none';
+    setIcon(alldone, 'pass');
+    alldone.appendChild(document.createTextNode(' ' + t('report.fix.alldone')));
+    body.appendChild(alldone);
 
-    function project(rr) {
+    function project(rr) { updateFab();
       var checkedGain = 0;
       var availableMax = 0;
       var masteryGain = 0; // applied gains that sit in the mastery-graded pool
@@ -1633,6 +1725,22 @@
     var btn = el('a'); btn.href = monitorBase() + '/monitoring'; btn.className = 'btn-primary'; btn.textContent = t('report.getfix'); btn.setAttribute('data-monitor-link', 'monitoring');
     wl.appendChild(btn);
     cta.appendChild(wl);
+    /* C6 exit survey — the O/CO research question at the friction point */
+    var survey = el('div', 'exit-survey'); survey.id = 'exitSurvey';
+    survey.appendChild(el('b', null, t('report.survey.q')));
+    var srow = el('div', 'srow');
+    [['false-positives', 'report.survey.fp'], ['data-accuracy', 'report.survey.acc'], ['price', 'report.survey.price']].forEach(function (pair) {
+      var sb = el('button'); sb.type = 'button'; sb.setAttribute('data-choice', pair[0]);
+      sb.textContent = t(pair[1]);
+      sb.addEventListener('click', function () {
+        try { fetch('/api/survey', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ choice: pair[0] }) }).catch(function () {}); } catch (_) {}
+        srow.querySelectorAll('button').forEach(function (x) { x.disabled = true; });
+        srow.appendChild(el('span', 'mut', t('report.survey.thanks')));
+      });
+      srow.appendChild(sb);
+    });
+    survey.appendChild(srow);
+    cta.appendChild(survey);
     return cta;
   }
 
@@ -1722,6 +1830,7 @@
 
     // Card 3 — fix list
     resultBox.appendChild(buildCard(t('report.fix.title'), buildFixes(r), false));
+    updateFab();
 
     // Card 3.5 — supplemental signals (not scored, spec 2026-09-03 F6)
     if (r.supplemental) resultBox.appendChild(buildCard(t('report.supp.title'), buildSupplemental(r.supplemental), false));
