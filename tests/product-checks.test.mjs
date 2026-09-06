@@ -3,7 +3,7 @@
 // Pure functions only: no network, no DOM, no fixtures. Repo convention:
 // self-executing, console.log progress, process.exit(fail ? 1 : 0).
 import {
-  checkApiErrors, checkFreshness, checkLinkHeaders,
+  checkApiErrors, checkFreshness, checkLinkHeaders, checkWebMCP,
   CHECK_POLICY, POOL_BUDGET,
 } from "../worker.js";
 import { readFileSync } from "node:fs";
@@ -60,4 +60,23 @@ for (const id of ids) {
 ok("SCORING_VERSION is 3.1.0 (three-pool model)", /const SCORING_VERSION = "3\.1\.0";/.test(WORKER_SRC));
 
 console.log(`\nproduct-checks 结果: ${pass} 通过 / ${fail} 失败`);
+/* [A5] checkWebMCP implementation-level grading (2026-09-06) */
+console.log("\n[A5] checkWebMCP grading");
+{
+  const described = { tools: [{ name: "search", description: "Search the catalog" }], platform: null, imperative: 1, declarative: 0 };
+  const r1 = checkWebMCP(described);
+  ok("有 name+description 的工具 -> pass", r1.status === "pass" && /1\/1 tool\(s\) with name\+description/.test(r1.detail), r1.detail);
+
+  const opaque = { tools: [{ name: "search" }], platform: null, imperative: 1, declarative: 0 };
+  const r2 = checkWebMCP(opaque);
+  ok("工具缺 description -> partial（declared, not operable）", r2.status === "partial" && /not operable/.test(r2.detail), r2.detail);
+
+  const none = { tools: [], platform: null, imperative: 0, declarative: 0 };
+  ok("无 surface -> fail", checkWebMCP(none).status === "fail");
+
+  const shopify = { tools: [], platform: "shopify", imperative: 0, declarative: 0 };
+  ok("platform 注入 -> pass（运行时保证，静态不可见）", checkWebMCP(shopify).status === "pass");
+}
+
 process.exit(fail ? 1 : 0);
+

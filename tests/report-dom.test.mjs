@@ -175,5 +175,35 @@ console.log("\n[G] legacy 报告（无 mastery/capPct）回退渲染");
   ok("legacy 无 mastery 行", [...doc.querySelectorAll(".nums .pct-line")].every(e => !/Mastery|掌握度/.test(e.textContent)), JSON.stringify([...doc.querySelectorAll(".nums .pct-line")].map(e => e.textContent)));
 }
 
+/* [PROD] fix-layer v2 additions — PRD Workflow A1/A2/C6 + F5 guard (2026-09-06) */
+console.log("\n[PROD] fix-layer v2");
+{
+  const dom = loadPage("https://toolfront.dev/report?domain=example.com&lang=en");
+  await new Promise(r => setTimeout(r, 50));
+  const doc = dom.window.document;
+
+  ok("buildAgentBrief 以纯函数暴露（可测）", typeof dom.window.buildAgentBrief === "function");
+  const brief = dom.window.buildAgentBrief({
+    id: "llms-txt", label: "llms.txt", detail: "missing",
+    sample: "# llms.txt sample", sources: [["Spec", "https://spec.example"]]
+  }, "example.com");
+  for (const sec of ["Goal:", "Issue:", "Fix:", "Sample:", "Skill:", "Docs:", "Verify: https://toolfront.dev/api/scan?domain=example.com&fresh=1"]) {
+    ok("简报含段 " + sec.split(":")[0], brief.includes(sec), brief.slice(0, 120));
+  }
+
+  ok("每项修复带 复制提示词 按钮（5 项）", doc.querySelectorAll(".fix-prompt-copy").length === 5, String(doc.querySelectorAll(".fix-prompt-copy").length));
+
+  ok("copy-all-fab 存在", doc.querySelector("#copy-all-fab") !== null);
+  ok("fab 计数=待修 5 项", (textOf("#copy-all-fab .n", dom) || doc.querySelector("#copy-all-fab").textContent.match(/\d+/)?.[0]) === "5");
+
+  const fsMod = await import("node:fs");
+  const published = fsMod.readdirSync(join(ROOT, "public/agent-skills")).filter(d => fsMod.existsSync(join(ROOT, "public/agent-skills", d, "SKILL.md")));
+  const links = [...doc.querySelectorAll(".fix-skill-link")].map(a => a.getAttribute("href"));
+  ok("无死链：每个 skill 链接都有已发布 SKILL.md（F5）", links.every(h => published.includes(h.split("/agent-skills/")[1].split("/")[0])), JSON.stringify(links));
+
+  ok("exit survey 三个选项", doc.querySelectorAll("#exitSurvey button[data-choice]").length === 3, String(doc.querySelectorAll("#exitSurvey button[data-choice]").length));
+}
+
 console.log(`\nreport-dom 结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail ? 1 : 0);
+

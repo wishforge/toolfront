@@ -75,6 +75,11 @@ body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:
 .score-cell .g{font-size:11px;font-weight:650}
 .gA{color:var(--good)}.gB{color:var(--mid)}.gC{color:var(--mid)}.gD,.gF{color:var(--bad)}
 .empty{padding:40px;text-align:center;color:var(--ink-4);font-size:13px}
+.skel{height:14px;border-radius:6px;background:linear-gradient(90deg,#F1F4F8 25%,#fff 50%,#F1F4F8 75%);background-size:200% 100%;animation:rsk 1.2s infinite;margin:10px 0}
+@keyframes rsk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.state-err{padding:14px 16px;background:#FEF2F2;color:#DC2626;border-radius:10px;font-size:13px;display:flex;gap:12px;align-items:center;justify-content:center}
+.state-err button{border:1px solid #DC2626;background:#fff;color:#DC2626;border-radius:8px;padding:5px 14px;font-size:12.5px;cursor:pointer;font-family:inherit}
+.state-err button:hover{background:#DC2626;color:#fff}
 .foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-4);display:flex;gap:20px;flex-wrap:wrap}
 .foot a{color:var(--ink-3);text-decoration:none}
 .foot a:hover{color:var(--ink)}
@@ -154,6 +159,8 @@ const PAIRS = {
  'search.ph':['Search domain...','搜索域名…'],
  'count':['Showing {n} of {total} scanned domains','显示 {total} 个已扫域名中的 {n} 个'],
  'empty':['No domains match — the board never invents a row.','没有匹配的域名——榜单绝不编造行。'],
+ 'retry':['Retry','重试'],
+ 'loaderr':['Board temporarily unavailable — try again shortly.','榜单暂时不可用——稍后重试。'],
  'all':['All','全部'],
 'rank.all':['All','全部'],'rank.hosting':['Hosting','主机服务'],'rank.payments':['Payments','支付服务'],'rank.devtools':['Dev Tools','开发工具'],'rank.ai':['AI','AI']
 };
@@ -257,6 +264,8 @@ function render2(){ /* rows flattened into ROWS by load(); filter+stats+render *
   render();
 }
 function load(){
+  var tb=document.getElementById('rows');
+  tb.innerHTML='<tr><td colspan="5" class="empty"><div class="skel"></div><div class="skel"></div><div class="skel"></div></td></tr>';
   fetch(MON+'/api/rankings?vertical='+fVert)
     .then(function(r){return r.json()})
     .then(function(d){
@@ -264,7 +273,9 @@ function load(){
       ROWS=((d&&d.rows)||[]).map(function(r){return {d:r.domain,s:r.score,g:(r.grade||'D').toUpperCase(),t:r.scanned_at}});
       render2();
     })
-    .catch(function(){ document.getElementById('rows').innerHTML='<tr><td colspan="5" class="empty">'+TT_ERR()+'</td></tr>' });
+    .catch(function(){
+      tb.innerHTML='<tr><td colspan="5" class="state-err"><span>'+TT_ERR()+'</span><button onclick="load()">'+t('retry')+'</button></td></tr>';
+    });
 }
 function TT_ERR(){return LANG==='zh'?'榜单暂时不可用——稍后重试。':'Board temporarily unavailable — try again shortly.'}
 qEl.addEventListener('input',render);

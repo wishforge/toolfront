@@ -114,6 +114,7 @@ export default {
     try {
       if (url.pathname === "/api/scan") return await handleScan(url, request, env);
     if (url.pathname === "/api/scan-history") return await handleScanHistory(url, request, env);
+    if (url.pathname === "/api/survey" && request.method === "POST") return await handleSurvey(request, env);
       if (url.pathname === "/api/compare") return await handleCompareApi(url, request, env);
       if (url.pathname === "/api/methodology") return json(methodologyData(), 200, { "Cache-Control": "public, max-age=3600" });
       if (url.pathname === "/api/waitlist") return await handleWaitlist(request, env);
@@ -581,7 +582,19 @@ function checkWebMCP(surface) {
   if (surface.tools.length || surface.platform) {
     const src = surface.platform ? `${surface.platform} platform injection` :
       `${surface.tools.length} tool(s) · ${surface.imperative} imperative / ${surface.declarative} declarative`;
-    return { status: "pass", ratio: 1, detail: `WebMCP surface detected (${src}). Agents can discover native tools on this page.` };
+    // A5: implementation-level grading. Platform injection (e.g. Shopify
+    // storefront WebMCP) guarantees runtime tools the static scanner cannot
+    // see — keep pass. For statically extracted surfaces, a registered tool
+    // without a readable description is declared but not operable: agents
+    // see the tool but not what it does.
+    if (surface.platform) {
+      return { status: "pass", ratio: 1, detail: `WebMCP surface detected (${src}). Agents can discover native tools on this page.` };
+    }
+    const described = surface.tools.filter(t => typeof t.description === "string" && t.description.length).length;
+    if (described > 0) {
+      return { status: "pass", ratio: 1, detail: `WebMCP surface detected (${src}; ${described}/${surface.tools.length} tool(s) with name+description). Agents can discover and operate native tools on this page.` };
+    }
+    return { status: "partial", ratio: 0.5, detail: `WebMCP surface detected (${src}) but no tool exposes a readable description — declared, not operable. Add name + description to every registered tool.` };
   }
   return { status: "fail", ratio: 0, detail: "No WebMCP tools registered. Agents must screenshot and click blind — every UI change risks breaking their flow." };
 }
@@ -1332,6 +1345,21 @@ async function handleScanHistory(url, request, env) {
   } catch (_) {
     return json({ ok: true, domain, rows: [] }, 200); // ledger unavailable -> empty, never 500
   }
+}
+
+/* ————— /api/survey: anonymous single-question conversion research (C6).
+   One KV counter per choice. ponytail: get+put is not atomic — a lost vote
+   under a race is an acceptable ceiling; upgrade path = D1 counter or
+   Analytics Engine. No identity is stored (privacy contract). ————— */
+async function handleSurvey(request, env) {
+  if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
+  const ip = request.headers.get("CF-Connecting-IP") || "anon";
+  if (!(await rateLimitAllow(ip, env))) return json({ error: "rate_limited", detail: "Too many requests. Try again later." }, 429);
+  let choice = "";
+  try { choice = String((await request.json()).choice || ""); } catch (_) { return json({ error: "bad_json" }, 400); }
+  if (["false-positives", "data-accuracy", "price"].indexOf(choice) === -1) return json({ error: "invalid_choice" }, 400);
+  if (env.KV) { try { const n = Number(await env.KV.get("survey:" + choice)) || 0; await env.KV.put("survey:" + choice, String(n + 1)); } catch (_) {} }
+  return json({ ok: true });
 }
 
 async function handleScan(url, request, env) {

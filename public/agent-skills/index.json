@@ -36,6 +36,24 @@
       "name": "Create an llms.txt",
       "description": "Publish a one-page markdown summary of your site for language-model clients.",
       "href": "https://toolfront.dev/.well-known/agent-skills/llms-txt/SKILL.md"
+    },
+    {
+      "id": "freshness",
+      "name": "Add content freshness signals",
+      "description": "Publish dateModified / article:modified_time so agents can tell how recent your content is.",
+      "href": "https://toolfront.dev/.well-known/agent-skills/freshness/SKILL.md"
+    },
+    {
+      "id": "link-headers",
+      "name": "Add Link response headers",
+      "description": "Advertise agent-useful resources (API catalog, docs, skills) via RFC 8288 Link response headers.",
+      "href": "https://toolfront.dev/.well-known/agent-skills/link-headers/SKILL.md"
+    },
+    {
+      "id": "api-errors",
+      "name": "Machine-readable API errors",
+      "description": "Return structured JSON error bodies with correct status codes so agents can react to failures programmatically.",
+      "href": "https://toolfront.dev/.well-known/agent-skills/api-errors/SKILL.md"
     }
   ]
 }
