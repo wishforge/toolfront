@@ -95,5 +95,13 @@ console.log("\n[B] 评级字母过滤");
   ok("过滤交互零报错", errors.length === 0, JSON.stringify(errors));
 }
 
+/* [B2] three states — loading skeleton / error retry / honest empty (2026-09-06) */
+console.log("\n[B2] rankings three states");
+ok("loading skeleton shown before data arrives", HTML.includes('class="skel"') && HTML.includes("tb.innerHTML='<tr><td colspan=\"5\" class=\"empty\"><div class=\"skel\""));
+ok("error state is distinct from empty (not swallowed)", HTML.includes('class="state-err"') && HTML.includes('TT_ERR()'));
+ok("error state offers retry", HTML.includes("button onclick=\"load()\""));
+ok("retry i18n keys present (en/zh)", HTML.includes("'retry':['Retry','重试']"));
+
 console.log(`\nrankings-page 结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail ? 1 : 0);
+

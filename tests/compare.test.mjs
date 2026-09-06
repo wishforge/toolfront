@@ -121,4 +121,12 @@ console.log("\n[C] zh locale");
 }
 
 console.log(`\ncompare 结果: ${pass} 通过 / ${fail} 失败`);
+/* [B1] one public scale — /100 normalization on compare (2026-09-06) */
+console.log("\n[B1] compare score normalization");
+ok("primary score normalized to /100", HTML.includes("Math.round(report.score / report.scoreMax * 100)") && HTML.includes("' / 100'"));
+ok("lead margin computed on normalized basis", HTML.includes("var dA = data.a.scoreMax") && HTML.includes("var d = dA - dB;"));
+ok("score bar animates transform (no width layout transition)", HTML.includes("transform:scaleX(0)") && !HTML.includes("transition:width"));
+ok("dark glow replaced with neutral shadow", HTML.includes("rgba(12,18,34,0.14)"));
+
 process.exit(fail ? 1 : 0);
+

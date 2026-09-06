@@ -89,7 +89,7 @@
   /* ═══ CARD SYSTEM (V5 glow border) ═══ */
   .card {
     background: var(--card); border: 1px solid rgba(37,99,235,0.08);
-    border-radius: var(--r-4); box-shadow: var(--shadow-report-glow);
+    border-radius: var(--r-4); box-shadow: 0 4px 16px rgba(12,18,34,0.10);
     margin-bottom: 20px; overflow: hidden;
     transition: box-shadow var(--dur-normal) var(--ease-out), border-color var(--dur-fast) ease;
   }
@@ -385,7 +385,7 @@
 
   /* Auto-fix strip: let the visitor's own coding agent apply the fixes */
   .autofix { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap;
-    background: #F0F7FF; border: 1px solid rgba(37,99,235,0.18); border-left: 3px solid var(--accent);
+    background: var(--accent-soft, #EFF6FF); border: 1px solid rgba(37,99,235,0.18);
     border-radius: var(--r-4); padding: 14px 16px; margin: 2px 0 16px; }
   .autofix-txt { min-width: 0; flex: 1 1 340px; }
   .autofix-title { font-family: var(--sans); font-weight: 650; font-size: 13px; color: var(--ink); display: block; }
@@ -411,7 +411,7 @@
   .scan-loading .dot { animation: pulse-dot 1s infinite; }
 
   /* ═══ CTA (light card — industry standard for white-background result pages) ═══ */
-  .cta { margin-top: 28px; background: #F8FAFC; border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: var(--r-5); color: var(--ink); padding: 32px 36px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 28px; align-items: center; box-shadow: var(--shadow-sm); position: relative; }
+  .cta { margin-top: 28px; background: #F8FAFC; border: 1px solid var(--line); border-radius: var(--r-5); color: var(--ink); padding: 32px 36px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 28px; align-items: center; box-shadow: var(--shadow-sm); position: relative; }
   @media (max-width: 760px){ .cta { grid-template-columns: 1fr; } .hero-row { align-items: flex-start; } }
   .cta .kicker { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; background: var(--accent-soft); border-radius: var(--r-full); margin-bottom: 12px; }
   .cta .kicker::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse-dot 2s infinite; }
@@ -474,7 +474,7 @@
   @keyframes popIn { from { transform:scale(.6); opacity:0 } to { transform:scale(1); opacity:1} }
   @keyframes fadeUp { from { transform:translateY(10px); opacity:0 } to { transform:none; opacity:1} }
   @keyframes stampIn { from { transform:scale(.7); opacity:0 } to { transform:scale(1); opacity:1} }
-  .potential .mini i { transition: width .45s cubic-bezier(.3,.7,.2,1); }
+  .potential .mini i { transition: transform .45s ease; transform-origin: left; }
   @media (prefers-reduced-motion: reduce) {
     body.anim .grade, body.anim .nums, body.anim .verdict, body.anim .trackwrap, body.anim .pills .pill, body.anim .vs, body.anim .acts, body.anim .card:not(.replay), body.anim .cbody .fix { animation: none; }
     body.anim .card.replay .scan-fx { animation: none; }
@@ -1587,7 +1587,7 @@
     var mini = el('div', 'mini');
     var fill = el('i');
     var pct = (typeof r.score === 'number' && maxScore > 0) ? Math.round((r.score / maxScore) * 100) : 0;
-    fill.style.width = pct + '%';
+    fill.style.transform = 'scaleX(' + (pct / 100) + ')';
     mini.appendChild(fill);
     pot.appendChild(mini);
     var est = el('span', 'est', '');
