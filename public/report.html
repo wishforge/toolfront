@@ -200,7 +200,7 @@
   .biz-item .pain { font-family: var(--serif); font-optical-sizing: auto; font-weight: 340; font-size: 13.5px; line-height: 1.55; color: var(--ink-2); }
   .biz-item .gain { margin-top: 10px; font-family: var(--serif); font-optical-sizing: auto; font-size: 13px; color: var(--ink); display: flex; gap: 8px; align-items: flex-start; }
   .biz-item .gain .arrow { color: var(--good); font-weight: 700; flex-shrink: 0; font-size: 16px; line-height: 1; }
-  .biz-sum { font-family: var(--serif); font-optical-sizing: auto; font-size: 14px; color: var(--ink-2); line-height: 1.55; border-left: 3px solid var(--mid); background: var(--mid-soft); border-radius: 0 var(--r-4) var(--r-4) 0; padding: 14px 18px; margin-bottom: 4px; }
+    .biz-sum { font-family: var(--serif); font-optical-sizing: auto; font-size: 14px; color: var(--ink-2); line-height: 1.55; background: var(--mid-soft); border-radius: var(--r-4); padding: 14px 18px; margin-bottom: 4px; }
   .biz-item .gain, .biz-item .pain { overflow-wrap: anywhere; }
 
   /* ═══ FIX LIST — Blume-inspired action cards ═══ */
@@ -436,6 +436,27 @@
   .copy-all-fab:hover { transform: translateY(-2px); }
   .copy-all-fab.hidden { opacity: 0; pointer-events: none; }
   .copy-all-fab .n { font-family: var(--mono); background: var(--accent); border-radius: var(--r-full); min-width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
+  /* ———— UI alignment batch: gauge rings / brief collapse / brand badge ———— */
+  .fix-gauge { position: relative; width: 30px; height: 30px; flex-shrink: 0; }
+  .fix-gauge svg { transform: rotate(-90deg); }
+  .fix-gauge circle { fill: none; stroke-width: 3.5; }
+  .fix-gauge .tr { stroke: var(--line); }
+  .fix-gauge .vl { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 82; stroke-dashoffset: 82; }
+  .fix-gauge.warn .vl { stroke: var(--mid); }
+  .fix-gauge.fail .vl { stroke: var(--bad); }
+  @media (prefers-reduced-motion: no-preference) {
+    .fix-gauge.swept .vl { animation: gauge-sweep 0.9s cubic-bezier(0, 0, 0.2, 1) forwards; }
+  }
+  @keyframes gauge-sweep { to { stroke-dashoffset: var(--gd); } }
+  .fix-gauge .gnum { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 9px; font-weight: 700; color: var(--ink-3); }
+  .fix-brief { border: 1px solid var(--line); border-radius: var(--r-3); background: var(--paper-soft, #F8FAFC); margin-top: 8px; }
+  .fix-brief summary { cursor: pointer; padding: 7px 12px; font-size: 12.5px; font-weight: 600; color: var(--accent); list-style: none; }
+  .fix-brief summary::before { content: '▸ '; }
+  .fix-brief[open] summary::before { content: '▾ '; }
+  .fix-brief pre { font-family: var(--mono); font-size: 11.5px; white-space: pre-wrap; word-break: break-word; padding: 0 12px 10px; margin: 0; color: var(--ink-2); }
+  .brand-badge { font-family: var(--mono); font-size: 11px; color: var(--ink-4, #9CA3AF); letter-spacing: 0.04em; white-space: nowrap; }
+  .brand-badge a { color: var(--ink-3, #6B7280); text-decoration: none; }
+  .brand-badge a:hover { color: var(--accent); }
   .cta .queued { grid-column: 1 / -1; font-family: var(--mono); font-size: 12px; color: var(--good); }
 
   /* ═══ COLOPHON ═══ */
@@ -619,12 +640,14 @@
       'report.fix.sample': 'Paste-ready /llms.txt',
       'report.fix.copy': 'Copy',
       'report.fix.prompt': 'Copy prompt',
+      'report.fix.brief': 'Agent fix brief',
       'report.fab': 'Copy all fix briefs',
       'report.survey.q': 'What almost stopped you from adding Monitor today?',
       'report.survey.fp': 'Too many false alerts',
       'report.survey.acc': 'Data accuracy',
       'report.survey.price': 'Price',
       'report.survey.thanks': 'Noted \u2014 thank you. This decides what we fix next month.',
+      'report.brand': 'Scanned by <a href="/">toolfront_</a>',
       'report.fix.copied': 'Copied',
       'report.fix.group.essential': 'Every site needs these',
       'report.fix.group.surface': 'Scored only where it applies',
@@ -696,12 +719,14 @@
       'report.fix.sample': '可直接粘贴的 /llms.txt',
       'report.fix.copy': '复制',
       'report.fix.prompt': '复制提示词',
+      'report.fix.brief': 'Agent 修复简报',
       'report.fab': '复制全部修复简报',
       'report.survey.q': '今天是什么让你没有添加 Monitor？',
       'report.survey.fp': '怕误报打扰',
       'report.survey.acc': '担心数据准确性',
       'report.survey.price': '价格',
       'report.survey.thanks': '已记录，谢谢。这决定我们下个月修什么。',
+      'report.brand': '由 <a href="/">toolfront_</a> 扫描',
       'report.fix.copied': '已复制',
       'report.fix.group.essential': '每个站点都该有的',
       'report.fix.group.surface': '按本站实际具备的能力评估',
@@ -927,6 +952,28 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' }[c];
     });
   }
+  /* gauge ring — per-fix progress visual (UI alignment batch) */
+  function gaugeRing(c) {
+    var frac = c.max ? Math.min(1, (c.points || 0) / c.max) : 0;
+    var gd = (82 * (1 - frac)).toFixed(1);
+    var wrap = document.createElement('span');
+    wrap.className = 'fix-gauge' + (c.status === 'pass' ? '' : ' ' + c.status);
+    wrap.setAttribute('aria-hidden', 'true');
+    var NS = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('width', '30'); svg.setAttribute('height', '30');
+    svg.setAttribute('viewBox', '0 0 30 30');
+    ['tr', 'vl'].forEach(function (cls) {
+      var circ = document.createElementNS(NS, 'circle');
+      circ.setAttribute('class', cls); circ.setAttribute('cx', '15');
+      circ.setAttribute('cy', '15'); circ.setAttribute('r', '13');
+      if (cls === 'vl') circ.style.setProperty('--gd', gd);
+      svg.appendChild(circ);
+    });
+    wrap.appendChild(svg);
+    wrap.appendChild(el('span', 'gnum', String(c.points || 0)));
+    return wrap;
+  }
   function el(tag, cls, text) {
     var e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -1054,6 +1101,11 @@
     sub.appendChild(el('span', 'sep', '›'));
     sub.appendChild(document.createTextNode(r.domain));
     topRow.appendChild(sub);
+    var badge = el('span', 'brand-badge');
+    badge.appendChild(document.createTextNode('Scanned by '));
+    var bl = el('a', null, 'toolfront_');
+    bl.href = '/'; badge.appendChild(bl);
+    topRow.appendChild(badge);
     if (typeof r.grade === 'string' && typeof r.score === 'number') {
       var sm = r.scoreMax || 100;
       // Same layered predicate as the hero: `r.mastery` present AND capPct a
@@ -1454,7 +1506,6 @@
     fixable.forEach(function (c, fixIdx) {
       var fx = fixDict[c.id + '.' + c.status] || fixDict[c.id + '.fail'];
       if (!fx) return;
-      if (!fx) return;
       var meta = { group: tierOf(c), grade: evidenceOf(c) };
       var gainN = Math.max(0, c.max - (c.points || 0));
       totalGain += gainN;
@@ -1481,6 +1532,14 @@
         titleRow.appendChild(badge);
       }
       txt.appendChild(titleRow);
+      /* gauge ring beside the title (UI alignment batch) */
+      titleRow.appendChild(gaugeRing(c));
+      /* collapsed agent brief preview — same six-section text as Copy prompt */
+      var briefDet = el('details', 'fix-brief');
+      var bsum = el('summary'); bsum.textContent = t('report.fix.brief');
+      var bpre = el('pre'); bpre.textContent = buildAgentBrief(c, r.domain); // textContent — data, never markup
+      briefDet.appendChild(bsum); briefDet.appendChild(bpre);
+      txt.appendChild(briefDet);
       txt.appendChild(el('span', null, localDetail(c)));
       if (c.sample) {
         var det = el('details', 'fix-sample');
