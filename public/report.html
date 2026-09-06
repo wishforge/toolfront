@@ -1198,7 +1198,10 @@
           top.appendChild(el('span', 'hist-grade ' + cls(row.score), row.grade || '\u2013'));
           rowEl.appendChild(top);
           var bottom = el('div', 'hr-bottom');
-          var sc = el('span', 'hist-score', String(row.score));
+          /* B1: one public scale - v3 rows normalize /86 -> /100, raw in title */
+          var histNorm = row.scoring_version === '3.0.0' ? Math.round(row.score / 86 * 100) : row.score;
+          var sc = el('span', 'hist-score', String(histNorm) + ' / 100');
+          sc.title = 'raw ' + row.score + ' (' + (row.scoring_version || 'legacy') + ')';
           // Δ vs the previous ledger row — only meaningful within one
           // scoring_version, otherwise the delta lies about progress.
           if (prevScore !== null && row.scoring_version && rows[0].scoring_version === row.scoring_version) {

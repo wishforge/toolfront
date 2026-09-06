@@ -582,7 +582,19 @@ function checkWebMCP(surface) {
   if (surface.tools.length || surface.platform) {
     const src = surface.platform ? `${surface.platform} platform injection` :
       `${surface.tools.length} tool(s) · ${surface.imperative} imperative / ${surface.declarative} declarative`;
-    return { status: "pass", ratio: 1, detail: `WebMCP surface detected (${src}). Agents can discover native tools on this page.` };
+    // A5: implementation-level grading. Platform injection (e.g. Shopify
+    // storefront WebMCP) guarantees runtime tools the static scanner cannot
+    // see — keep pass. For statically extracted surfaces, a registered tool
+    // without a readable description is declared but not operable: agents
+    // see the tool but not what it does.
+    if (surface.platform) {
+      return { status: "pass", ratio: 1, detail: `WebMCP surface detected (${src}). Agents can discover native tools on this page.` };
+    }
+    const described = surface.tools.filter(t => typeof t.description === "string" && t.description.length).length;
+    if (described > 0) {
+      return { status: "pass", ratio: 1, detail: `WebMCP surface detected (${src}; ${described}/${surface.tools.length} tool(s) with name+description). Agents can discover and operate native tools on this page.` };
+    }
+    return { status: "partial", ratio: 0.5, detail: `WebMCP surface detected (${src}) but no tool exposes a readable description — declared, not operable. Add name + description to every registered tool.` };
   }
   return { status: "fail", ratio: 0, detail: "No WebMCP tools registered. Agents must screenshot and click blind — every UI change risks breaking their flow." };
 }
