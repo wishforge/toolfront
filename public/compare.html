@@ -69,7 +69,7 @@
   .cmp-form { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 8px; }
   .cmp-input { flex: 1 1 200px; border: 1.5px solid var(--line); border-radius: var(--r-3); padding: 11px 14px; font-family: var(--mono); font-size: 13px; color: var(--ink); background: var(--card); outline: none; }
   .cmp-input:focus { border-color: var(--accent); }
-  .cmp-btn { border: 0; background: var(--grad-primary); color: #FFF; font-weight: 600; font-size: 13px; padding: 11px 22px; border-radius: var(--r-3); cursor: pointer; font-family: var(--sans); letter-spacing: -0.01em; box-shadow: 0 2px 10px rgba(37,99,235,0.18); }
+  .cmp-btn { border: 0; background: var(--grad-primary); color: #FFF; font-weight: 600; font-size: 13px; padding: 11px 22px; border-radius: var(--r-3); cursor: pointer; font-family: var(--sans); letter-spacing: -0.01em; box-shadow: 0 2px 10px rgba(12,18,34,0.14); }
   .cmp-btn:disabled { opacity: 0.55; cursor: wait; }
   .fine { font-size: 12px; color: var(--ink-3); font-family: var(--mono); }
 
@@ -136,7 +136,7 @@
   .progline{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2,#444);margin-bottom:6px}
   .progline .pct{font-weight:700}
   .pbar{height:4px;border-radius:2px;background:var(--paper-soft,#F1F4F8);overflow:hidden;margin-bottom:14px}
-  .pbar i{display:block;height:100%;background:var(--accent,#2563EB);width:0;transition:width .5s}
+  .pbar i{display:block;height:100%;background:var(--accent,#2563EB);width:100%;transform:scaleX(0);transform-origin:left;transition:transform .5s ease}
   .vtl{margin:4px 0}
   .vstage{display:flex;align-items:center;gap:12px;padding:7px 0;position:relative}
   .vstage .ic{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:none;background:#FFF;border:1.5px solid var(--ink-5,#D1D5DB);position:relative;z-index:1}
@@ -350,7 +350,9 @@
     var okA = data.a && typeof data.a.score === 'number';
     var okB = data.b && typeof data.b.score === 'number';
     if (okA && okB) {
-      var d = data.a.score - data.b.score;
+      var dA = data.a.scoreMax ? Math.round(data.a.score / data.a.scoreMax * 100) : data.a.score;
+      var dB = data.b.scoreMax ? Math.round(data.b.score / data.b.scoreMax * 100) : data.b.score;
+      var d = dA - dB;
       var pill = el('div', 'delta-row');
       var badge = el('span', 'delta-pill ' + (d === 0 ? 'tie' : 'a'),
         d === 0 ? t('cmp.tie').replace('{n}', String(data.a.score))

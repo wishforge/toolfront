@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>你的站为 WebMCP 做好准备了吗？ · ToolFront</title>
+<meta name="description" content="WebMCP 让网站把工具直接暴露给 AI agent。Vercel CEO 三次公开站台。检查你的站是否就绪——免费。">
+<style>
+  :root{--paper:#FAFBFC;--ink:#0C1222;--ink-2:#374151;--ink-3:#6B7280;--line:#E2E6EE;--accent:#2563EB;--accent-deep:#1D4ED8;--accent-soft:#EFF6FF;--good:#059669;--mid:#D97706;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace;--sans:'Space Grotesk','Noto Sans SC',-apple-system,sans-serif}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.7}
+  .wrap{max-width:760px;margin:0 auto;padding:40px 22px 80px}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+  h1{font-size:30px;font-weight:700;line-height:1.3;letter-spacing:-.01em}
+  .lede{color:var(--ink-2);margin:14px 0 6px;font-size:16px}
+  blockquote{border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 12px 12px 0;padding:14px 18px;margin:18px 0;font-size:14px}
+  blockquote .who{display:block;margin-top:8px;font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+  h2{font-size:20px;margin:34px 0 10px;font-weight:700}
+  p{margin:10px 0;color:var(--ink-2)}
+  code{font-family:var(--mono);font-size:12.5px;background:var(--accent-soft);border-radius:5px;padding:2px 7px}
+  pre{font-family:var(--mono);font-size:12px;background:var(--ink);color:#d7dce6;border-radius:10px;padding:14px 16px;overflow-x:auto;margin:12px 0;line-height:1.6}
+  .en{color:var(--ink-3);font-size:13.5px;border-top:1px solid var(--line);margin-top:34px;padding-top:18px}
+  .cta{margin-top:30px;background:linear-gradient(160deg,var(--accent-soft),transparent);border:1px solid var(--line);border-radius:14px;padding:22px 24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .btn{font-family:var(--sans);font-weight:700;border:none;border-radius:10px;padding:11px 22px;font-size:14px;cursor:pointer;text-decoration:none;background:var(--accent);color:#fff;display:inline-block}
+  .btn:hover{background:var(--accent-deep)}
+  .mut{color:var(--ink-3);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">AGENT READINESS · WebMCP</div>
+  <h1>你的站为 WebMCP 做好准备了吗？</h1>
+  <p class="lede">WebMCP 让网站把<strong>工具</strong>直接暴露给 AI agent——不是让 agent 截图点按钮，而是让它在请求时就调用你提供的能力。Vercel CEO 三次公开为它站台。</p>
+
+  <blockquote>
+    "llms.txt is very much like the static representation of an agentic website. And the MCP now enables you to put an agent out into the internet."
+    <span class="who">Guillermo Rauch, CEO Vercel — Sequoia 播客访谈</span>
+  </blockquote>
+
+  <h2>三个独立信号，同一个方向</h2>
+  <p><strong>① X 双层 Web 演化论</strong>（459 赞）：Rauch 判断 Web 正在分成两层——给人看的沉浸层，和给 agent 读的机器友好层。"markdown 格式和 MCP 协议的爆发式增长，就是这个趋势的信号。"</p>
+  <p><strong>② Shopify 同台</strong>：DotDev 2026 炉边对话，Rauch 与 Shopify CEO 一致确认："MCP is a great success"——电商头部已在为 agent commerce 铺 WebMCP 路面。</p>
+  <p><strong>③ Cloudflare 已入局</strong>：isitagentready.com（Cloudflare 官方检测工具）把 MCP Server Card、WebMCP 列为独立检查项。基础设施方、电商平台、检测方——三方都在。</p>
+
+  <h2>WebMCP 就绪 = 三件事</h2>
+  <p><strong>1. 工具面存在</strong>：页面用 <code>&lt;script type="webmcp"&gt;</code> 或 <code>registerTool()</code> 注册工具。</p>
+  <p><strong>2. 工具可理解</strong>：每个工具有真实的 <code>name</code> 和 <code>description</code>——agent 靠描述决定调不调你。只注册不描述 = 声明了但不可操作。</p>
+  <p><strong>3. 工具面安全</strong>：描述字段是注入攻击的新入口（tool poisoning）。提示词注入、零宽字符、拼接混淆——注册了工具就要有人盯安全。</p>
+  <pre>{ "name": "search_products",
+  "description": "Search the catalog and return prices",
+  "readOnlyHint": true }</pre>
+
+  <h2>现状：连头部站都没做</h2>
+  <p>我们扫了 claude.com——WebMCP 检查项 <strong>N/A</strong>（未实现）。Anthropic 的官网都还没上 WebMCP，说明标准采用在极早期。<strong>早期实现 = 排名倾斜的便宜分，也是"我在这个生态里"的声明。</strong></p>
+
+  <div class="cta">
+    <div style="flex:1;min-width:240px">
+      <b>30 秒看你的 WebMCP 就绪度</b>
+      <div class="mut">免费扫描 · 不收集扫描者身份 · 附 AI 可直接执行的修复简报</div>
+    </div>
+    <a class="btn" href="/?utm_source=webmcp-article">扫描我的站 →</a>
+  </div>
+  <p class="mut">已扫描？<a href="/rankings" style="color:var(--accent)">看排行榜上谁已就绪 →</a>　Monitor 订阅用户会在工具面变化时收到邮件告警——<a href="https://monitor.toolfront.dev/signup" style="color:var(--accent)">包括 WebMCP 工具面被篡改时</a>。</p>
+
+  <div class="en">
+    <b>English summary</b><br>
+    WebMCP lets websites expose native tools to AI agents — a shift Vercel's CEO has publicly championed three separate times (the two-layer web thesis, the Sequoia podcast, and the DotDev 2026 fireside with Shopify). A ToolFront scan checks three things: does a WebMCP tool surface exist, is every tool operable (name + description), and is the surface secure against tool poisoning. Most top sites — including claude.com — have not implemented it yet. Early adopters get the score bump and the ecosystem presence.
+  </div>
+</div>
+</body>
+</html>
