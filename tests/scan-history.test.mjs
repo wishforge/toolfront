@@ -37,7 +37,8 @@ ok("throttle stamp independent of prune outcome", worker.includes("The throttle 
 console.log("\n[C] page contract");
 ok("renders history from the same-origin endpoint", page.includes("'/api/scan-history?domain='"));
 ok("no fake history: empty ledger hides the card", page.includes("if (!rows.length) return; // no ledger rows -> no card"));
-ok("row fields are textContent, never innerHTML", !/innerHTML[\s\S]{0,120}hist-row/.test(page) && page.includes("el('span', 'hist-score', String(histNorm) + ' / 100')"));
+ok("row fields are textContent, never innerHTML", !/innerHTML[\s\S]{0,120}hist-row/.test(page) && page.includes("el('span', 'hist-score', String(histNorm) + histLabel)"));
+ok("[F5] one public scale: cap_pct from detail_json wins, then /86, then raw", page.includes("row.cap_pct") && page.includes("Math.round(row.score / 86 * 100)"));
 ok("B1: v3 rows normalized /86 -> /100 for one public scale", page.includes("Math.round(row.score / 86 * 100)") && page.includes("raw ' + row.score"));
 ok("scoring version shown per row (version-mixing honesty)", page.includes("row.scoring_version"));
 ok("each row pre-fills Compare with this domain", page.includes("'/compare?a=' + encodeURIComponent(domain)"));
