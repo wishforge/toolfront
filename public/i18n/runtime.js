@@ -28,12 +28,16 @@
       var q = new URLSearchParams(location.search).get('lang');
       if (valid(q)) { try { localStorage.setItem(LS, q); } catch (e) {} return q; }
       var saved = localStorage.getItem(LS);
-      if (valid(saved)) return saved;
       // Cookie bridge: localStorage is per-origin, so the choice made on
       // toolfront.dev must reach monitor.toolfront.dev via a parent-domain
-      // functional cookie (no tracking, language only).
-      var c = document.cookie.match(/(?:^|;\s*)tf-lang=(en|zh)/);
-      if (c && valid(c[1])) return c[1];
+      // functional cookie (no tracking, language only). The newer of the
+      // two writes wins — a stale localStorage value must not override a
+      // fresher choice made on the other subdomain.
+      var lsT = parseInt(localStorage.getItem(LS + '-t') || '0', 10);
+      var cm = document.cookie.match(/(?:^|;\s*)tf-lang=(en|zh)(?:;|\s|$)/);
+      var cmT = parseInt((document.cookie.match(/(?:^|;\s*)tf-lang-t=(\d+)/) || [])[1] || '0', 10);
+      if (cm && valid(cm[1]) && cmT >= lsT) return cm[1];
+      if (valid(saved)) return saved;
     } catch (e) {}
     return (navigator.language || 'en').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
   }
@@ -51,7 +55,9 @@
   window.tfSetLang = function (l) {
     if (!valid(l)) return;
     try { localStorage.setItem(LS, l); } catch (e) {}
+    try { localStorage.setItem(LS + '-t', String(Date.now())); } catch (e) {}
     try { document.cookie = LS + '=' + l + ';domain=.toolfront.dev;path=/;max-age=31536000;samesite=Lax'; } catch (e) {}
+    try { document.cookie = LS + '-t=' + Date.now() + ';domain=.toolfront.dev;path=/;max-age=31536000;samesite=Lax'; } catch (e) {}
     // Sync ?lang= so detect() (which gives the URL priority) agrees with the
     // user's choice on the next apply() — without this the click looks dead.
     try {
