@@ -204,6 +204,7 @@
     function setLang(zh) {
       body.classList.toggle('lang-zh', zh);
       try { localStorage.setItem('tf-lang', zh ? 'zh' : 'en'); } catch (_) {}
+      try { document.cookie = 'tf-lang-t=' + Date.now() + ';domain=.toolfront.dev;path=/;max-age=31536000;samesite=Lax'; } catch (_) {}
       try { document.cookie = 'tf-lang=' + (zh ? 'zh' : 'en') + ';domain=.toolfront.dev;path=/;max-age=31536000;samesite=Lax'; } catch (_) {}
       btns.forEach(function (b) { b.classList.toggle('on', (b.dataset.lang === 'zh') === zh); });
     }

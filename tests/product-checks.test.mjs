@@ -85,6 +85,7 @@ console.log("\n[i18n-cookie] runtime cookie bridge");
   const rt = readFileSync(join(ROOT, "public/i18n/runtime.js"), "utf8");
   ok("setLang writes parent-domain cookie", rt.includes("domain=.toolfront.dev") && rt.includes("samesite=Lax"), "cookie attrs");
   ok("detect falls back to cookie when localStorage is empty", /tf-lang=\(en\|zh\)/.test(rt), "cookie read regex");
+  ok("newer write wins (timestamp on both stores)", rt.includes("tf-lang-t") && rt.includes("cmT >= lsT"), "timestamp arbitration");
   for (const f of ["privacy.html", "terms.html", "bot.html"]) {
     const h = readFileSync(join(ROOT, "public", f), "utf8");
     ok(f + " writes the language cookie", h.includes("domain=.toolfront.dev"), f);
