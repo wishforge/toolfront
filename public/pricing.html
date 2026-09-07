@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing — free fixes, paid monitoring · ToolFront</title>
+<meta name="description" content="Fixing your site is free, forever. Monitoring starts at ¥99/mo. Billing opens soon — join the waitlist to be notified first.">
+<script src="/i18n/common.js"></script>
+<script src="/i18n/runtime.js"></script>
+<style>
+  :root{--paper:#FAFBFC;--ink:#0C1222;--ink-2:#374151;--ink-3:#6B7280;--line:#E2E6EE;--accent:#2563EB;--accent-deep:#1D4ED8;--accent-soft:#EFF6FF;--good:#059669;--good-soft:#ECFDF5;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace;--sans:'Space Grotesk','Noto Sans SC',-apple-system,sans-serif}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65}
+  .wrap{max-width:960px;margin:0 auto;padding:30px 22px 80px}
+  a{color:var(--accent)}
+  .wordmark{font-family:var(--mono);font-size:19px;font-weight:700;letter-spacing:-.02em;text-decoration:none;color:var(--ink);display:inline-block}
+  .wordmark .u{color:var(--accent)}
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .back{font-size:13.5px;color:var(--ink-2);text-decoration:none}
+  .back:hover{color:var(--accent)}
+  .badge{display:inline-block;background:var(--good-soft);color:var(--good);border:1px solid #A7F3D0;border-radius:999px;padding:4px 14px;font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.05em;margin:18px 0 10px}
+  h1{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1.2;margin-bottom:8px}
+  .lede{color:var(--ink-2);font-size:16px;max-width:640px;margin-bottom:26px}
+  .sect{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:34px 0 14px}
+  .plans{display:flex;gap:14px;flex-wrap:wrap}
+  .plan{flex:1;min-width:240px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px}
+  .plan.hot{border:1.5px solid var(--accent);box-shadow:0 2px 10px rgba(37,99,235,.10)}
+  .plan .hot-tag{display:inline-block;background:var(--accent);color:#fff;font-size:10.5px;font-weight:700;border-radius:4px;padding:2px 8px;margin-left:8px;vertical-align:2px;letter-spacing:.05em}
+  .plan .name{font-weight:700;font-size:15px}
+  .plan .price{font-family:var(--mono);font-size:28px;font-weight:700;margin:8px 0 2px}
+  .plan .price span{font-size:12.5px;color:var(--ink-3);font-weight:400}
+  .plan ul{list-style:none;margin:12px 0 16px;font-size:13.5px;color:var(--ink-2)}
+  .plan ul li{padding:3px 0}
+  .plan ul li::before{content:'✓ ';color:var(--good);font-weight:700}
+  .plan ul li.no::before{content:'— ';color:var(--ink-faint)}
+  .wl-form{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-top:6px}
+  .wl-form label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+  .wl-form input[type=email],.wl-form select{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:14px;font-family:var(--sans);margin-bottom:12px;background:var(--paper)}
+  .wl-form button{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .wl-form button:hover{background:var(--accent-deep)}
+  .wl-form .hp{position:absolute;left:-9999px}
+  .wl-msg{font-size:13.5px;margin-top:10px;display:none}
+  .wl-msg.ok{color:var(--good);display:block}
+  .wl-msg.err{color:#B91C1C;display:block}
+  .faq{margin:8px 0}
+  .faq h3{font-size:14.5px;margin:16px 0 4px}
+  .faq p{font-size:13.5px;color:var(--ink-2)}
+  .free-line{background:var(--good-soft);border:1px solid #A7F3D0;border-radius:12px;padding:14px 18px;font-size:14px;margin:26px 0}
+  .free-line b{color:var(--good)}
+  .zh{margin-top:40px;border-top:1px solid var(--line);padding-top:22px;font-size:13.5px;color:var(--ink-2)}
+  .zh h2{font-size:18px;margin-bottom:8px}
+  .zh p{margin:6px 0}
+  .colo{margin-top:44px;font-size:12px;color:var(--ink-faint);display:flex;gap:16px}
+  .colo a{color:var(--ink-faint);text-decoration:none}
+  .colo a:hover{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="wordmark" href="/">toolfront<span class="u">_</span></a>
+    <a class="back" href="/">← Back to the scanner</a>
+  </div>
+
+  <span class="badge" data-i18n="p.badge">BILLING OPENS SOON · JOIN THE WAITLIST</span>
+  <h1 data-i18n="p.h1">Fixing is free.<br>Watching is what costs.</h1>
+  <p class="lede" data-i18n="p.lede">Every fix brief on this site is free — copy it, run it in your own AI editor, rescan. What you pay for is not having to watch: scheduled re-scans, score-drop alerts, and tool-surface tamper warnings, delivered the day they happen.</p>
+  <p class="lede" style="font-size:13.5px;color:var(--ink-3)" data-i18n="p.pos">Most AI-visibility tools stop at the dashboard and leave the fixing to you. Our fix briefs ship as prompts your AI can execute — the work is built into the plan, not bolted on.</p>
+
+  <div class="sect">Plans — billing opens soon</div>
+  <div class="plans">
+    <div class="plan">
+      <div class="name" data-i18n="p.b1">Monitor Basic</div>
+      <div class="price">$19<span> /mo</span></div>
+      <ul>
+        <li data-i18n="p.bf1">3 websites · weekly scans</li>
+        <li data-i18n="p.bf2">Score-drop email alerts</li>
+        <li data-i18n="p.bf3">Tool-surface tamper alerts</li>
+        <li data-i18n="p.bf4">90-day trend history</li>
+      </ul>
+    </div>
+    <div class="plan hot">
+      <div class="name">Monitor Pro<span class="hot-tag">FULL WATCH</span></div>
+      <div class="price">$49<span> /mo</span></div>
+      <ul>
+        <li data-i18n="p.pf1">10 websites · daily scans</li>
+        <li data-i18n="p.pf2">Real-time tamper alerts</li>
+        <li data-i18n="p.pf3">Diagnostic reports</li>
+        <li data-i18n="p.pf4">MCP + API access</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="name" data-i18n="p.r1">Deep diagnostic</div>
+      <div class="price">$49<span data-i18n="p.r1s"> one-off</span></div>
+      <ul>
+        <li data-i18n="p.rf1">PDF report, priority-ordered</li>
+        <li data-i18n="p.rf2">SKILL.md fix file included</li>
+        <li data-i18n="p.rf3">Re-scan $19</li>
+        <li data-i18n="p.rf4">No subscription</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="free-line"><b data-i18n="p.freeline.b">The fixes are free — forever.</b> <span data-i18n="p.freeline">Copy the briefs, run them in your own AI editor. You only pay if you want us to keep watching.</span></div>
+
+  <div class="sect">Join the waitlist — billing opens soon</div>
+  <div class="wl-form">
+    <form id="wlForm">
+      <label for="wl-email" data-i18n="p.wl.email">Email address</label>
+      <input type="email" id="wl-email" name="email" required maxlength="254" autocomplete="email">
+      <label for="wl-plan" data-i18n="p.wl.plan">Which plan interests you?</label>
+      <select id="wl-plan" name="plan">
+        <option value="basic" data-i18n="p.wl.pb">Monitor Basic — $19/mo</option>
+        <option value="pro" selected data-i18n="p.wl.pp">Monitor Pro — $49/mo</option>
+        <option value="report" data-i18n="p.wl.pr">Deep diagnostic — $49 one-off</option>
+      </select>
+      <input class="hp" type="text" name="name" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button type="submit" data-i18n="p.wl.btn">Join the waitlist</button>
+      <div class="wl-msg" id="wlMsg"></div>
+    </form>
+    <p style="font-size:12px;color:var(--ink-faint);margin-top:10px" data-i18n="p.wl.note">Double opt-in: we email you a confirmation link first. No card, no charge — the waitlist only decides who gets notified (and in what order) when billing opens.</p>
+  </div>
+
+  <div class="sect">Questions people actually ask</div>
+  <div class="faq">
+    <h3 data-i18n="p.q1">Will it flag problems that don't exist?</h3>
+    <p data-i18n="p.q1a">Every finding maps to one named check and one measured value you can open and reproduce. Findings that can't survive that test shouldn't exist.</p>
+    <h3 data-i18n="p.q2">Why should I trust the score?</h3>
+    <p data-i18n="p.q2a">Checks, weights, and scoring version are public at /methodology. The score changes because your site changes — we log the change in the ledger instead of quietly rewriting the number.</p>
+    <h3 data-i18n="p.q3">Why does monitoring cost money when scanning is free?</h3>
+    <p data-i18n="p.q3a">A scan answers "how do things stand". A monitor answers "when did it change" — that takes scheduled re-scans and someone (us) watching the tool surface 24/7.</p>
+  </div>
+
+  <div class="zh">
+    <h2>中文摘要</h2>
+    <p>网站修复功能<b>永久免费</b>：扫描、完整报告、AI 修复简报、Rescan、对比、排行榜。收费的是"不用你自己盯着"：Monitor 基础版 $19/月（3 网站 · 周扫 · 掉分与篡改邮件告警）、Pro $49/月（10 网站 · 日扫 · 实时篡改告警 · 诊断报告 · MCP+API）、一次性深度诊断报告 $49（PDF + SKILL.md 修复版）。</p>
+    <p>支付通道正在开通中——留下邮箱加入等待名单，计费开放后按登记顺序第一时间通知你（双确认邮件，不收费、不需要绑卡）。</p>
+  </div>
+
+  <div class="colo">
+    <span>© 2026 ToolFront</span>
+    <a href="/methodology">Methodology</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+  </div>
+</div>
+
+<script>
+(function () {
+  var PAIRS = {
+    'p.badge': ['BILLING OPENS SOON · JOIN THE WAITLIST', '计费即将开放 · 加入等待名单'],
+    'p.h1': ['Fixing is free.<br>Watching is what costs.', '修复永远免费。<br>收费的是"盯着"。'],
+    'p.lede': ['Every fix brief on this site is free — copy it, run it in your own AI editor, rescan. What you pay for is not having to watch: scheduled re-scans, score-drop alerts, and tool-surface tamper warnings, delivered the day they happen.',
+               '本站所有修复简报永久免费——复制、在你的 AI 编辑器里执行、重扫即可。收费的是"不用你自己盯着"：定时重扫、掉分告警、工具面篡改告警，当天发生当天通知。'],
+    'p.b1': ['Monitor Basic', 'Monitor 基础版'],
+    'p.bf1': ['3 websites · weekly scans', '3 个网站 · 每周扫描'],
+    'p.bf2': ['Score-drop email alerts', '掉分邮件告警'],
+    'p.bf3': ['Tool-surface tamper alerts', '工具面篡改告警'],
+    'p.bf4': ['90-day trend history', '90 天趋势历史'],
+    'p.pf1': ['10 websites · daily scans', '10 个网站 · 每日扫描'],
+    'p.pf2': ['Real-time tamper alerts', '实时篡改告警'],
+    'p.pf3': ['Diagnostic reports', '诊断报告'],
+    'p.pf4': ['MCP + API access', 'MCP + API 接入'],
+    'p.r1': ['Deep diagnostic', '深度诊断报告'],
+    'p.r1s': [' one-off', ' 一次性'],
+    'p.rf1': ['PDF report, priority-ordered', 'PDF 报告，按优先级排序'],
+    'p.rf2': ['SKILL.md fix file included', '含 SKILL.md 修复文件'],
+    'p.rf3': ['Re-scan $19', '重扫 $19'],
+    'p.rf4': ['No subscription', '无需订阅'],
+    'p.freeline.b': ['The fixes are free — forever.', '修复功能免费——永久。'],
+    'p.freeline': ['Copy the briefs, run them in your own AI editor. You only pay if you want us to keep watching.', '复制简报、在你自己的 AI 编辑器里执行。只有想让我们持续盯着时才需要付费。'],
+    'p.wl.email': ['Email address', '邮箱地址'],
+    'p.wl.plan': ['Which plan interests you?', '感兴趣的计划？'],
+    'p.wl.pb': ['Monitor Basic — $19/mo', 'Monitor 基础版 — $19/月'],
+    'p.wl.pp': ['Monitor Pro — $49/mo', 'Monitor Pro — $49/月'],
+    'p.wl.pr': ['Deep diagnostic — $49 one-off', '深度诊断报告 — $49 一次性'],
+    'p.wl.btn': ['Join the waitlist', '加入等待名单'],
+    'p.wl.note': ['Double opt-in: we email you a confirmation link first. No card, no charge — the waitlist only decides who gets notified (and in what order) when billing opens.', '双确认：先发确认邮件到你的邮箱。不绑卡、不扣费——等待名单只决定计费开放时谁先收到通知。'],
+    'p.q1': ["Will it flag problems that don't exist?", '会误报不存在的问题吗？'],
+    'p.q1a': ['Every finding maps to one named check and one measured value you can open and reproduce. Findings that can\u2019t survive that test shouldn\u2019t exist.', '每个结论都对应一个具体检查项和实测值，可以点开自己验证。经不起验证的结论不该存在。'],
+    'p.q2': ['Why should I trust the score?', '凭什么相信这个分数？'],
+    'p.q2a': ['Checks, weights, and scoring version are public at /methodology. The score changes because your site changes — we log the change in the ledger instead of quietly rewriting the number.', '检查项、权重、评分版本全部公开在 /methodology。分数会变是因为你的网站会变——我们把变化记进台账，而不是悄悄改数。'],
+    'p.q3': ['Why does monitoring cost money when scanning is free?', '扫描免费，监控为什么收费？'],
+    'p.pos': ['Most AI-visibility tools stop at the dashboard and leave the fixing to you. Our fix briefs ship as prompts your AI can execute — the work is built into the plan, not bolted on.',
+               '多数 AI 可见度工具止步于仪表盘，活还得你自己干。我们的修复简报是你的 AI 可以直接执行的提示词——执行内建于计划，不是外挂。'],
+    'p.q3a': ['A scan answers "how do things stand". A monitor answers "when did it change" — that takes scheduled re-scans and someone (us) watching the tool surface 24/7.', '扫描回答"现在怎么样"，监控回答"什么时候变的"——那需要定时重扫和有人（我们）24 小时盯着工具面。']
+  };
+  function applyLang() {
+    var lang = (window.tfLang && window.tfLang()) || 'en';
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var p = PAIRS[el.getAttribute('data-i18n')];
+      if (p) el.innerHTML = (lang === 'zh' ? p[1] : p[0]);
+    });
+  }
+  if (window.tfOnLang) window.tfOnLang(function () { applyLang(); });
+  applyLang();
+
+  /* waitlist submit — same contract as the homepage form */
+  var form = document.getElementById('wlForm');
+  var msg = document.getElementById('wlMsg');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    msg.className = 'wl-msg';
+    msg.textContent = '…';
+    fetch('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: document.getElementById('wl-email').value,
+        plan: document.getElementById('wl-plan').value,
+        lang: (window.tfLang && window.tfLang()) === 'zh' ? 'zh' : 'en'
+      })
+    }).then(function (r) { return r.json().then(function (b) { return { ok: r.ok, body: b }; }); })
+      .then(function (out) {
+        if (out.ok && out.body.ok) { msg.className = 'wl-msg ok'; msg.setAttribute('data-i18n', ''); msg.textContent = 'Almost done — check your inbox for the confirmation link. It works for 30 minutes.'; }
+        else { msg.className = 'wl-msg err'; msg.textContent = out.body && out.body.error === 'invalid_email' ? 'That email address does not look valid.' : 'Something went wrong — try again in a minute.'; }
+      })
+      .catch(function () { msg.className = 'wl-msg err'; msg.textContent = 'Network error — please retry.'; });
+  });
+})();
+</script>
+</body>
+</html>
