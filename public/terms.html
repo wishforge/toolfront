@@ -134,10 +134,12 @@
     function setLang(zh) {
       body.classList.toggle('lang-zh', zh);
       try { localStorage.setItem('tf-lang', zh ? 'zh' : 'en'); } catch (_) {}
+      try { document.cookie = 'tf-lang=' + (zh ? 'zh' : 'en') + ';domain=.toolfront.dev;path=/;max-age=31536000;samesite=Lax'; } catch (_) {}
       btns.forEach(function (b) { b.classList.toggle('on', (b.dataset.lang === 'zh') === zh); });
     }
     var saved = 'en';
     try { saved = localStorage.getItem('tf-lang') || 'en'; } catch (_) {}
+    if (saved !== 'zh') { try { var m = document.cookie.match(/(?:^|;\s*)tf-lang=(en|zh)/); if (m) saved = m[1]; } catch (_) {} }
     setLang(saved === 'zh');
     btns.forEach(function (b) {
       b.addEventListener('click', function () { setLang(b.dataset.lang === 'zh'); });

@@ -67,7 +67,7 @@
       <li><strong>Email address</strong> — only when you voluntarily join the waitlist or request a tool blueprint.</li>
       <li><strong>Domain you scanned</strong> — the domain name entered into the scanner, associated with your waitlist request if provided.</li>
       <li><strong>IP address and timestamps</strong> — collected for rate limiting, abuse prevention, and (for waitlist signups) as your consent record under GDPR Art. 7.</li>
-      <li><strong>Language preference</strong> — stored in your browser's localStorage (key <code>tf-lang</code>) to remember your language choice. This is strictly functional storage; the scanner itself uses no cookies or third-party trackers.</li>
+      <li><strong>Language preference</strong> — stored in your browser's localStorage (key <code>tf-lang</code>) to remember your language choice, and mirrored into one strictly functional cookie (<code>tf-lang</code>; first-party; <code>domain=.toolfront.dev</code>; SameSite=Lax; 12-month lifetime) so the choice carries between toolfront.dev and monitor.toolfront.dev, which localStorage cannot span. The cookie holds the language code only — no identifiers, no tracking, no third parties.</li>
       <li><strong>Browser-local comparison data</strong> — your fix-list checkboxes and a convenience copy of your latest result (keys <code>tf-fix:*</code> and <code>tf-last:*</code>) are stored in your browser's localStorage to power the "since your last scan" comparison and remember progress. This copy never leaves your browser and can be cleared in browser settings. (The authoritative record of a scan is covered under <em>Public scan history</em> below.)</li>
       <li><strong>Public scan history</strong> — when a scan of a domain succeeds, a record of that scan — domain, score, grade, per-check statuses, scoring version and timestamp — is stored server-side and is <strong>publicly visible</strong> on the report page and in rankings, so scores can be compared over time. A scan fetches only publicly reachable pages, the way a crawler does: no credentials are used and forms are never submitted. Sites that opt out in robots.txt are never scanned. IP addresses are used only for rate limiting and are never stored with a scan record.</li>
       <li><strong>Aggregate usage statistics</strong> — counts of product events (e.g., signups, email confirmations, logins, monitors added) and their coarse outcome, used to understand the signup funnel and improve the product. These counters <strong>cannot identify you</strong>: they contain no email address, no domain, no IP address, and no language. Stored by our host in Cloudflare Analytics Engine for 90 days.</li>
@@ -136,7 +136,7 @@
       <li><strong>电子邮箱</strong>——仅当你主动加入候补名单或索取工具蓝图时收集。</li>
       <li><strong>你扫描的域名</strong>——你在扫描器中输入的域名，如与候补请求一同提交则关联保存。</li>
       <li><strong>IP 地址与时间戳</strong>——用于限流、防滥用，以及（针对候补注册）作为 GDPR 第 7 条要求的同意凭证。</li>
-      <li><strong>语言偏好</strong>——存储在你浏览器的 localStorage（键名 <code>tf-lang</code>）中，用于记住语言选择。这是严格功能性存储；扫描器本身不使用 Cookie 或第三方跟踪器。</li>
+      <li><strong>语言偏好</strong>——存储在你浏览器的 localStorage（键名 <code>tf-lang</code>）中，并镜像为一个严格功能性的第一方 Cookie（<code>tf-lang</code>；<code>domain=.toolfront.dev</code>；SameSite=Lax；有效期 12 个月），让语言选择能在 toolfront.dev 与 monitor.toolfront.dev 之间保持——这是 localStorage 做不到的。Cookie 只存语言代码：无标识符、无跟踪、无第三方。</li>
       <li><strong>浏览器本地对比数据</strong>——你的修复清单勾选状态与最近一次结果的便利副本（键名 <code>tf-fix:*</code>、<code>tf-last:*</code>）存储于浏览器 localStorage，用于"对比上次扫描"与记住修复进度。这份副本永不离开你的浏览器，可在浏览器设置中清除（扫描的权威记录见下方<em>公开扫描历史</em>）。</li>
       <li><strong>公开扫描历史</strong>——当某域名的扫描成功时，该次扫描的记录（域名、分数、等级、逐项检查状态、评分版本与时间）会存储于服务器并<strong>公开展示</strong>在报告页与排行榜上，以便跨时间比较分数。扫描仅抓取公网可达页面（与爬虫方式相同）：不使用任何凭据，绝不提交表单。通过 robots.txt 声明拒绝扫描的网站永远不会被扫描。IP 地址仅用于限流，绝不与扫描记录一同存储。</li>
       <li><strong>聚合用量统计</strong>——产品事件计数（如注册、邮箱确认、登录、添加监控）及其粗粒度结果，用于理解注册漏斗、改进产品。这些计数器<strong>无法识别你</strong>：不包含邮箱、域名、IP 或语言。存储于我们的主机方 Cloudflare Analytics Engine，保留 90 天。</li>
@@ -204,10 +204,12 @@
     function setLang(zh) {
       body.classList.toggle('lang-zh', zh);
       try { localStorage.setItem('tf-lang', zh ? 'zh' : 'en'); } catch (_) {}
+      try { document.cookie = 'tf-lang=' + (zh ? 'zh' : 'en') + ';domain=.toolfront.dev;path=/;max-age=31536000;samesite=Lax'; } catch (_) {}
       btns.forEach(function (b) { b.classList.toggle('on', (b.dataset.lang === 'zh') === zh); });
     }
     var saved = 'en';
     try { saved = localStorage.getItem('tf-lang') || 'en'; } catch (_) {}
+    if (saved !== 'zh') { try { var m = document.cookie.match(/(?:^|;\s*)tf-lang=(en|zh)/); if (m) saved = m[1]; } catch (_) {} }
     setLang(saved === 'zh');
     btns.forEach(function (b) {
       b.addEventListener('click', function () { setLang(b.dataset.lang === 'zh'); });
