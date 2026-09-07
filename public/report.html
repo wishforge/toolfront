@@ -630,7 +630,7 @@
       'report.biz.high': 'Bottom line: your site already speaks AI fluently — you are ahead of most competitors. Keep it that way and keep monitoring.',
       'report.biz.allgood': 'Nothing urgent: AI can already read and work with your site. Keep monitoring so redesigns don\u2019t break it.',
       'report.diag.title': 'Scan diagnostics', 'report.diag.assessed': 'assessed', 'report.diag.passed': 'passed', 'report.diag.partial': 'partial', 'report.diag.failed': 'failed', 'report.diag.na': 'n/a', 'report.diag.strongest': 'Strongest', 'report.diag.weakest': 'Weakest',
-      'report.compare': 'Compare with a competitor', 'report.mastery': 'Mastery {pct}% — core fundamentals {e}/{m}', 'report.cap.label': 'Capability score across the full 108-point rubric, shown out of 100', 'report.hist.title': 'Previous scans', 'report.hist.scanned': 'Scanned', 'report.hist.cmpbtn': 'Compare →', 'report.hist.cmp': 'Compare with a competitor — click to pre-fill', 'report.share': 'Share', 'report.pdf': 'Save as PDF', 'report.new': 'New scan', 'report.copied': 'Link copied', 'report.copyfail': 'Copy failed — copy it from the address bar',
+      'report.compare': 'Compare with a competitor', 'report.mastery': 'Mastery {pct}% — core fundamentals {e}/{m}', 'report.cap.label': 'Capability score across the full 108-point rubric, shown out of 100', 'report.hist.title': 'Previous scans', 'report.hist.scanned': 'Scanned', 'report.hist.cmpbtn': 'Compare →', 'report.hist.cmp': 'Compare with a competitor — click to pre-fill', 'report.share': 'Share', 'report.pdf': 'Save as PDF', 'report.new': 'New scan', 'report.rescan': 'Rescan', 'report.copied': 'Link copied', 'report.copyfail': 'Copy failed — copy it from the address bar',
       'report.printhead': 'Agent-readiness report — toolfront.dev',
       'report.raise': '<b>One redesign can drop this score.</b> Monitor checks weekly and emails you only when it moves:',
       'report.raise.keep': '<b>Good score \u2014 but one redesign can still drop it.</b> Monitor checks weekly and emails you only when it moves:',
@@ -710,7 +710,7 @@
       'report.biz.allgood': '暂时不用改：AI 已经能读懂并用好你的网站。定期回扫，别让下次改版悄悄把它搞坏。',
       'report.diag.title': '扫描诊断', 'report.diag.assessed': '项已评估', 'report.diag.passed': '通过', 'report.diag.partial': '部分', 'report.diag.failed': '失败', 'report.diag.na': '不适用', 'report.diag.strongest': '最强项', 'report.diag.weakest': '最弱项',
       'report.compare': '与竞品对比', 'report.mastery': '掌握度 {pct}%——基础面 {e}/{m}', 'report.cap.label': '能力总分按整套 108 分评测折算为百分制',
-      'report.hist.title': '历史扫描', 'report.hist.scanned': '最近扫描', 'report.hist.cmpbtn': '对比 →', 'report.hist.cmp': '与竞品对比——点击预填本域名', 'report.share': '分享', 'report.pdf': '存为 PDF', 'report.new': '重新扫描', 'report.copied': '链接已复制', 'report.copyfail': '复制失败——请从地址栏复制',
+      'report.hist.title': '历史扫描', 'report.hist.scanned': '最近扫描', 'report.hist.cmpbtn': '对比 →', 'report.hist.cmp': '与竞品对比——点击预填本域名', 'report.share': '分享', 'report.pdf': '存为 PDF', 'report.new': '再扫一次', 'report.rescan': '重新扫描', 'report.copied': '链接已复制', 'report.copyfail': '复制失败——请从地址栏复制',
       'report.printhead': 'AI 就绪度报告 — toolfront.dev',
       'report.raise': '<b>一次改版，分数可能就掉了。</b>Monitor 每周扫一次，掉了才发邮件：',
       'report.raise.keep': '<b>分数不低——但一次改版还是能悄悄掉下去。</b>Monitor 每周扫一次，掉了才发邮件：',
@@ -744,7 +744,7 @@
     'report.metric': '这是适用检查项的达成率——该查的都查了，弱项直接扣分，所以数字会比只算「覆盖了多少」的扫描器低。',
     'rfoot.methodology': '评分方法',
     'rfoot.privacy': '隐私政策',
-    'rfoot.security': '安全说明', 'rfoot.bot': '/bot 文档', 'report.new': '再扫一次',
+    'rfoot.security': '安全说明',
     'rfoot.bot': '扫描器说明',
       'report.vs.title': '对比上次扫描', 'report.vs.first': '首次扫描该域名——改完再来看看变化。', 'report.vs.local': '数据仅存于本浏览器——可随时在浏览器设置中清除。', 'report.vs.unchanged': '与上次扫描相比无变化。', 'report.vs.date': '对比 {d} 的扫描结果',
       'report.getfix': '开始监控 \u2192',
@@ -1336,7 +1336,7 @@
     });
     shareBtn.textContent = '🔗 ' + t('report.share');
     pdfBtn.textContent = '🖨 ' + t('report.pdf');
-    newBtn.textContent = '↺ ' + t('report.new');
+    newBtn.textContent = '↻ ' + t('report.rescan');
     // Social share panel
     var shareUrl = location.origin + '/report?domain=' + encodeURIComponent(r.domain) + '&lang=' + lang;
     var shareTitle = document.title;
@@ -1419,7 +1419,7 @@
       if (panel && panel.classList.contains('open') && !panel.contains(e.target) && e.target !== shareBtn) panel.classList.remove('open');
     });
     pdfBtn.addEventListener('click', function () { window.print(); });
-    newBtn.addEventListener('click', function () { location.href = '/'; });
+    newBtn.addEventListener('click', function () { runScan(r.domain); });
     acts.appendChild(cmpBtn); acts.appendChild(shareBtn); acts.appendChild(pdfBtn); acts.appendChild(newBtn);
     return acts;
   }
@@ -1976,8 +1976,8 @@
     b1.appendChild(vd);
     var acts = el('div', 'acts');
     var newBtn = el('button'); newBtn.type = 'button';
-    newBtn.textContent = '↺ ' + t('report.new');
-    newBtn.addEventListener('click', function () { location.href = '/'; });
+    newBtn.textContent = '↻ ' + t('report.rescan');
+    newBtn.addEventListener('click', function () { runScan(r.domain); });
     acts.appendChild(newBtn);
     b1.appendChild(acts);
     resultBox.appendChild(buildCard(t('report.blocked.title'), b1, false));
