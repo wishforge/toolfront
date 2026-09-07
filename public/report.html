@@ -1056,6 +1056,7 @@
      fail/partial fix cards so users see the standards behind each fix. */
   /* ———— fix-layer v2 (PRD Workflow A): agent brief + copy-all fab ———— */
   var reportDomain = "";
+  var lastReportChecks = null; /* [copy-fix] FAB read this but it was never declared/assigned — the button was a silent no-op since launch */
   var HAS_SKILL = {
     "llms-txt": 1, "robots-policy": 1, "machine-surfaces": 1, "structured-data": 1,
     "webmcp": 1, "tool-security": 1, "freshness": 1, "link-headers": 1, "api-errors": 1
@@ -1114,7 +1115,9 @@
     var briefs = [];
     document.querySelectorAll('.fix').forEach(function (fx) {
       if (fx.classList.contains('done') || fx.classList.contains('dismissed')) return;
-      var idx = Number(fx.getAttribute('data-idx'));
+      var attr = fx.getAttribute('data-idx');
+      if (attr === null) return; /* [copy-fix] idx-less cards must not Number() to 0 and duplicate the first brief */
+      var idx = Number(attr);
       var c = (typeof lastReportChecks !== 'undefined' && lastReportChecks) ? lastReportChecks[idx] : null;
       if (c) briefs.push(buildAgentBrief(c, reportDomain));
     });
@@ -1578,6 +1581,7 @@
     });
     var lastGroup = null;
     reportDomain = r.domain;
+    lastReportChecks = r.checks || []; /* [copy-fix] wire the data the copy-all button reads */
     fixable.forEach(function (c, fixIdx) {
       var fx = fixDict[c.id + '.' + c.status] || fixDict[c.id + '.fail'];
       if (!fx) return;
