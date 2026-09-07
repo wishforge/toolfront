@@ -156,9 +156,10 @@ console.log("\n[F] CTA 不收集邮箱（留资失败面消失）");
   /* The CTA is the new-customer start form (/monitoring: website + email, no
      password), not the password-account signup page — funnel fix, PR #48
      convention: data-monitor-link="monitoring" everywhere. */
-  ok("CTA 带 Monitor 起步标记（/monitoring 而非 /signup）", !!btn && btn.getAttribute("data-monitor-link") === "monitoring");
-  ok("CTA 指向 /monitoring（新客门）", !!btn && /\/monitoring$/.test(btn.href || ""), btn && btn.href);
-  ok("CTA 指向 monitor 域（环境改写生效）", !!btn && /monitor\./.test(btn.href || ""), btn && btn.href);
+  /* [v2] billing not live -> CTA routes to /pricing (waitlist), same-origin */
+  ok("CTA 带 pricing 起步标记（计费未开→waitlist）", !!btn && btn.getAttribute("data-pricing-link") === "pricing");
+  ok("CTA 指向 /pricing（等待名单门）", !!btn && /\/pricing$/.test(btn.href || ""), btn && btn.href);
+  ok("CTA 同源（无跨域依赖）", !!btn && btn.href.indexOf("/pricing") !== -1, btn && btn.href);
 }
 
 /* G. legacy 回退：旧缓存报告无 mastery/capPct → hero 原样渲染 score/scoreMax */

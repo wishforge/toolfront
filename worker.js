@@ -137,6 +137,13 @@ export default {
       if (!env.ASSETS) return json({ name: "toolfront", status: "ok" });
       return harden(await env.ASSETS.fetch(new Request(url.origin + "/compare.html", request)));
     }
+    // Pricing page (2026-09-07): plans are displayed; billing is not live, so
+    // every purchase CTA routes to the waitlist (double opt-in) instead of a
+    // checkout. No payment processing happens anywhere on this page.
+    if (url.pathname === "/pricing" || url.pathname === "/pricing/") {
+      if (!env.ASSETS) return json({ name: "toolfront", status: "ok" });
+      return harden(await env.ASSETS.fetch(new Request(url.origin + "/pricing.html", request)));
+    }
     // Methodology: the published rules behind every score.
     if (url.pathname === "/methodology") return await handleMethodology(request, env, url.origin);
     // Agent-skills repair docs live under the standard /.well-known/agent-skills/
@@ -1652,7 +1659,11 @@ async function handleWaitlist(request, env) {
     // Double opt-in: CSPRNG token (crypto.randomUUID = 122-bit entropy), single-use,
     // 7-day TTL (industry standard), pending record never joins the active list.
     const token = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
-    const pending = { email, domain: normalizeDomain(body.domain) || null, ip, lang: body.lang === "zh" ? "zh" : "en", signupTs: new Date().toISOString() };
+    // Plan interest (pricing page, 2026-09-07): whitelist — free-text would
+    // let attackers park arbitrary strings in KV records. No plan -> null.
+    const PLAN_KEYS = ["basic", "pro", "report"];
+    const plan = PLAN_KEYS.indexOf(body.plan) !== -1 ? body.plan : null;
+    const pending = { email, domain: normalizeDomain(body.domain) || null, plan, ip, lang: body.lang === "zh" ? "zh" : "en", signupTs: new Date().toISOString() };
     await env.KV.put("wl:token:" + token, JSON.stringify(pending), { expirationTtl: 7 * 86400 });
     await env.KV.put("wl:pending:" + email, JSON.stringify({ token, ts: pending.signupTs }), { expirationTtl: 7 * 86400 });
 

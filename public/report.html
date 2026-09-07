@@ -440,6 +440,17 @@
   .copy-all-fab.hidden { opacity: 0; pointer-events: none; }
   .copy-all-fab .n { font-family: var(--mono); background: var(--accent); border-radius: var(--r-full); min-width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
   /* ———— UI alignment batch: gauge rings / brief collapse / brand badge ———— */
+  /* [v2] quick-fix journey strip + FREE badge */
+  .journey{display:flex;gap:0;background:linear-gradient(135deg,var(--accent-soft),transparent);border:1px solid var(--line);border-radius:12px;margin:0 0 18px;overflow:hidden}
+  .jstep{flex:1;padding:14px 16px;position:relative}
+  .jstep+.jstep{border-left:1px dashed var(--line)}
+  .jstep .jn{font-family:var(--mono);font-size:10.5px;color:var(--accent);font-weight:700;letter-spacing:.08em}
+  .jstep b{display:block;font-size:13.5px;margin:3px 0 2px}
+  .jstep p{font-size:12.5px;color:var(--ink-2)}
+  .jstep .jarr{position:absolute;right:-8px;top:50%;transform:translateY(-50%);color:var(--ink-faint);font-size:15px}
+  .free-tag{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--good);background:var(--good-soft);border-radius:4px;padding:2px 6px;margin-left:8px}
+  .diag-ext a{color:var(--accent);font-weight:600;text-decoration:none}
+  .diag-ext a:hover{text-decoration:underline}
   .fix-gauge { position: relative; width: 30px; height: 30px; flex-shrink: 0; }
   .fix-gauge svg { transform: rotate(-90deg); }
   .fix-gauge circle { fill: none; stroke-width: 3.5; }
@@ -585,6 +596,11 @@
     </div>
   </div>
 
+  <div class="journey" id="journey" hidden>
+    <div class="jstep"><span class="jn" data-i18n="report.journey.1n">STEP 1 — COPY</span><b data-i18n="report.journey.1t">Copy the fix brief</b><p data-i18n="report.journey.1d">Every failing check ships a six-section prompt your AI can run as-is.</p><span class="jarr">›</span></div>
+    <div class="jstep"><span class="jn" data-i18n="report.journey.2n">STEP 2 — EXECUTE</span><b data-i18n="report.journey.2t">Paste into your AI editor</b><p data-i18n="report.journey.2d">Claude Code, Cursor — the brief includes a self-check link to verify the fix.</p><span class="jarr">›</span></div>
+    <div class="jstep"><span class="jn" data-i18n="report.journey.3n">STEP 3 — VERIFY</span><b data-i18n="report.journey.3t">Rescan, watch the score move</b><p data-i18n="report.journey.3d">A fresh scan re-renders this report and the change lands in history.</p></div>
+  </div>
   <div id="scan-result"></div>
 
   <div class="colo">
@@ -630,7 +646,10 @@
       'report.biz.high': 'Bottom line: your site already speaks AI fluently — you are ahead of most competitors. Keep it that way and keep monitoring.',
       'report.biz.allgood': 'Nothing urgent: AI can already read and work with your site. Keep monitoring so redesigns don\u2019t break it.',
       'report.diag.title': 'Scan diagnostics', 'report.diag.assessed': 'assessed', 'report.diag.passed': 'passed', 'report.diag.partial': 'partial', 'report.diag.failed': 'failed', 'report.diag.na': 'n/a', 'report.diag.strongest': 'Strongest', 'report.diag.weakest': 'Weakest',
-      'report.compare': 'Compare with a competitor', 'report.mastery': 'Mastery {pct}% — core fundamentals {e}/{m}', 'report.cap.label': 'Capability score across the full 108-point rubric, shown out of 100', 'report.hist.title': 'Previous scans', 'report.hist.scanned': 'Scanned', 'report.hist.cmpbtn': 'Compare →', 'report.hist.cmp': 'Compare with a competitor — click to pre-fill', 'report.share': 'Share', 'report.pdf': 'Save as PDF', 'report.new': 'New scan', 'report.rescan': 'Rescan', 'report.copied': 'Link copied', 'report.copyfail': 'Copy failed — copy it from the address bar',
+      'report.compare': 'Compare with a competitor', 'report.mastery': 'Mastery {pct}% — core fundamentals {e}/{m}', 'report.cap.label': 'Capability score across the full 108-point rubric, shown out of 100', 'report.hist.title': 'Previous scans', 'report.hist.scanned': 'Scanned', 'report.hist.cmpbtn': 'Compare →', 'report.hist.cmp': 'Compare with a competitor — click to pre-fill', 'report.share': 'Share', 'report.pdf': 'Save as PDF', 'report.new': 'New scan', 'report.rescan': 'Rescan', 'report.freebadge': 'FREE FIX',
+      'report.journey.1n': 'STEP 1 — COPY', 'report.journey.1t': 'Copy the fix brief', 'report.journey.1d': 'Every failing check ships a six-section prompt your AI can run as-is.',
+      'report.journey.2n': 'STEP 2 — EXECUTE', 'report.journey.2t': 'Paste into your AI editor', 'report.journey.2d': 'Claude Code, Cursor — the brief includes a self-check link to verify the fix.',
+      'report.journey.3n': 'STEP 3 — VERIFY', 'report.journey.3t': 'Rescan, watch the score move', 'report.journey.3d': 'A fresh scan re-renders this report and the change lands in history.', 'report.copied': 'Link copied', 'report.copyfail': 'Copy failed — copy it from the address bar',
       'report.printhead': 'Agent-readiness report — toolfront.dev',
       'report.raise': '<b>One redesign can drop this score.</b> Monitor checks weekly and emails you only when it moves:',
       'report.raise.keep': '<b>Good score \u2014 but one redesign can still drop it.</b> Monitor checks weekly and emails you only when it moves:',
@@ -710,7 +729,10 @@
       'report.biz.allgood': '暂时不用改：AI 已经能读懂并用好你的网站。定期回扫，别让下次改版悄悄把它搞坏。',
       'report.diag.title': '扫描诊断', 'report.diag.assessed': '项已评估', 'report.diag.passed': '通过', 'report.diag.partial': '部分', 'report.diag.failed': '失败', 'report.diag.na': '不适用', 'report.diag.strongest': '最强项', 'report.diag.weakest': '最弱项',
       'report.compare': '与竞品对比', 'report.mastery': '掌握度 {pct}%——基础面 {e}/{m}', 'report.cap.label': '能力总分按整套 108 分评测折算为百分制',
-      'report.hist.title': '历史扫描', 'report.hist.scanned': '最近扫描', 'report.hist.cmpbtn': '对比 →', 'report.hist.cmp': '与竞品对比——点击预填本域名', 'report.share': '分享', 'report.pdf': '存为 PDF', 'report.new': '再扫一次', 'report.rescan': '重新扫描', 'report.copied': '链接已复制', 'report.copyfail': '复制失败——请从地址栏复制',
+      'report.hist.title': '历史扫描', 'report.hist.scanned': '最近扫描', 'report.hist.cmpbtn': '对比 →', 'report.hist.cmp': '与竞品对比——点击预填本域名', 'report.share': '分享', 'report.pdf': '存为 PDF', 'report.new': '再扫一次', 'report.rescan': '重新扫描', 'report.freebadge': '免费修复',
+      'report.journey.1n': '第 1 步 — 复制', 'report.journey.1t': '复制修复简报', 'report.journey.1d': '每个待修检查都附带六段式提示词，你的 AI 可以直接执行。',
+      'report.journey.2n': '第 2 步 — 执行', 'report.journey.2t': '粘贴进你的 AI 编辑器', 'report.journey.2d': 'Claude Code、Cursor 都行——简报里带自证链接，改完即可验证。',
+      'report.journey.3n': '第 3 步 — 验证', 'report.journey.3t': 'Rescan 看分数变化', 'report.journey.3d': '重新扫描会刷新本报告，变化记入历史台账。', 'report.copied': '链接已复制', 'report.copyfail': '复制失败——请从地址栏复制',
       'report.printhead': 'AI 就绪度报告 — toolfront.dev',
       'report.raise': '<b>一次改版，分数可能就掉了。</b>Monitor 每周扫一次，掉了才发邮件：',
       'report.raise.keep': '<b>分数不低——但一次改版还是能悄悄掉下去。</b>Monitor 每周扫一次，掉了才发邮件：',
@@ -1180,7 +1202,7 @@
         var sEl = el('div'); var b1 = el('b', null, t('report.diag.strongest')); sEl.appendChild(b1);
         sEl.appendChild(document.createTextNode(' — ' + localLabel(hi) + ' ' + hi.points + '/' + hi.max));
         var wEl = el('div'); var b2 = el('b', null, t('report.diag.weakest')); wEl.appendChild(b2);
-        wEl.appendChild(document.createTextNode(' — ' + localLabel(lo) + ' ' + lo.points + '/' + lo.max));
+        var wLink = el('a'); wLink.href = '#fix-' + lo.id; wLink.textContent = localLabel(lo) + ' ' + lo.points + '/' + lo.max; wEl.appendChild(document.createTextNode(' — ')); wEl.appendChild(wLink);
         ext.appendChild(sEl); ext.appendChild(wEl);
         wrap.appendChild(ext);
       }
@@ -1457,6 +1479,8 @@
   function buildFixes(r) {
     var body = el('div', 'cbody');
     var fixable = (r.checks || []).filter(function (c) { return c.status === 'fail' || c.status === 'partial'; });
+    var jstrip = document.getElementById('journey');
+    if (jstrip) jstrip.hidden = !fixable.length; /* [v2] nothing to fix -> no guidance strip */
     var fixDict = (CHECKS_L10N[lang] && CHECKS_L10N[lang].fixes) || {};
     var totalGain = 0;
     // Local layered-equivalent of renderReport's hasLayers: when the engine
@@ -1523,6 +1547,7 @@
         body.appendChild(el('div', 'fix-group-h', t('report.fix.group.' + meta.group)));
       }
       var item = el('label', 'fix');
+      item.id = 'fix-' + c.id; /* [v2] Weakest -> anchor target */
       item.setAttribute('data-idx', fixIdx);
       item.setAttribute('data-sev', sev);
       var cb = el('input'); cb.type = 'checkbox'; cb.checked = done;
@@ -1536,6 +1561,8 @@
         badge.title = t('report.grade.' + meta.grade.toLowerCase());
         titleRow.appendChild(badge);
       }
+      var fb = el('span', 'free-tag', t('report.freebadge')); /* [v2] fixing is free, forever */
+      titleRow.appendChild(fb);
       txt.appendChild(titleRow);
       /* gauge ring beside the title (UI alignment batch) */
       titleRow.appendChild(gaugeRing(c));
@@ -1789,7 +1816,8 @@
     // The CTA node is detached when buildCta runs (renderReport appends it
     // later), so a document-wide link rewrite can never see it: compute the
     // Monitor URL directly on the node itself.
-    var btn = el('a'); btn.href = monitorBase() + '/monitoring'; btn.className = 'btn-primary'; btn.textContent = t('report.getfix'); btn.setAttribute('data-monitor-link', 'monitoring');
+    /* [v2] billing not live -> route to /pricing (waitlist); monitor link lives there */
+    var btn = el('a'); btn.href = '/pricing'; btn.className = 'btn-primary'; btn.textContent = t('report.getfix'); btn.setAttribute('data-pricing-link', 'pricing');
     wl.appendChild(btn);
     cta.appendChild(wl);
     /* C6 exit survey — the O/CO research question at the friction point */
