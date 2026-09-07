@@ -301,4 +301,15 @@ console.log("\n[H] 前端注入模式根治");
 }
 
 console.log(`\n========== 结果: ${pass} 通过 / ${fail} 失败 ==========`);
+/* [abuse] fresh=1 cooldown — replayed forced rescans downgrade to cache
+   (2026-09-07 audit: fresh bypassed all caches; replaying it turned the
+   scanner into an on-demand crawler and burned Workers quota) */
+console.log("\n[abuse] fresh=1 per-domain cooldown");
+{
+  const src = readFileSync(new URL("../worker.js", import.meta.url), "utf8");
+  ok("fresh cooldown exists (fresh:domain KV marker)", src.includes('"fresh:" + domain'));
+  ok("cooldown window is 60s", src.includes('expirationTtl: 60'));
+  ok("downgrade falls back to the cached path (forceFresh=false)", /if \(recent\) forceFresh = false;/.test(src));
+}
+
 process.exit(fail ? 1 : 0);
