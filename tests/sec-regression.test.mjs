@@ -311,6 +311,12 @@ console.log("\n[abuse] fresh=1 per-domain cooldown");
   ok("cooldown window is 60s", src.includes('expirationTtl: 60'));
   ok("downgrade falls back to the cached path (forceFresh=false)", /if \(recent\) forceFresh = false;/.test(src));
   ok("deliberate fresh scans force ledger recording (loop closure)", src.includes("env, liveFresh") && src.includes("!force && last && now - Number(last)"), "force-record on liveFresh");
+  /* F-live-3 Option A (approved 2026-09-08): keep the honest 400, add a
+     probe-detection trail. The log must carry a HASHED email (never raw PII)
+     so enumeration shows up as one IP x many hash prefixes. */
+  ok("waitlist failure logs waitlist_send_failed (probe trail)", src.includes('"waitlist_send_failed"') || src.includes("waitlist_send_failed"));
+  ok("failure log hashes the email (no raw PII in logs)", src.includes("subtle.digest") && /waitlist_send_failed[\s\S]{0,120}email=/.test(src));
+  ok("400 response itself unchanged (honest retry preserved)", /return json\(\{ ok: false, stored: false \}, 400\)/.test(src));
 }
 
 process.exit(fail ? 1 : 0);
