@@ -78,5 +78,18 @@ console.log("\n[A5] checkWebMCP grading");
   ok("platform 注入 -> pass（运行时保证，静态不可见）", checkWebMCP(shopify).status === "pass");
 }
 
+/* [i18n-cookie] language cookie bridge (cross-subdomain persistence) */
+console.log("\n[i18n-cookie] runtime cookie bridge");
+{
+  const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+  const rt = readFileSync(join(ROOT, "public/i18n/runtime.js"), "utf8");
+  ok("setLang writes parent-domain cookie", rt.includes("domain=.toolfront.dev") && rt.includes("samesite=Lax"), "cookie attrs");
+  ok("detect falls back to cookie when localStorage is empty", /tf-lang=\(en\|zh\)/.test(rt), "cookie read regex");
+  for (const f of ["privacy.html", "terms.html", "bot.html"]) {
+    const h = readFileSync(join(ROOT, "public", f), "utf8");
+    ok(f + " writes the language cookie", h.includes("domain=.toolfront.dev"), f);
+  }
+}
+
 process.exit(fail ? 1 : 0);
 
