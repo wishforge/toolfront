@@ -435,7 +435,8 @@
   .community-link a:hover { color: var(--accent); }
 .exit-survey button { border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: var(--r-3); padding: 6px 12px; font-size: 12.5px; cursor: pointer; }
   .exit-survey button:hover { border-color: var(--accent); color: var(--accent); }
-  .copy-all-fab { position: fixed; bottom: 24px; right: 24px; z-index: 80; border: 0; background: var(--ink); color: #FFF; font-family: var(--sans); font-weight: 600; font-size: 13.5px; padding: 13px 22px; border-radius: var(--r-full); cursor: pointer; box-shadow: 0 8px 24px rgba(12,18,34,0.35); display: inline-flex; align-items: center; gap: 8px; transition: transform var(--dur-fast) ease, opacity var(--dur-fast) ease; }
+  /* [fab-v2] lives IN the fix-list card header (was: position:fixed bottom-right — floated detached from its section and covered content) */
+  .copy-all-fab { margin-left: auto; border: 0; background: var(--ink); color: #FFF; font-family: var(--sans); font-weight: 600; font-size: 12.5px; padding: 7px 14px; border-radius: var(--r-full); cursor: pointer; display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0; transition: transform var(--dur-fast) ease, opacity var(--dur-fast) ease; }
   .copy-all-fab:hover { transform: translateY(-2px); }
   .copy-all-fab.hidden { opacity: 0; pointer-events: none; }
   .copy-all-fab .n { font-family: var(--mono); background: var(--accent); border-radius: var(--r-full); min-width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
@@ -1060,14 +1061,36 @@
     "webmcp": 1, "tool-security": 1, "freshness": 1, "link-headers": 1, "api-errors": 1
   };
   function copyText(text, btn) {
-    var done = function () { btn.textContent = t('report.fix.copied'); setTimeout(function () { btn.textContent = t('report.fix.copy'); }, 1600); };
-    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); }); }
-    else { fallbackCopy(text, done); }
-    function fallbackCopy(text, done) {
-      var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); } catch (_) {}
-      document.body.removeChild(ta); done();
-    }
+    /* [copy-v2] two bugs fixed:
+       1. execCommand fallback used to run inside the clipboard-API promise
+          rejection handler — by then Safari had consumed the user gesture and
+          execCommand('copy') failed SILENTLY (the "copy does nothing" report).
+          Sync execCommand now runs FIRST, inside the gesture; the async
+          clipboard API is only the fallback for non-gesture contexts.
+       2. done() set textContent, which wiped the FAB's inner spans (count
+          badge) and restored the wrong label. A cloneNode snapshot restores
+          the exact children without touching innerHTML. */
+    var restore = btn.cloneNode(true); /* DOM clone — no HTML parsing, keeps the FAB's count badge */
+    var done = function () {
+      btn.textContent = t('report.fix.copied');
+      setTimeout(function () {
+        btn.textContent = '';
+        while (restore.firstChild) btn.appendChild(restore.firstChild);
+      }, 1600);
+    };
+    var ok = false;
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch (_) {}
+    if (!ok && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, done);
+    } else { done(); }
   }
   /* Six-section agent brief (Goal/Issue/Fix/Sample/Skill/Docs/Verify).
      Verify is ToolFront's addition: the agent can self-check after fixing. */
@@ -1097,7 +1120,7 @@
     });
     if (briefs.length) copyText(briefs.join('\n\n----------\n\n'), fab);
   });
-  document.body.appendChild(fab);
+  /* [fab-v2] placement happens at render time — re-parented into the fix-list card's cbar */
   function updateFab() {
     var all = document.querySelectorAll('.fix input[type=checkbox]').length;
     var done = document.querySelectorAll('.fix.done input[type=checkbox]').length;
@@ -1982,7 +2005,10 @@
     resultBox.appendChild(buildCard(t('report.biz.title'), buildBiz(r, basis), false));
 
     // Card 3 — fix list
-    resultBox.appendChild(buildCard(t('report.fix.title'), buildFixes(r), false));
+    var fixCard = buildCard(t('report.fix.title'), buildFixes(r), false);
+    var fixBar = fixCard.querySelector('.cbar');
+    if (fixBar) fixBar.appendChild(fab); /* [fab-v2] header row, right-aligned */
+    resultBox.appendChild(fixCard);
     updateFab();
 
     // Card 3.5 — supplemental signals (not scored, spec 2026-09-03 F6)
