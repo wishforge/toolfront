@@ -76,7 +76,7 @@ console.log("\n[A] happy path (37/D report)");
     return m > -1 && s > -1 && m < s;
   })(), JSON.stringify([...doc.querySelectorAll(".fix .t b")].map(b => b.textContent)));
   ok("预估条存在", doc.querySelector(".potential .est") !== null);
-  ok("CTA 为 Monitor 注册链接（留资表单已移除）", doc.querySelector(".cta a.btn-primary") !== null && doc.querySelector(".cta input[type=email]") === null);
+  ok("CTA 为内嵌等待名单表单（计费未开→就地捕获）", !!doc.querySelector(".cta .wl-inline"));
   ok("域名进标题头", textOf(".rhead .dom", dom) === "example.com");
   ok("地址栏 replaceState 为分享链接", dom.window.location.search.includes("domain=example.com"));
   ok("基线已写入 localStorage", (() => { try { return !!dom.window.localStorage.getItem("tf-last:example.com"); } catch (_) { return false; } })());
@@ -151,15 +151,14 @@ console.log("\n[F] CTA 不收集邮箱（留资失败面消失）");
   });
   await new Promise(r => setTimeout(r, 60));
   const doc = dom.window.document;
-  ok("页面无任何邮箱输入", doc.querySelector("input[type=email]") === null);
-  const btn = doc.querySelector(".cta a.btn-primary");
-  /* The CTA is the new-customer start form (/monitoring: website + email, no
-     password), not the password-account signup page — funnel fix, PR #48
-     convention: data-monitor-link="monitoring" everywhere. */
-  /* [v2] billing not live -> CTA routes to /pricing (waitlist), same-origin */
-  ok("CTA 带 pricing 起步标记（计费未开→waitlist）", !!btn && btn.getAttribute("data-pricing-link") === "pricing");
-  ok("CTA 指向 /pricing（等待名单门）", !!btn && /\/pricing$/.test(btn.href || ""), btn && btn.href);
-  ok("CTA 同源（无跨域依赖）", !!btn && btn.href.indexOf("/pricing") !== -1, btn && btn.href);
+  /* [v2] inline waitlist capture at the friction point (user-approved):
+     email + plan select inside the CTA card; the viewed domain rides along
+     to the waitlist API. The old "no email input" rule is inverted — the
+     capture is the primary conversion action now. */
+  ok("CTA 内嵌等待名单表单", doc.querySelector(".cta .wl-inline") !== null);
+  ok("表单含邮箱输入与计划下拉", doc.querySelector(".cta input[type=email]") !== null && doc.querySelector(".cta select") !== null);
+  ok("提交按钮带 waitlist 标记", doc.querySelector(".cta [data-waitlist-submit]") !== null);
+  ok("计划详情链接指向 /pricing", (doc.querySelector(".cta .wl-pricing-link") || {}).href?.indexOf("/pricing") !== -1);
 }
 
 /* G. legacy 回退：旧缓存报告无 mastery/capPct → hero 原样渲染 score/scoreMax */
