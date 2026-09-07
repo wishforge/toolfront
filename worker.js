@@ -1690,6 +1690,17 @@ async function handleWaitlist(request, env) {
         await env.KV.delete("wl:token:" + token).catch(() => {});
         await env.KV.delete("wl:pending:" + email).catch(() => {});
         await env.KV.delete(coolKey).catch(() => {});
+        /* F-live-3 Option A (approved 2026-09-08): the 400 stays — honest
+           retry for real users — but failures leave a probe-detection trail.
+           The email is HASHED (sha-256, 12 hex chars): enumeration shows up
+           as one IP hitting many distinct hash prefixes with 400s, without
+           putting raw PII into logs. Provider error categories are already
+           logged by sendConfirmationEmail (resend_error / resend_exception). */
+        try {
+          const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(email));
+          const emailTag = Array.from(new Uint8Array(digest)).slice(0, 6).map(function (b) { return ("0" + b.toString(16)).slice(-2); }).join("");
+          console.log("waitlist_send_failed", "ip=" + ip, "email=" + emailTag, "status=400");
+        } catch (_) { /* hashing must never break the response path */ }
         // Uniform response: never reveal WHY the send failed — distinguishing
         // "undeliverable address" from "provider down" would be an oracle for
         // probing which addresses are deliverable.
