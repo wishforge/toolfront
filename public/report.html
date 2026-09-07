@@ -1279,8 +1279,12 @@
           rowEl.appendChild(top);
           var bottom = el('div', 'hr-bottom');
           /* B1: one public scale - v3 rows normalize /86 -> /100, raw in title */
-          var histNorm = row.scoring_version === '3.0.0' ? Math.round(row.score / 86 * 100) : row.score;
-          var sc = el('span', 'hist-score', String(histNorm) + ' / 100');
+          var histNorm, histLabel = ' / 100';
+          if (typeof row.cap_pct === 'number' && row.cap_pct > 0) histNorm = row.cap_pct;
+          else if (row.scoring_version === '3.0.0') histNorm = Math.round(row.score / 86 * 100);
+          else if (typeof row.score_max === 'number' && row.score_max > 0) histNorm = Math.round(row.score / row.score_max * 100);
+          else { histNorm = row.score; histLabel = ''; }
+          var sc = el('span', 'hist-score', String(histNorm) + histLabel);
           sc.title = 'raw ' + row.score + ' (' + (row.scoring_version || 'legacy') + ')';
           // Δ vs the previous ledger row — only meaningful within one
           // scoring_version, otherwise the delta lies about progress.
@@ -1537,8 +1541,14 @@
       var fx = fixDict[c.id + '.' + c.status] || fixDict[c.id + '.fail'];
       if (!fx) return;
       var meta = { group: tierOf(c), grade: evidenceOf(c) };
-      var gainN = Math.max(0, c.max - (c.points || 0));
-      totalGain += gainN;
+      var gainRaw = Math.max(0, c.max - (c.points || 0));
+      /* [v2] badge on the SAME scale as the hero score (capPct when layered,
+         raw /scoreMax otherwise) — raw gains made 44 + '+12' arithmetic that
+         could not reconcile for users. */
+      var gainScale = (typeof r.capMax === 'number' && r.capMax > 0) ? r.capMax
+                    : (typeof r.scoreMax === 'number' && r.scoreMax > 0) ? r.scoreMax : 100;
+      var gainN = Math.max(0, Math.round(gainRaw / gainScale * 100));
+      totalGain += gainRaw;
       var key = 'tf-fix:' + r.domain + ':' + c.id;
       var done = false;
       try { done = localStorage.getItem(key) === '1'; } catch (_) {}

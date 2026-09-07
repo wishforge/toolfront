@@ -1365,7 +1365,10 @@ async function handleScanHistory(url, request, env) {
   if (!env.SCAN_DB) return json({ ok: true, domain, rows: [] }, 200);
   try {
     const { results } = await env.SCAN_DB.prepare(
-      "SELECT domain, scanned_at, score, grade, scoring_version FROM scan_history WHERE domain = ? ORDER BY scanned_at DESC LIMIT 50"
+      "SELECT domain, scanned_at, score, grade, scoring_version, " +
+      "json_extract(detail_json, '$.capPct') AS cap_pct, " +
+      "json_extract(detail_json, '$.scoreMax') AS score_max " +
+      "FROM scan_history WHERE domain = ? ORDER BY scanned_at DESC LIMIT 50"
     ).bind(domain).all();
     // Public rows carry no scanner identity and no PII by construction
     // (schema has no such columns) — see privacy.html "Public scan history".
