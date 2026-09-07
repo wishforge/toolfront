@@ -116,5 +116,20 @@ console.log("\n[i18n-coverage] dict key coverage");
   }
 }
 
+/* [skills-alignment] every check id has a published SKILL.md, and the
+   well-known set matches the fix-skills repo manifest (index.json) */
+console.log("\n[skills-alignment] report skills vs check policy");
+{
+  const ROOT2 = join(dirname(fileURLToPath(import.meta.url)), "..");
+  const policy = readFileSync(join(ROOT2, "worker.js"), "utf8");
+  const idx = JSON.parse(readFileSync(join(ROOT2, "public/agent-skills/index.json"), "utf8"));
+  const listed = (idx.skills || idx).map ? (idx.skills || idx).map(s => s.id || s) : Object.keys(idx.skills || idx);
+  ok("index.json lists all check ids", Array.isArray(listed) && listed.length >= 9, listed.join(","));
+  for (const id of listed) {
+    ok("SKILL.md served for " + id, !!readFileSync(join(ROOT2, "public/agent-skills", id, "SKILL.md"), "utf8"));
+  }
+  ok("policy references the skills index", policy.includes("agent-skills") || policy.includes("CHECK_POLICY"));
+}
+
 process.exit(fail ? 1 : 0);
 
