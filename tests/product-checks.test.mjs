@@ -92,5 +92,29 @@ console.log("\n[i18n-cookie] runtime cookie bridge");
   }
 }
 
+/* [i18n-coverage] every data-i18n key used in a page must exist in BOTH
+   LANGS.en and LANGS.zh of that page (catches keys added to one block only) */
+console.log("\n[i18n-coverage] dict key coverage");
+{
+  const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+  const pages = ["index.html", "report.html"];
+  for (const f of pages) {
+    const h = readFileSync(join(ROOT, "public", f), "utf8");
+    const keys = new Set([...h.matchAll(/data-i18n(?:-html|-ph|-aria)?="([^"]+)"/g)].map(m => m[1]));
+    // Robust block split: works whether "en: {" sits on the same line as
+    // "var LANGS = {" (index) or on the next line (report).
+    const langStart = h.indexOf("var LANGS = {");
+    const zhStart = h.indexOf("zh: {", langStart);
+    const enBlock = h.slice(langStart, zhStart);
+    const zhBlock = h.slice(zhStart);
+    const common = readFileSync(join(ROOT, "public/i18n/common.js"), "utf8");
+    // A key is covered if it lives in the page's en AND zh blocks, or in the
+    // shared common.js dictionary (t()'s fallback resolves it for both).
+    const has = (block, k) => block.includes('"' + k + '"') || block.includes("'" + k + "'");
+    const missing = [...keys].filter(k => !(has(enBlock, k) && has(zhBlock, k)) && !has(common, k));
+    ok(f + ": all data-i18n keys defined in both en and zh blocks", missing.length === 0, missing.join(", ") || "covered " + keys.size + " keys");
+  }
+}
+
 process.exit(fail ? 1 : 0);
 
