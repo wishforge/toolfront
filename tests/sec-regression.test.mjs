@@ -310,6 +310,7 @@ console.log("\n[abuse] fresh=1 per-domain cooldown");
   ok("fresh cooldown exists (fresh:domain KV marker)", src.includes('"fresh:" + domain'));
   ok("cooldown window is 60s", src.includes('expirationTtl: 60'));
   ok("downgrade falls back to the cached path (forceFresh=false)", /if \(recent\) forceFresh = false;/.test(src));
+  ok("deliberate fresh scans force ledger recording (loop closure)", src.includes("env, liveFresh") && src.includes("!force && last && now - Number(last)"), "force-record on liveFresh");
 }
 
 process.exit(fail ? 1 : 0);
