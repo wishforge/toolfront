@@ -450,6 +450,10 @@
   .jstep .jarr{position:absolute;right:-8px;top:50%;transform:translateY(-50%);color:var(--ink-faint);font-size:15px}
   .free-tag{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--good);background:var(--good-soft);border-radius:4px;padding:2px 6px;margin-left:8px}
   .fix{scroll-margin-top:16px}
+  .fix-brief summary{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;list-style:none}
+  .fix-brief summary::-webkit-details-marker{display:none}
+  .fix-brief summary .fix-prompt-copy{flex-shrink:0;border:1px solid var(--line);background:#fff;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--ink);font-family:var(--sans)}
+  .fix-brief summary .fix-prompt-copy:hover{border-color:var(--accent);color:var(--accent)}
   .diag-ext a{color:var(--accent);font-weight:600;text-decoration:none}
   .diag-ext a:hover{text-decoration:underline}
   .fix-gauge { position: relative; width: 30px; height: 30px; flex-shrink: 0; }
@@ -1578,37 +1582,24 @@
       /* gauge ring beside the title (UI alignment batch) */
       titleRow.appendChild(gaugeRing(c));
       /* collapsed agent brief preview — same six-section text as Copy prompt */
+      /* [v2-IA] one control: read + copy in the same row (was: separate
+         collapsible preview + standalone copy button + paste-ready block —
+         three doors to the same content) */
       var briefDet = el('details', 'fix-brief');
-      var bsum = el('summary'); bsum.textContent = t('report.fix.brief');
-      var bpre = el('pre'); bpre.textContent = buildAgentBrief(c, r.domain); // textContent — data, never markup
+      var bsum = el('summary');
+      bsum.appendChild(el('span', null, t('report.fix.brief')));
+      var btnBrief = el('button', 'fix-prompt-copy');
+      btnBrief.type = 'button';
+      btnBrief.textContent = t('report.fix.copy');
+      btnBrief.addEventListener('click', function (ev) {
+        ev.preventDefault(); ev.stopPropagation(); /* don't toggle the details */
+        copyText(buildAgentBrief(c, r.domain), btnBrief);
+      });
+      bsum.appendChild(btnBrief);
+      var bpre = el('pre'); bpre.textContent = buildAgentBrief(c, r.domain); // textContent — data, never markup (sample file included)
       briefDet.appendChild(bsum); briefDet.appendChild(bpre);
       txt.appendChild(briefDet);
       txt.appendChild(el('span', null, localDetail(c)));
-      if (c.sample) {
-        var det = el('details', 'fix-sample');
-        var sum = el('summary'); sum.textContent = t('report.fix.sample');
-        var pre = el('pre'); pre.textContent = c.sample; // textContent — sample is data, never markup
-        var cbtn = el('button', 'fix-sample-copy');
-        cbtn.type = 'button';
-        cbtn.textContent = t('report.fix.copy');
-        cbtn.addEventListener('click', function () {
-          var done = function () {
-            cbtn.textContent = t('report.fix.copied');
-            setTimeout(function () { cbtn.textContent = t('report.fix.copy'); }, 1600);
-          };
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(c.sample).then(done, function () { fallback(); });
-          } else { fallback(); }
-          function fallback() {
-            var ta = document.createElement('textarea');
-            ta.value = c.sample; document.body.appendChild(ta); ta.select();
-            try { document.execCommand('copy'); } catch (_) {}
-            document.body.removeChild(ta); done();
-          }
-        });
-        det.appendChild(sum); det.appendChild(pre); det.appendChild(cbtn);
-        txt.appendChild(det);
-      }
       if (HAS_SKILL[c.id]) {
         var skill = el('a', 'fix-skill-link');
         skill.href = '/.well-known/agent-skills/' + c.id + '/SKILL.md';
@@ -1633,11 +1624,6 @@
       if (gainN > 0) item.appendChild(el('span', 'gain', '+' + gainN));
       /* Action buttons */
       var acts = el('div', 'fix-actions');
-      var btnBrief = el('button', 'fix-btn fix-prompt-copy');
-      btnBrief.type = 'button';
-      btnBrief.textContent = t('report.fix.prompt');
-      btnBrief.addEventListener('click', function () { copyText(buildAgentBrief(c, r.domain), btnBrief); });
-      acts.appendChild(btnBrief);
       var btnApply = el('button', 'fix-btn fix-btn-apply');
       btnApply.textContent = t('report.fix.apply') || 'Mark as fixed';
       btnApply.type = 'button';
