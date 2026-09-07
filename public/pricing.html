@@ -65,12 +65,13 @@
   <span class="badge" data-i18n="p.badge">BILLING OPENS SOON · JOIN THE WAITLIST</span>
   <h1 data-i18n="p.h1">Fixing is free.<br>Watching is what costs.</h1>
   <p class="lede" data-i18n="p.lede">Every fix brief on this site is free — copy it, run it in your own AI editor, rescan. What you pay for is not having to watch: scheduled re-scans, score-drop alerts, and tool-surface tamper warnings, delivered the day they happen.</p>
+  <p class="lede" style="font-size:13.5px;color:var(--ink-3)" data-i18n="p.pos">Most AI-visibility tools stop at the dashboard and leave the fixing to you. Our fix briefs ship as prompts your AI can execute — the work is built into the plan, not bolted on.</p>
 
   <div class="sect">Plans — billing opens soon</div>
   <div class="plans">
     <div class="plan">
       <div class="name" data-i18n="p.b1">Monitor Basic</div>
-      <div class="price">¥99<span> /mo</span></div>
+      <div class="price">$19<span> /mo</span></div>
       <ul>
         <li data-i18n="p.bf1">3 websites · weekly scans</li>
         <li data-i18n="p.bf2">Score-drop email alerts</li>
@@ -80,7 +81,7 @@
     </div>
     <div class="plan hot">
       <div class="name">Monitor Pro<span class="hot-tag">FULL WATCH</span></div>
-      <div class="price">¥299<span> /mo</span></div>
+      <div class="price">$49<span> /mo</span></div>
       <ul>
         <li data-i18n="p.pf1">10 websites · daily scans</li>
         <li data-i18n="p.pf2">Real-time tamper alerts</li>
@@ -90,11 +91,11 @@
     </div>
     <div class="plan">
       <div class="name" data-i18n="p.r1">Deep diagnostic</div>
-      <div class="price">¥199<span data-i18n="p.r1s"> one-off</span></div>
+      <div class="price">$49<span data-i18n="p.r1s"> one-off</span></div>
       <ul>
         <li data-i18n="p.rf1">PDF report, priority-ordered</li>
         <li data-i18n="p.rf2">SKILL.md fix file included</li>
-        <li data-i18n="p.rf3">Re-scan ¥79</li>
+        <li data-i18n="p.rf3">Re-scan $19</li>
         <li data-i18n="p.rf4">No subscription</li>
       </ul>
     </div>
@@ -109,9 +110,9 @@
       <input type="email" id="wl-email" name="email" required maxlength="254" autocomplete="email">
       <label for="wl-plan" data-i18n="p.wl.plan">Which plan interests you?</label>
       <select id="wl-plan" name="plan">
-        <option value="basic" data-i18n="p.wl.pb">Monitor Basic — ¥99/mo</option>
-        <option value="pro" selected data-i18n="p.wl.pp">Monitor Pro — ¥299/mo</option>
-        <option value="report" data-i18n="p.wl.pr">Deep diagnostic — ¥199 one-off</option>
+        <option value="basic" data-i18n="p.wl.pb">Monitor Basic — $19/mo</option>
+        <option value="pro" selected data-i18n="p.wl.pp">Monitor Pro — $49/mo</option>
+        <option value="report" data-i18n="p.wl.pr">Deep diagnostic — $49 one-off</option>
       </select>
       <input class="hp" type="text" name="name" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button type="submit" data-i18n="p.wl.btn">Join the waitlist</button>
@@ -132,7 +133,7 @@
 
   <div class="zh">
     <h2>中文摘要</h2>
-    <p>网站修复功能<b>永久免费</b>：扫描、完整报告、AI 修复简报、Rescan、对比、排行榜。收费的是"不用你自己盯着"：Monitor 基础版 ¥99/月（3 网站 · 周扫 · 掉分与篡改邮件告警）、Pro ¥299/月（10 网站 · 日扫 · 实时篡改告警 · 诊断报告 · MCP+API）、一次性深度诊断报告 ¥199（PDF + SKILL.md 修复版）。</p>
+    <p>网站修复功能<b>永久免费</b>：扫描、完整报告、AI 修复简报、Rescan、对比、排行榜。收费的是"不用你自己盯着"：Monitor 基础版 $19/月（3 网站 · 周扫 · 掉分与篡改邮件告警）、Pro $49/月（10 网站 · 日扫 · 实时篡改告警 · 诊断报告 · MCP+API）、一次性深度诊断报告 $49（PDF + SKILL.md 修复版）。</p>
     <p>支付通道正在开通中——留下邮箱加入等待名单，计费开放后按登记顺序第一时间通知你（双确认邮件，不收费、不需要绑卡）。</p>
   </div>
 
@@ -164,15 +165,15 @@
     'p.r1s': [' one-off', ' 一次性'],
     'p.rf1': ['PDF report, priority-ordered', 'PDF 报告，按优先级排序'],
     'p.rf2': ['SKILL.md fix file included', '含 SKILL.md 修复文件'],
-    'p.rf3': ['Re-scan ¥79', '重扫 ¥79'],
+    'p.rf3': ['Re-scan $19', '重扫 $19'],
     'p.rf4': ['No subscription', '无需订阅'],
     'p.freeline.b': ['The fixes are free — forever.', '修复功能免费——永久。'],
     'p.freeline': ['Copy the briefs, run them in your own AI editor. You only pay if you want us to keep watching.', '复制简报、在你自己的 AI 编辑器里执行。只有想让我们持续盯着时才需要付费。'],
     'p.wl.email': ['Email address', '邮箱地址'],
     'p.wl.plan': ['Which plan interests you?', '感兴趣的计划？'],
-    'p.wl.pb': ['Monitor Basic — ¥99/mo', 'Monitor 基础版 — ¥99/月'],
-    'p.wl.pp': ['Monitor Pro — ¥299/mo', 'Monitor Pro — ¥299/月'],
-    'p.wl.pr': ['Deep diagnostic — ¥199 one-off', '深度诊断报告 — ¥199 一次性'],
+    'p.wl.pb': ['Monitor Basic — $19/mo', 'Monitor 基础版 — $19/月'],
+    'p.wl.pp': ['Monitor Pro — $49/mo', 'Monitor Pro — $49/月'],
+    'p.wl.pr': ['Deep diagnostic — $49 one-off', '深度诊断报告 — $49 一次性'],
     'p.wl.btn': ['Join the waitlist', '加入等待名单'],
     'p.wl.note': ['Double opt-in: we email you a confirmation link first. No card, no charge — the waitlist only decides who gets notified (and in what order) when billing opens.', '双确认：先发确认邮件到你的邮箱。不绑卡、不扣费——等待名单只决定计费开放时谁先收到通知。'],
     'p.q1': ["Will it flag problems that don't exist?", '会误报不存在的问题吗？'],
@@ -180,6 +181,8 @@
     'p.q2': ['Why should I trust the score?', '凭什么相信这个分数？'],
     'p.q2a': ['Checks, weights, and scoring version are public at /methodology. The score changes because your site changes — we log the change in the ledger instead of quietly rewriting the number.', '检查项、权重、评分版本全部公开在 /methodology。分数会变是因为你的网站会变——我们把变化记进台账，而不是悄悄改数。'],
     'p.q3': ['Why does monitoring cost money when scanning is free?', '扫描免费，监控为什么收费？'],
+    'p.pos': ['Most AI-visibility tools stop at the dashboard and leave the fixing to you. Our fix briefs ship as prompts your AI can execute — the work is built into the plan, not bolted on.',
+               '多数 AI 可见度工具止步于仪表盘，活还得你自己干。我们的修复简报是你的 AI 可以直接执行的提示词——执行内建于计划，不是外挂。'],
     'p.q3a': ['A scan answers "how do things stand". A monitor answers "when did it change" — that takes scheduled re-scans and someone (us) watching the tool surface 24/7.', '扫描回答"现在怎么样"，监控回答"什么时候变的"——那需要定时重扫和有人（我们）24 小时盯着工具面。']
   };
   function applyLang() {

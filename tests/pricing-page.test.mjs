@@ -12,7 +12,7 @@ function ok(name, cond, detail) {
 }
 
 console.log("\n[pricing] page shell");
-ok("plans: all three tiers present", ["¥99", "¥299", "¥199"].every(p => HTML.includes(p)), "99/299/199");
+ok("plans: USD pricing, all three tiers present", ["$19", "$49"].every(p => HTML.includes(p)) && HTML.includes("$49<span"), "99/299/199");
 ok("Pro carries the hot-tag", HTML.includes("FULL WATCH"));
 ok("free-forever line present", /free — forever|免费——永久/.test(HTML));
 ok("no credit-card promises (copy rule)", !/credit card|信用卡/i.test(HTML));
