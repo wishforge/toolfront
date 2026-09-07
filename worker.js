@@ -1260,6 +1260,21 @@ async function recordScanHistory(domain, publicReport, env) {
 }
 
 async function scanPublicReport(domain, forceFresh, env) {
+  // Fresh-cooldown (abuse ceiling, 2026-09-07 audit): forceFresh bypasses
+  // every cache, so replaying fresh=1 turns the scanner into an on-demand
+  // crawler against any site and burns our Workers quota (and the target's).
+  // A 60s per-domain cooldown downgrades replayed fresh requests to the
+  // normal cached path — a legitimate Rescan (user read the report, fixed
+  // something, came back) never lands inside the window; floods do.
+  // ponytail: get-then-put has a TOCTOU window — two concurrent fresh
+  // requests may both pass. Ceiling: 2 live scans, acceptable.
+  if (env.KV && forceFresh) {
+    try {
+      const recent = await env.KV.get("fresh:" + domain);
+      if (recent) forceFresh = false;
+      else await env.KV.put("fresh:" + domain, "1", { expirationTtl: 60 });
+    } catch (_) { /* KV hiccup -> keep the fresh behavior */ }
+  }
   if (env.KV && !forceFresh) {
     const cached = await env.KV.get("scan:" + domain, "json");
     if (cached) return { status: 200, body: { ...cached, cached: true }, cacheControl: "public, max-age=60" };
