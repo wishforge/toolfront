@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>你的站为 WebMCP 做好准备了吗？ · ToolFront</title>
 <meta name="description" content="WebMCP 让网站把工具直接暴露给 AI agent。Vercel CEO 三次公开站台。检查你的站是否就绪——免费。">
+<script src="/i18n/common.js"></script>
+<script src="/i18n/runtime.js"></script>
 <style>
   :root{--paper:#FAFBFC;--ink:#0C1222;--ink-2:#374151;--ink-3:#6B7280;--line:#E2E6EE;--accent:#2563EB;--accent-deep:#1D4ED8;--accent-soft:#EFF6FF;--good:#059669;--mid:#D97706;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace;--sans:'Space Grotesk','Noto Sans SC',-apple-system,sans-serif}
   *{margin:0;padding:0;box-sizing:border-box}
@@ -55,12 +57,12 @@
 
   <div class="cta">
     <div style="flex:1;min-width:240px">
-      <b>30 秒看你的 WebMCP 就绪度</b>
+      <b data-i18n="art.cta.t">30 秒看你的 WebMCP 就绪度</b>
       <div class="mut">免费扫描 · 不收集扫描者身份 · 附 AI 可直接执行的修复简报</div>
     </div>
-    <a class="btn" href="/?utm_source=webmcp-article">扫描我的站 →</a>
+    <a class="btn" href="/?utm_source=webmcp-article" data-i18n="art.cta">扫描我的站 →</a>
   </div>
-  <p style="margin-top:14px;font-size:13px;"><a href="https://github.com/wishforge/toolfront/discussions" target="_blank" rel="noopener" style="color:var(--ink-2,#555);">你的站修好了？来 Discussions 贴你的前后分数 →</a></p>
+  <p style="margin-top:14px;font-size:13px;"><a href="https://github.com/wishforge/toolfront/discussions" target="_blank" rel="noopener" style="color:var(--ink-2,#555);"><span data-i18n="art.community">你的站修好了？来 Discussions 贴你的前后分数 →</span></a></p>
   <p class="mut">已扫描？<a href="/rankings" style="color:var(--accent)">看排行榜上谁已就绪 →</a>　Monitor 订阅用户会在工具面变化时收到邮件告警——<a href="https://monitor.toolfront.dev/signup" style="color:var(--accent)">包括 WebMCP 工具面被篡改时</a>。</p>
 
   <div class="en">
@@ -68,5 +70,25 @@
     WebMCP lets websites expose native tools to AI agents — a shift Vercel's CEO has publicly championed three separate times (the two-layer web thesis, the Sequoia podcast, and the DotDev 2026 fireside with Shopify). A ToolFront scan checks three things: does a WebMCP tool surface exist, is every tool operable (name + description), and is the surface secure against tool poisoning. Most top sites — including claude.com — have not implemented it yet. Early adopters get the score bump and the ecosystem presence.
   </div>
 </div>
+<script>
+/* C9/CTA UI elements ride the shared i18n runtime; article body keeps its
+   content-page bilingual strategy (zh body + en summary block). */
+(function () {
+  var PAIRS = {
+    'art.cta.t': ['Check your WebMCP readiness in 30 seconds', '30 秒看你的 WebMCP 就绪度'],
+    'art.cta': ['Scan my site →', '扫描我的站 →'],
+    'art.community': ['Fixed your site? Post your before/after scores in Discussions →', '你的站修好了？来 Discussions 贴你的前后分数 →']
+  };
+  function applyLang() {
+    var lang = (window.tfLang && window.tfLang()) || 'zh';
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      var p = PAIRS[el.getAttribute('data-i18n')];
+      if (p) el.textContent = (lang === 'zh' ? p[1] : p[0]);
+    });
+  }
+  if (window.tfOnLang) window.tfOnLang(function () { applyLang(); });
+  applyLang();
+})();
+</script>
 </body>
 </html>
