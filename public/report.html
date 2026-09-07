@@ -1061,14 +1061,36 @@
     "webmcp": 1, "tool-security": 1, "freshness": 1, "link-headers": 1, "api-errors": 1
   };
   function copyText(text, btn) {
-    var done = function () { btn.textContent = t('report.fix.copied'); setTimeout(function () { btn.textContent = t('report.fix.copy'); }, 1600); };
-    if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text, done); }); }
-    else { fallbackCopy(text, done); }
-    function fallbackCopy(text, done) {
-      var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); } catch (_) {}
-      document.body.removeChild(ta); done();
-    }
+    /* [copy-v2] two bugs fixed:
+       1. execCommand fallback used to run inside the clipboard-API promise
+          rejection handler — by then Safari had consumed the user gesture and
+          execCommand('copy') failed SILENTLY (the "copy does nothing" report).
+          Sync execCommand now runs FIRST, inside the gesture; the async
+          clipboard API is only the fallback for non-gesture contexts.
+       2. done() set textContent, which wiped the FAB's inner spans (count
+          badge) and restored the wrong label. A cloneNode snapshot restores
+          the exact children without touching innerHTML. */
+    var restore = btn.cloneNode(true); /* DOM clone — no HTML parsing, keeps the FAB's count badge */
+    var done = function () {
+      btn.textContent = t('report.fix.copied');
+      setTimeout(function () {
+        btn.textContent = '';
+        while (restore.firstChild) btn.appendChild(restore.firstChild);
+      }, 1600);
+    };
+    var ok = false;
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch (_) {}
+    if (!ok && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, done);
+    } else { done(); }
   }
   /* Six-section agent brief (Goal/Issue/Fix/Sample/Skill/Docs/Verify).
      Verify is ToolFront's addition: the agent can self-check after fixing. */
