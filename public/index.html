@@ -295,6 +295,8 @@
   .scan-btn:hover::before { opacity: 1; }
   .scan-btn:active { transform: translateY(0); }
 
+  .trust-bar { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 14px; font-size: 12px; color: var(--ink-2, #444); }
+  .trust-bar span::before { content: '\2713 '; color: var(--good, #16A34A); font-weight: 700; }
   .scan-meta {
     margin-top: 12px; font-size: 11.5px; color: var(--ink-4);
     font-family: var(--mono); letter-spacing: 0.01em;
@@ -1061,6 +1063,11 @@
     </form>
 
     <div  class="scan-meta" data-i18n-html="hero.meta">no signup · checks <b>WebMCP · structured data · llms.txt · robots · sitemap</b></div>
+    <div class="trust-bar">
+      <span data-i18n="trust.real">真实网络路径实测，非资产快照</span>
+      <span data-i18n="trust.ledger">服务端台账仅存域名+分数+时间（12 个月）</span>
+      <span data-i18n="trust.privacy">不收集扫描者身份</span>
+    </div>
   </div>
 
   <!-- REPORT CARD — interactive preview (Blume-inspired) -->
@@ -1436,6 +1443,9 @@
   "doc.title": "ToolFront — Is your site ready for AI agents?",
   "hero.h1": "Your next customers send<br><span class=\"hl-u\">AI agents</span>,<br>not browsers.",
   "hero.meta": "no signup · checks <b>WebMCP · structured data · llms.txt · robots · sitemap</b>",
+  "trust.real": "真实网络路径实测，非资产快照",
+  "trust.ledger": "服务端台账仅存域名+分数+时间（12 个月）",
+  "trust.privacy": "不收集扫描者身份",
   "rp.fix": "<b>Fastest win:</b> add <code>/llms.txt</code> — one markdown file so agents introduce you by your own script. <b>+15 pts</b>",
   "dog.h3": "This page registered a live tool: <code>scan_domain</code>",
   "dog.p": "If you're viewing this in a WebMCP-enabled browser (Chrome 146+ Origin Trial), an AI agent on this page can call <code style=\"font-family:var(--mono);background:var(--good-soft);color:var(--good);padding:2px 7px;border-radius:4px;font-size:13px;\">scan_domain</code> right now and scan any website — same as the form above. That's the whole idea: your pages become places agents can <em>work</em>, not just read.",
