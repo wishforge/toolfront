@@ -1241,11 +1241,16 @@ const SCAN_HISTORY_TTL_MS = 60 * 60 * 1000;   // 1 write per domain per hour
 const SCAN_HISTORY_MAX_ROWS = 50;             // retention cap per domain
 const SCAN_HISTORY_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000; // 12 months
 
-async function recordScanHistory(domain, publicReport, env) {
+async function recordScanHistory(domain, publicReport, env, force) {
   if (!env.SCAN_DB || !env.KV || publicReport.score == null) return;
   const now = Date.now();
   const last = await env.KV.get("hist:" + domain).catch(() => null);
-  if (last && now - Number(last) < SCAN_HISTORY_TTL_MS) return; // throttled
+  /* force = the caller ran a deliberate fresh scan (IP-limited + 60s
+     fresh-cooldown). Skipping the 1h throttle here is what closes the
+     scan -> fix -> rescan loop: without it the improved score silently
+     never reaches the ledger and the user sees no change. Abuse remains
+     bounded: one live fresh scan per domain per 60s (fresh cooldown). */
+  if (!force && last && now - Number(last) < SCAN_HISTORY_TTL_MS) return; // throttled
   // Full public report: ledger rows double as the warm cache tier, so the
   // row must restore into a complete report (verdict/checks included).
   // detail_json never leaves D1 — the public API whitelists its own fields.
@@ -1307,6 +1312,7 @@ async function scanPublicReport(domain, forceFresh, env) {
     } catch (_) { /* ledger hiccup -> fall through to a live scan */ }
   }
 
+  const liveFresh = forceFresh === true; /* [loop] survived the 60s cooldown = deliberate user rescan */
   const report = await scanDomainCore(domain, env);
   if (!report) {
     // Re-derive WHY cheaply for the HTTP caller (cron callers just skip).
@@ -1342,7 +1348,7 @@ async function scanPublicReport(domain, forceFresh, env) {
   // Cache write: short TTL (300s) so data stays fresh.
   // Blocked reports use shorter TTL (1800s) above since WAF state is sticky.
   if (env.KV) { try { await env.KV.put("scan:" + domain, JSON.stringify(publicReport), { expirationTtl: 300 }); } catch (_) {} }
-  await recordScanHistory(domain, publicReport, env);
+  await recordScanHistory(domain, publicReport, env, liveFresh);
   return { status: 200, body: publicReport, cacheControl: "public, max-age=60" };
 }
 
