@@ -204,6 +204,18 @@ console.log("\n[PROD] fix-layer v2");
   ok("exit survey 三个选项", doc.querySelectorAll("#exitSurvey button[data-choice]").length === 3, String(doc.querySelectorAll("#exitSurvey button[data-choice]").length));
 }
 
+/* [C9] community entry — Discussions link in CTA card */
+console.log("\n[C9] community entry");
+{
+  const dom = loadPage("https://toolfront.dev/report?domain=example.com&lang=zh");
+  await new Promise(r => setTimeout(r, 50));
+  const doc = dom.window.document;
+  const links = [...doc.querySelectorAll('.community-link a')];
+  ok("CTA 卡含社区链接", links.length === 1, links.length + " links");
+  ok("链接指向 GitHub Discussions", links[0] && links[0].href === "https://github.com/wishforge/toolfront/discussions", links[0] && links[0].href);
+  ok("链接文本走 i18n", links[0] && /修好|Fixed/.test(links[0].textContent), links[0] && links[0].textContent);
+}
+
 console.log(`\nreport-dom 结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail ? 1 : 0);
 

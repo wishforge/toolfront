@@ -430,7 +430,10 @@
   .exit-survey { margin-top: 14px; background: var(--paper-soft, #F1F4F8); border-radius: var(--r-3); padding: 12px 16px; }
   .exit-survey b { font-size: 13px; color: var(--ink-2); }
   .exit-survey .srow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
-  .exit-survey button { border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: var(--r-3); padding: 6px 12px; font-size: 12.5px; cursor: pointer; }
+    .community-link { margin-top: 12px; font-size: 12.5px; }
+  .community-link a { color: var(--ink-2, #555); }
+  .community-link a:hover { color: var(--accent); }
+.exit-survey button { border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: var(--r-3); padding: 6px 12px; font-size: 12.5px; cursor: pointer; }
   .exit-survey button:hover { border-color: var(--accent); color: var(--accent); }
   .copy-all-fab { position: fixed; bottom: 24px; right: 24px; z-index: 80; border: 0; background: var(--ink); color: #FFF; font-family: var(--sans); font-weight: 600; font-size: 13.5px; padding: 13px 22px; border-radius: var(--r-full); cursor: pointer; box-shadow: 0 8px 24px rgba(12,18,34,0.35); display: inline-flex; align-items: center; gap: 8px; transition: transform var(--dur-fast) ease, opacity var(--dur-fast) ease; }
   .copy-all-fab:hover { transform: translateY(-2px); }
@@ -647,6 +650,7 @@
       'report.survey.acc': 'Data accuracy',
       'report.survey.price': 'Price',
       'report.survey.thanks': 'Noted \u2014 thank you. This decides what we fix next month.',
+      'report.community': 'Fixed your site? Post your before/after scores in Discussions →',
       'report.brand': 'Scanned by <a href="/">toolfront_</a>',
       'report.fix.copied': 'Copied',
       'report.fix.group.essential': 'Every site needs these',
@@ -726,6 +730,7 @@
       'report.survey.acc': '担心数据准确性',
       'report.survey.price': '价格',
       'report.survey.thanks': '已记录，谢谢。这决定我们下个月修什么。',
+      'report.community': '你的站修好了？来 Discussions 贴你的前后分数 →',
       'report.brand': '由 <a href="/">toolfront_</a> 扫描',
       'report.fix.copied': '已复制',
       'report.fix.group.essential': '每个站点都该有的',
@@ -1803,6 +1808,12 @@
     });
     survey.appendChild(srow);
     cta.appendChild(survey);
+    /* C9 community entry — owned attention (report tail) */
+    var com = el('div', 'community-link');
+    var cl = el('a'); cl.href = 'https://github.com/wishforge/toolfront/discussions'; cl.target = '_blank'; cl.rel = 'noopener';
+    cl.textContent = t('report.community');
+    com.appendChild(cl);
+    cta.appendChild(com);
     return cta;
   }
 

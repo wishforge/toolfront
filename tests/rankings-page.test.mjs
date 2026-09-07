@@ -102,6 +102,11 @@ ok("error state is distinct from empty (not swallowed)", HTML.includes('class="s
 ok("error state offers retry", HTML.includes("button onclick=\"load()\""));
 ok("retry i18n keys present (en/zh)", HTML.includes("'retry':['Retry','重试']"));
 
+/* [C9] community entry in foot */
+console.log("\n[C9] rankings community link");
+ok("foot has Discussions link", HTML.includes('github.com/wishforge/toolfront/discussions'));
+ok("community link i18n key present", HTML.includes("'foot.community'"));
+
 console.log(`\nrankings-page 结果: ${pass} 通过 / ${fail} 失败`);
 process.exit(fail ? 1 : 0);
 
