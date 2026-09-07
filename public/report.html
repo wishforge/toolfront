@@ -435,7 +435,8 @@
   .community-link a:hover { color: var(--accent); }
 .exit-survey button { border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: var(--r-3); padding: 6px 12px; font-size: 12.5px; cursor: pointer; }
   .exit-survey button:hover { border-color: var(--accent); color: var(--accent); }
-  .copy-all-fab { position: fixed; bottom: 24px; right: 24px; z-index: 80; border: 0; background: var(--ink); color: #FFF; font-family: var(--sans); font-weight: 600; font-size: 13.5px; padding: 13px 22px; border-radius: var(--r-full); cursor: pointer; box-shadow: 0 8px 24px rgba(12,18,34,0.35); display: inline-flex; align-items: center; gap: 8px; transition: transform var(--dur-fast) ease, opacity var(--dur-fast) ease; }
+  /* [fab-v2] lives IN the fix-list card header (was: position:fixed bottom-right — floated detached from its section and covered content) */
+  .copy-all-fab { margin-left: auto; border: 0; background: var(--ink); color: #FFF; font-family: var(--sans); font-weight: 600; font-size: 12.5px; padding: 7px 14px; border-radius: var(--r-full); cursor: pointer; display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0; transition: transform var(--dur-fast) ease, opacity var(--dur-fast) ease; }
   .copy-all-fab:hover { transform: translateY(-2px); }
   .copy-all-fab.hidden { opacity: 0; pointer-events: none; }
   .copy-all-fab .n { font-family: var(--mono); background: var(--accent); border-radius: var(--r-full); min-width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
@@ -1097,7 +1098,7 @@
     });
     if (briefs.length) copyText(briefs.join('\n\n----------\n\n'), fab);
   });
-  document.body.appendChild(fab);
+  /* [fab-v2] placement happens at render time — re-parented into the fix-list card's cbar */
   function updateFab() {
     var all = document.querySelectorAll('.fix input[type=checkbox]').length;
     var done = document.querySelectorAll('.fix.done input[type=checkbox]').length;
@@ -1982,7 +1983,10 @@
     resultBox.appendChild(buildCard(t('report.biz.title'), buildBiz(r, basis), false));
 
     // Card 3 — fix list
-    resultBox.appendChild(buildCard(t('report.fix.title'), buildFixes(r), false));
+    var fixCard = buildCard(t('report.fix.title'), buildFixes(r), false);
+    var fixBar = fixCard.querySelector('.cbar');
+    if (fixBar) fixBar.appendChild(fab); /* [fab-v2] header row, right-aligned */
+    resultBox.appendChild(fixCard);
     updateFab();
 
     // Card 3.5 — supplemental signals (not scored, spec 2026-09-03 F6)
