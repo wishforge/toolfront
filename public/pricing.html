@@ -67,7 +67,7 @@
     <span class="lang" role="group" aria-label="Language / 语言"><button type="button" id="lang-en">EN</button><button type="button" id="lang-zh">中文</button></span>
   </div>
 
-  <span class="badge" data-i18n="p.badge">BILLING OPENS SOON · JOIN THE WAITLIST</span>
+  <span class="badge" data-i18n="p.badge">BILLING OPENS SOON · FOUNDING MEMBERS LOCK $19/$49</span>
   <h1 data-i18n="p.h1">Fixing is free.<br>Watching is what costs.</h1>
   <p class="lede" data-i18n="p.lede">Every fix brief on this site is free — copy it, run it in your own AI editor, rescan. What you pay for is not having to watch: scheduled re-scans, score-drop alerts, and tool-surface tamper warnings, delivered the day they happen.</p>
   <p class="lede" style="font-size:13.5px;color:var(--ink-3)" data-i18n="p.pos">Most AI-visibility tools stop at the dashboard and leave the fixing to you. Our fix briefs ship as prompts your AI can execute — the work is built into the plan, not bolted on.</p>
@@ -89,7 +89,7 @@
       <div class="price">$49<span> /mo</span></div>
       <ul>
         <li data-i18n="p.pf1">10 websites · daily scans</li>
-        <li data-i18n="p.pf2">Real-time tamper alerts</li>
+        <li data-i18n="p.pf2">Tamper & score-drop alerts with every scan</li>
         <li data-i18n="p.pf3">Diagnostic reports</li>
         <li data-i18n="p.pf4">MCP + API access</li>
       </ul>
@@ -102,6 +102,7 @@
         <li data-i18n="p.rf2">SKILL.md fix file included</li>
         <li data-i18n="p.rf3">Re-scan $19</li>
         <li data-i18n="p.rf4">No subscription</li>
+        <li data-i18n="p.rf5">Delivery pipeline in build — waitlist first</li>
       </ul>
     </div>
   </div>
@@ -132,13 +133,15 @@
     <p data-i18n="p.q1a">Every finding maps to one named check and one measured value you can open and reproduce. Findings that can't survive that test shouldn't exist.</p>
     <h3 data-i18n="p.q2">Why should I trust the score?</h3>
     <p data-i18n="p.q2a">Checks, weights, and scoring version are public at /methodology. The score changes because your site changes — we log the change in the ledger instead of quietly rewriting the number.</p>
+    <h3 data-i18n="p.q4">When does billing start, and what am I committing to now?</h3>
+    <p data-i18n="p.q4a">Billing opens after our payment provider finishes verification (days, not months). The waitlist costs nothing, needs no card, and founding members keep $19/$49 when it opens. Once subscribed, cancelling is one click and effective immediately.</p>
     <h3 data-i18n="p.q3">Why does monitoring cost money when scanning is free?</h3>
     <p data-i18n="p.q3a">A scan answers "how do things stand". A monitor answers "when did it change" — that takes scheduled re-scans and someone (us) watching the tool surface 24/7.</p>
   </div>
 
   <div class="zh">
     <h2>中文摘要</h2>
-    <p>网站修复功能<b>永久免费</b>：扫描、完整报告、AI 修复简报、Rescan、对比、排行榜。收费的是"不用你自己盯着"：Monitor 基础版 $19/月（3 网站 · 周扫 · 掉分与篡改邮件告警）、Pro $49/月（10 网站 · 日扫 · 实时篡改告警 · 诊断报告 · MCP+API）、一次性深度诊断报告 $49（PDF + SKILL.md 修复版）。</p>
+    <p>网站修复功能<b>永久免费</b>：扫描、完整报告、AI 修复简报、Rescan、对比、排行榜。收费的是"不用你自己盯着"：Monitor 基础版 $19/月（3 网站 · 周扫 · 掉分与篡改邮件告警）、Pro $49/月（10 网站 · 日扫 · 每次扫描后篡改与掉分告警 · 诊断报告 · MCP+API）、一次性深度诊断报告 $49（PDF + SKILL.md 修复版 · 交付管线在建中，名单成员首发）。</p>
     <p>支付通道正在开通中——留下邮箱加入等待名单，计费开放后按登记顺序第一时间通知你（双确认邮件，不收费、不需要绑卡）。</p>
   </div>
 
@@ -153,17 +156,17 @@
 <script>
 (function () {
   var PAIRS = {
-    'p.badge': ['BILLING OPENS SOON · JOIN THE WAITLIST', '计费即将开放 · 加入等待名单'],
+    'p.badge': ['BILLING OPENS SOON · FOUNDING MEMBERS LOCK $19/$49', '计费即将开放 · 创始会员锁定 $19/$49'],
     'p.h1': ['Fixing is free.<br>Watching is what costs.', '修复永远免费。<br>收费的是"盯着"。'],
-    'p.lede': ['Every fix brief on this site is free — copy it, run it in your own AI editor, rescan. What you pay for is not having to watch: scheduled re-scans, score-drop alerts, and tool-surface tamper warnings, delivered the day they happen.',
-               '本站所有修复简报永久免费——复制、在你的 AI 编辑器里执行、重扫即可。收费的是"不用你自己盯着"：定时重扫、掉分告警、工具面篡改告警，当天发生当天通知。'],
+    'p.lede': ['Every fix brief on this site is free — copy it, run it in your own AI editor, rescan. What you pay for is not having to watch: scheduled re-scans, score-drop alerts, and tool-surface tamper warnings, delivered with every scan.',
+               '本站所有修复简报永久免费——复制、在你的 AI 编辑器里执行、重扫即可。收费的是"不用你自己盯着"：定时重扫、掉分告警、工具面篡改告警，每次扫描后送达。'],
     'p.b1': ['Monitor Basic', 'Monitor 基础版'],
     'p.bf1': ['3 websites · weekly scans', '3 个网站 · 每周扫描'],
     'p.bf2': ['Score-drop email alerts', '掉分邮件告警'],
     'p.bf3': ['Tool-surface tamper alerts', '工具面篡改告警'],
     'p.bf4': ['90-day trend history', '90 天趋势历史'],
     'p.pf1': ['10 websites · daily scans', '10 个网站 · 每日扫描'],
-    'p.pf2': ['Real-time tamper alerts', '实时篡改告警'],
+    'p.pf2': ['Tamper & score-drop alerts with every scan', '每次扫描带篡改与掉分告警'],
     'p.pf3': ['Diagnostic reports', '诊断报告'],
     'p.pf4': ['MCP + API access', 'MCP + API 接入'],
     'p.r1': ['Deep diagnostic', '深度诊断报告'],
@@ -172,6 +175,7 @@
     'p.rf2': ['SKILL.md fix file included', '含 SKILL.md 修复文件'],
     'p.rf3': ['Re-scan $19', '重扫 $19'],
     'p.rf4': ['No subscription', '无需订阅'],
+    'p.rf5': ['Delivery pipeline in build — waitlist first', '交付管线在建中 · 名单成员首发'],
     'p.freeline.b': ['The fixes are free — forever.', '修复功能免费——永久。'],
     'p.freeline': ['Copy the briefs, run them in your own AI editor. You only pay if you want us to keep watching.', '复制简报、在你自己的 AI 编辑器里执行。只有想让我们持续盯着时才需要付费。'],
     'p.wl.email': ['Email address', '邮箱地址'],
@@ -185,6 +189,8 @@
     'p.q1a': ['Every finding maps to one named check and one measured value you can open and reproduce. Findings that can\u2019t survive that test shouldn\u2019t exist.', '每个结论都对应一个具体检查项和实测值，可以点开自己验证。经不起验证的结论不该存在。'],
     'p.q2': ['Why should I trust the score?', '凭什么相信这个分数？'],
     'p.q2a': ['Checks, weights, and scoring version are public at /methodology. The score changes because your site changes — we log the change in the ledger instead of quietly rewriting the number.', '检查项、权重、评分版本全部公开在 /methodology。分数会变是因为你的网站会变——我们把变化记进台账，而不是悄悄改数。'],
+    'p.q4': ['When does billing start, and what am I committing to now?', '计费什么时候开？我现在要承诺什么？'],
+    'p.q4a': ['Billing opens after our payment provider finishes verification (days, not months). The waitlist costs nothing, needs no card, and founding members keep $19/$49 when it opens. Once subscribed, cancelling is one click and effective immediately.', '支付通道审核通过即开（以天计）。等待名单零费用、无需绑卡；创始会员开放时保留 $19/$49。订阅后退订一键、立即生效。'],
     'p.q3': ['Why does monitoring cost money when scanning is free?', '扫描免费，监控为什么收费？'],
     'p.pos': ['Most AI-visibility tools stop at the dashboard and leave the fixing to you. Our fix briefs ship as prompts your AI can execute — the work is built into the plan, not bolted on.',
                '多数 AI 可见度工具止步于仪表盘，活还得你自己干。我们的修复简报是你的 AI 可以直接执行的提示词——执行内建于计划，不是外挂。'],
