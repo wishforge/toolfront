@@ -51,10 +51,7 @@
   .faq p{font-size:13.5px;color:var(--ink-2)}
   .free-line{background:var(--good-soft);border:1px solid #A7F3D0;border-radius:12px;padding:14px 18px;font-size:14px;margin:26px 0}
   .free-line b{color:var(--good)}
-  /* [i18n] the zh recap hides in EN mode — the EN/中文 pill now serves Chinese
-     readers; a bare Chinese block at the bottom of the EN page read as a bug */
   .zh{margin-top:40px;border-top:1px solid var(--line);padding-top:22px;font-size:13.5px;color:var(--ink-2)}
-  html[lang="en"] .zh{display:none}
   .zh h2{font-size:18px;margin-bottom:8px}
   .zh p{margin:6px 0}
   .colo{margin-top:44px;font-size:12px;color:var(--ink-faint);display:flex;gap:16px}
@@ -143,9 +140,9 @@
   </div>
 
   <div class="zh">
-    <h2>中文摘要</h2>
-    <p>网站修复功能<b>永久免费</b>：扫描、完整报告、AI 修复简报、Rescan、对比、排行榜。收费的是"不用你自己盯着"：Monitor 基础版 $19/月（3 网站 · 周扫 · 掉分与篡改邮件告警）、Pro $49/月（10 网站 · 日扫 · 每次扫描后篡改与掉分告警 · 诊断报告 · MCP+API）、一次性深度诊断报告 $49（PDF + SKILL.md 修复版 · 交付管线在建中，名单成员首发）。</p>
-    <p>支付通道正在开通中——留下邮箱加入等待名单，计费开放后按登记顺序第一时间通知你（双确认邮件，不收费、不需要绑卡）。</p>
+    <h2 data-i18n="p.zh.h">The short version</h2>
+    <p data-i18n="p.zh.p1">Fixing here is <b>free for good</b>: scans, the full report, AI fix briefs, rescan, compare, rankings. You pay only for not having to watch: Monitor Basic $19/mo (3 websites, weekly scans, score-drop and tamper email alerts), Pro $49/mo (10 websites, daily scans, tamper and score-drop alerts with every scan, diagnostic reports, MCP+API), and the one-off deep diagnostic $49 (PDF + SKILL.md fix file — delivery pipeline in build, waitlist first).</p>
+    <p data-i18n="p.zh.p2">Billing is opening — leave an email to join the waitlist and be notified first, in signup order, when it does (double opt-in, no card, no charge).</p>
   </div>
 
   <div class="colo">
@@ -179,6 +176,9 @@
     'p.rf3': ['Re-scan $19', '重扫 $19'],
     'p.rf4': ['No subscription', '无需订阅'],
     'p.rf5': ['Delivery pipeline in build — waitlist first', '交付管线在建中 · 名单成员首发'],
+    'p.zh.h': ['The short version', '中文摘要'],
+    'p.zh.p1': ['Fixing here is <b>free for good</b>: scans, the full report, AI fix briefs, rescan, compare, rankings. You pay only for not having to watch: Monitor Basic $19/mo (3 websites, weekly scans, score-drop and tamper email alerts), Pro $49/mo (10 websites, daily scans, tamper and score-drop alerts with every scan, diagnostic reports, MCP+API), and the one-off deep diagnostic $49 (PDF + SKILL.md fix file — delivery pipeline in build, waitlist first).', '网站修复功能<b>永久免费</b>：扫描、完整报告、AI 修复简报、Rescan、对比、排行榜。收费的是"不用你自己盯着"：Monitor 基础版 $19/月（3 网站 · 周扫 · 掉分与篡改邮件告警）、Pro $49/月（10 网站 · 日扫 · 每次扫描后篡改与掉分告警 · 诊断报告 · MCP+API）、一次性深度诊断报告 $49（PDF + SKILL.md 修复版 · 交付管线在建中，名单成员首发）。'],
+    'p.zh.p2': ['Billing is opening — leave an email to join the waitlist and be notified first, in signup order, when it does (double opt-in, no card, no charge).', '支付通道正在开通中——留下邮箱加入等待名单，计费开放后按登记顺序第一时间通知你（双确认邮件，不收费、不需要绑卡）。'],
     'p.freeline.b': ['The fixes are free — forever.', '修复功能免费——永久。'],
     'p.freeline': ['Copy the briefs, run them in your own AI editor. You only pay if you want us to keep watching.', '复制简报、在你自己的 AI 编辑器里执行。只有想让我们持续盯着时才需要付费。'],
     'p.wl.email': ['Email address', '邮箱地址'],
